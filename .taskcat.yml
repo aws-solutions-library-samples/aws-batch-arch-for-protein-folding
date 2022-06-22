@@ -1,0 +1,13 @@
+project:
+  name: aws-alphafold2
+  package_lambda: false
+  s3_bucket: aws-batch-architecture-for-alphafold-public-artifacts
+  regions:
+    - us-east-1
+    - us-east-2
+    - us-west-2
+  parameters:
+    Environment: dev
+tests:
+  default:
+    template: infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
