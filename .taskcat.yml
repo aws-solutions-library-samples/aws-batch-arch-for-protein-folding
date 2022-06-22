@@ -1,5 +1,5 @@
 project:
-  name: aws-alphafold2
+  name: batch-protein-folding
   package_lambda: false
   s3_bucket: aws-batch-architecture-for-alphafold-public-artifacts
   regions:
