@@ -1,0 +1,577 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  batch-protein-folding-cfn-batch.yaml: Creates Batch computing environment.
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: "Unknown"
+  DefaultSecurityGroupID:
+    Description: The default security group ID for the VPC
+    Type: String
+  FileSystemId:
+    Description: ID of the FSx for the Lustre file system
+    Type: String
+  FileSystemMountName:
+    Description: Mount name for the Lustre file system
+    Type: String
+  Subnet:
+    Description: Subnet ID for the file system.
+    Type: String
+  AlphaFold2ContainerRegistryURI:
+    Description: URI of the AlphaFold2 container
+    Type: String
+  DownloadContainerRegistryURI:
+    Description: URI of the download container
+    Type: String
+  OpenFoldContainerRegistryURI:
+    Description: URI of the OpenFold container
+    Type: String  
+
+Resources:
+  ##################################################
+  # EC2 Launch Template
+  ##################################################
+
+  EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: "Required service policies to support running protein folding on AWS Batch"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Roles:
+        - !Ref EC2InstanceRole
+
+  InstanceLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: "/dev/xvda"
+            Ebs:
+              DeleteOnTermination: true
+              Encrypted: true
+              VolumeSize: 50
+              VolumeType: "gp2"
+        IamInstanceProfile:
+          Name: !Ref InstanceProfile
+        TagSpecifications:
+          - ResourceType: "instance"
+            Tags:
+              - Key: Application
+                Value: !Ref ApplicationName
+              - Key: StackId
+                Value: !Ref AWS::StackId
+        UserData:
+          Fn::Base64:
+            Fn::Join:
+              [
+                "",
+                [
+                  "MIME-Version: 1.0\n",
+                  "Content-Type: multipart/mixed; boundary=\"==MYBOUNDARY==\"\n",
+                  "\n",
+                  "--==MYBOUNDARY==\n",
+                  "Content-Type: text/cloud-config; charset=\"us-ascii\"\n",
+                  "\n",
+                  "runcmd:\n",
+                  "- file_system_id_01=",
+                  !Ref FileSystemId,
+                  "\n",
+                  "- region=",
+                  !Ref "AWS::Region",
+                  "\n",
+                  "- fsx_directory=/fsx\n",
+                  "- fsx_mount_name=",
+                  !Ref FileSystemMountName,
+                  "\n",
+                  "- amazon-linux-extras install -y lustre2.10\n",
+                  "- mkdir -p ${fsx_directory}\n",
+                  "- mount -t lustre ${file_system_id_01}.fsx.${region}.amazonaws.com@tcp:/${fsx_mount_name} ${fsx_directory}\n",
+                  "\n",
+                  "--==MYBOUNDARY==--",
+                ],
+              ]
+
+  ##################################################
+  # Batch Environment
+  ##################################################
+
+  PrivateCPUComputeEnvironmentOnDemand:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - m5
+          - r5
+          - c5
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - !Ref DefaultSecurityGroupID
+        Subnets:
+          - !Ref Subnet
+        Type: EC2
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+
+  SpotFleetRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: "Required service policies to support tagging spot fleet instances on AWS Batch"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - spotfleet.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+        
+  AWSServiceRoleForEC2SpotServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: spot.amazonaws.com
+      Description: Default EC2 Spot Service Linked Role
+
+  AWSServiceRoleForEC2SpotFleetServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: spotfleet.amazonaws.com
+      Description: Default EC2 Spot Fleet Service Linked Role
+
+  PrivateCPUComputeEnvironmentSpot:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
+        BidPercentage: 100
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - m5
+          - r5
+          - c5
+        LaunchTemplate:
+          LaunchTemplateId: 
+            Ref: InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        SpotIamFleetRole:
+          "Fn::GetAtt": SpotFleetRole.Arn
+        Subnets:
+          - Ref: Subnet
+        Type: SPOT
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"        
+
+  PrivateGPUComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - g4dn
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        Subnets:
+          - Ref: Subnet
+        Type: EC2
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+
+  PrivateCPUJobQueueOnDemand:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref PrivateCPUComputeEnvironmentOnDemand
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+
+  PrivateCPUJobQueueSpot:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref PrivateCPUComputeEnvironmentSpot
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"        
+
+  PrivateGPUJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref PrivateGPUComputeEnvironment
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+
+  ##################################################
+  # Job Definitions
+  ##################################################
+
+  CPUFoldingJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      ContainerProperties:
+        Command:
+          - "-c echo hello, world"
+        Image: !Join [":", [!Ref OpenFoldContainerRegistryURI, "latest"]]
+        LogConfiguration:
+          LogDriver: awslogs
+        MountPoints:
+          - ContainerPath: /mnt/bfd_database_path
+            ReadOnly: True
+            SourceVolume: bfd
+          - ContainerPath: /mnt/mgnify_database_path
+            ReadOnly: True
+            SourceVolume: mgnify
+          - ContainerPath: /mnt/pdb70_database_path
+            ReadOnly: True
+            SourceVolume: pdb70
+          - ContainerPath: /mnt/template_mmcif_dir
+            ReadOnly: True
+            SourceVolume: pdb_mmcif
+          - ContainerPath: /mnt/obsolete_pdbs_path
+            ReadOnly: True
+            SourceVolume: pdb_mmcif
+          - ContainerPath: /mnt/pdb_seqres_database_path
+            ReadOnly: True
+            SourceVolume: pdb_seqres
+          - ContainerPath: /mnt/small_bfd_database_path
+            ReadOnly: True
+            SourceVolume: small_bfd
+          - ContainerPath: /mnt/uniclust30_database_path
+            ReadOnly: True
+            SourceVolume: uniclust30
+          - ContainerPath: /mnt/uniprot_database_path
+            ReadOnly: True
+            SourceVolume: uniprot
+          - ContainerPath: /mnt/uniref90_database_path
+            ReadOnly: True
+            SourceVolume: uniref90
+          - ContainerPath: /mnt/data_dir
+            ReadOnly: True
+            SourceVolume: data
+          - ContainerPath: /mnt/output
+            ReadOnly: False
+            SourceVolume: output
+        ResourceRequirements:
+          - Type: VCPU
+            Value: 8
+          - Type: MEMORY
+            Value: 16000
+        Volumes:
+          - Name: bfd
+            Host:
+              SourcePath: /fsx/bfd
+          - Name: mgnify
+            Host:
+              SourcePath: /fsx/mgnify
+          - Name: pdb70
+            Host:
+              SourcePath: /fsx/pdb70
+          - Name: pdb_mmcif
+            Host:
+              SourcePath: /fsx/pdb_mmcif
+          - Name: pdb_seqres
+            Host:
+              SourcePath: /fsx/pdb_seqres
+          - Name: small_bfd
+            Host:
+              SourcePath: /fsx/small_bfd
+          - Name: uniclust30
+            Host:
+              SourcePath: /fsx/uniclust30
+          - Name: uniprot
+            Host:
+              SourcePath: /fsx/uniprot
+          - Name: uniref90
+            Host:
+              SourcePath: /fsx/uniref90
+          - Name: data
+            Host:
+              SourcePath: /
+          - Name: output
+            Host:
+              SourcePath: /tmp/alphafold
+      PlatformCapabilities:
+        - EC2
+      PropagateTags: true
+      RetryStrategy:
+        Attempts: 3
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+      Type: container
+
+  AlphaFold2JobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      ContainerProperties:
+        Command:
+          - "nvidia-smi"
+        Environment:
+          - Name: TF_FORCE_UNIFIED_MEMORY
+            Value: 1
+          - Name: XLA_PYTHON_CLIENT_MEM_FRACTION
+            Value: 4.0
+        Image: !Join [":", [!Ref AlphaFold2ContainerRegistryURI, "latest"]]
+        LogConfiguration:
+          LogDriver: awslogs
+        MountPoints:
+          - ContainerPath: /mnt/bfd_database_path
+            ReadOnly: True
+            SourceVolume: bfd
+          - ContainerPath: /mnt/mgnify_database_path
+            ReadOnly: True
+            SourceVolume: mgnify
+          - ContainerPath: /mnt/pdb70_database_path
+            ReadOnly: True
+            SourceVolume: pdb70
+          - ContainerPath: /mnt/template_mmcif_dir
+            ReadOnly: True
+            SourceVolume: pdb_mmcif
+          - ContainerPath: /mnt/obsolete_pdbs_path
+            ReadOnly: True
+            SourceVolume: pdb_mmcif
+          - ContainerPath: /mnt/pdb_seqres_database_path
+            ReadOnly: True
+            SourceVolume: pdb_seqres
+          - ContainerPath: /mnt/small_bfd_database_path
+            ReadOnly: True
+            SourceVolume: small_bfd
+          - ContainerPath: /mnt/uniclust30_database_path
+            ReadOnly: True
+            SourceVolume: uniclust30
+          - ContainerPath: /mnt/uniprot_database_path
+            ReadOnly: True
+            SourceVolume: uniprot
+          - ContainerPath: /mnt/uniref90_database_path
+            ReadOnly: True
+            SourceVolume: uniref90
+          - ContainerPath: /mnt/data_dir
+            ReadOnly: True
+            SourceVolume: data
+          - ContainerPath: /mnt/output
+            ReadOnly: False
+            SourceVolume: output
+        ResourceRequirements:
+          - Type: VCPU
+            Value: 8
+          - Type: MEMORY
+            Value: 16000
+          - Type: GPU
+            Value: 1
+        Volumes:
+          - Name: bfd
+            Host:
+              SourcePath: /fsx/bfd
+          - Name: mgnify
+            Host:
+              SourcePath: /fsx/mgnify
+          - Name: pdb70
+            Host:
+              SourcePath: /fsx/pdb70
+          - Name: pdb_mmcif
+            Host:
+              SourcePath: /fsx/pdb_mmcif
+          - Name: pdb_seqres
+            Host:
+              SourcePath: /fsx/pdb_seqres
+          - Name: small_bfd
+            Host:
+              SourcePath: /fsx/small_bfd
+          - Name: uniclust30
+            Host:
+              SourcePath: /fsx/uniclust30
+          - Name: uniprot
+            Host:
+              SourcePath: /fsx/uniprot
+          - Name: uniref90
+            Host:
+              SourcePath: /fsx/uniref90
+          - Name: data
+            Host:
+              SourcePath: /
+          - Name: output
+            Host:
+              SourcePath: /tmp/alphafold
+      PlatformCapabilities:
+        - EC2
+      PropagateTags: true
+      RetryStrategy:
+        Attempts: 3
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+      Type: container
+
+  DownloadJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      ContainerProperties:
+        Command:
+          - "-c echo hello, world"
+        Image: !Join [":", [!Ref DownloadContainerRegistryURI, "latest"]]
+        LogConfiguration:
+          LogDriver: awslogs
+        MountPoints:
+          - ContainerPath: /fsx
+            ReadOnly: False
+            SourceVolume: fsx
+        Privileged: False
+        ResourceRequirements:
+          - Type: VCPU
+            Value: 4
+          - Type: MEMORY
+            Value: 16000
+        Volumes:
+          - Name: fsx
+            Host:
+              SourcePath: /fsx
+      PlatformCapabilities:
+        - EC2
+      PropagateTags: true
+      RetryStrategy:
+        Attempts: 3
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+      Type: container
+
+  OpenFoldJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      ContainerProperties:
+        Command:
+          - "nvidia-smi"
+        Image: !Join [":", [!Ref OpenFoldContainerRegistryURI, "latest"]]
+        LogConfiguration:
+          LogDriver: awslogs
+        MountPoints:
+          - ContainerPath: /data
+            ReadOnly: False
+            SourceVolume: data
+          - ContainerPath: /database/
+            ReadOnly: True
+            SourceVolume: database
+        ResourceRequirements:
+          - Type: VCPU
+            Value: 8
+          - Type: MEMORY
+            Value: 16000
+          - Type: GPU
+            Value: 1
+        Volumes:
+          - Name: database
+            Host:
+              SourcePath: /fsx/
+          - Name: data
+            Host:
+              SourcePath: /home/ec2-user/data
+      PlatformCapabilities:
+        - EC2
+      PropagateTags: true
+      RetryStrategy:
+        Attempts: 3
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+      Type: container
+
+Outputs:
+  LaunchTemplate:
+    Description: Launch template for EC2 instances.
+    Value:
+      Ref: InstanceLaunchTemplate
+  CPUOnDemandJobQueue:
+    Description: Job queue for on-demand CPU instances.
+    Value:
+      Ref: PrivateCPUJobQueueOnDemand
+  CPUSpotJobQueue:
+    Description: Job queue for spot CPU instances.
+    Value:
+      Ref: PrivateCPUJobQueueSpot
+  GPUJobQueue:
+    Description: Job queue for on-demand GPU instances.
+    Value: PrivateGPUJobQueue
+  CPUFoldingJobDefinition:
+    Description: Job definition for running folding jobs on CPU instances.
+    Value:
+      Ref: CPUFoldingJobDefinition
+  AlphaFold2JobDefinition:
+    Description: Job definition for running AlphaFold2 jobs on GPU instances.
+    Value:
+      Ref: AlphaFold2JobDefinition
+  DownloadJobDefinition:
+    Description: Job definition for running download jobs on CPU instances.
+    Value:
+      Ref: DownloadJobDefinition
+  OpenFoldJobDefinition:
+    Description: Job definition for running OpenFold jobs on GPU instances.
+    Value:
+      Ref: OpenFoldJobDefinition      

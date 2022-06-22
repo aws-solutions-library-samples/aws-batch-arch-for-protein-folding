@@ -1,0 +1,73 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  batch-protein-folding-cfn-fsx-lustre.yaml: Creates an FSx for Lustre file system
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: Unknown
+  DefaultSecurityGroup:
+    Description: The default security group ID for the VPC
+    Type: String
+  FSXForLustreStorageCapacity:
+    Description: Storage capacity in GB, 1200 or increments of 2400.
+    Type: String
+    AllowedValues:
+      - 1200
+      - 2400
+      - 4800
+      - 7200
+    Default: 1200
+  FSxForLustreThroughput:
+    Description: Throughput for unit storage (MB/s/TB) to provision for FSx for Lustre file system.
+    Type: Number
+    AllowedValues:
+      - 125
+      - 250
+      - 500
+      - 1000
+    Default: 500
+  Subnet:
+    Description: Subnet ID for the file system.
+    Type: String
+
+Resources:
+  ##################################################
+  # FSx File System
+  ##################################################
+  FSX:
+    Type: AWS::FSx::FileSystem
+    Properties:
+      FileSystemType: "LUSTRE"
+      FileSystemTypeVersion: "2.12"
+      LustreConfiguration:
+        DataCompressionType: "LZ4"
+        DeploymentType: "PERSISTENT_2"
+        PerUnitStorageThroughput:
+          Ref: FSxForLustreThroughput
+      SecurityGroupIds:
+        - Ref: DefaultSecurityGroup
+      StorageCapacity: !Ref FSXForLustreStorageCapacity
+      StorageType: "SSD"
+      SubnetIds:
+        - Ref: Subnet
+      Tags:
+        - Key: Application
+          Value:
+            Ref: ApplicationName
+        - Key: StackId
+          Value:
+            Ref: AWS::StackId
+
+Outputs:
+  FileSystemId:
+    Description: File system ID
+    Value:
+      Ref: FSX
+  FileSystemMountName:
+    Description: Mount name for file system
+    Value:
+      Fn::GetAtt: FSX.LustreMountName

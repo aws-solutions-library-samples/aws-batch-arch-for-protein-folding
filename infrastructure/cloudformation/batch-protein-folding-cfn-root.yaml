@@ -1,0 +1,190 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  batch-protein-folding-cfn-root.yaml: Root stack for running protein folding on AWS Batch
+
+Parameters:
+  ApplicationName:
+    Type: String
+    Default: BatchProteinFolding
+  LaunchSageMakerNotebook:
+    Type: String
+    Default: Y
+    Description: Create a SageMaker Notebook Instance.
+    AllowedValues: [Y, N]       
+  StackAvailabilityZone:
+    Type: String
+    AllowedValues: [a, b, c]
+    Default: a     
+  Environment:
+    Description: Leave this as "main" unless you are testing a pre-release version of this architecture.
+    Type: String
+    Default: main
+    AllowedValues:
+      - main
+      - dev
+  VPC:
+    Description: (Optional) ID of VPC to use. If left empty, a new VPC will be created.
+    Type: String
+    Default: ""     
+  Subnet:
+    Description: (Optional) ID of private subnet to use. If left empty, a new VPC will be created.
+    Type: String
+    Default: ""     
+  DefaultSecurityGroup:
+    Description: (Optional) ID of security group to use. If left empty, a new VPC will be created.
+    Type: String
+    Default: ""
+  FileSystemId:
+    Description: (Optional) ID of FSX for Lustre  to use. If left empty, a new FSx for Lustre instance will be created.
+    Type: String
+    Default: ""
+  FileSystemMountName:
+    Description: (Optional) Mount name of FSX for Lustre to use. If left empty, a new FSx for Lustre instance will be created.
+    Type: String
+    Default: ""    
+  DownloadFsxData:
+    Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
+    Type: String
+    Default: "Y"
+
+Conditions:
+  CreateFileSystem:
+    "Fn::Or":
+      [
+        "Fn::Equals": [Ref: FileSystemId, ""],
+        "Fn::Equals": [Ref: FileSystemMountName, ""],
+        "Fn::Equals": [Ref: VPC, ""],
+        "Fn::Equals": [Ref: DefaultSecurityGroup, ""],
+        "Fn::Equals": [Ref: Subnet, ""],
+      ]
+  CreateNetwork:
+    "Fn::Or":
+      [
+        "Fn::Equals": [Ref: VPC, ""],
+        "Fn::Equals": [Ref: DefaultSecurityGroup, ""],
+        "Fn::Equals": [Ref: Subnet, ""],
+      ]
+  CreateSageMakerNotebook:
+    "Fn::Equals": [Ref: "LaunchSageMakerNotebook", "Y"]
+  DownloadFsxDataCondition:
+    "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
+
+Resources:
+  Network:
+    Type: "AWS::CloudFormation::Stack"
+    Condition: CreateNetwork
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-network.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        StackAvailabilityZone:
+          "Fn::Join": ["", [Ref: "AWS::Region", Ref: StackAvailabilityZone]]
+
+  FileSystem:
+    Type: "AWS::CloudFormation::Stack"
+    Condition: CreateFileSystem
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-fsx-lustre.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        DefaultSecurityGroup:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
+            - Ref: DefaultSecurityGroup
+        FSXForLustreStorageCapacity: 1200
+        FSxForLustreThroughput: 500
+        Subnet:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - Ref: Subnet
+
+  Container:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-container.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment:
+          Ref: Environment
+
+  BatchEnvironment:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-batch.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Subnet:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - Ref: Subnet
+        DefaultSecurityGroupID:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
+            - Ref: DefaultSecurityGroup
+        FileSystemId:
+          "Fn::If":
+            - CreateFileSystem
+            - "Fn::GetAtt": FileSystem.Outputs.FileSystemId
+            - Ref: FileSystemId
+        FileSystemMountName:
+          "Fn::If":
+            - CreateFileSystem
+            - "Fn::GetAtt": FileSystem.Outputs.FileSystemMountName
+            - Ref: FileSystemMountName
+        AlphaFold2ContainerRegistryURI:
+          "Fn::GetAtt": Container.Outputs.AlphaFold2ContainerRegistryURI
+        DownloadContainerRegistryURI:
+          "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
+        OpenFoldContainerRegistryURI:
+          "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
+
+  Notebook:
+    Type: "AWS::CloudFormation::Stack"
+    Condition: CreateSageMakerNotebook
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-notebook.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Subnet:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - Ref: Subnet
+        DefaultSecurityGroupID:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
+            - Ref: DefaultSecurityGroup
+        CodeRepositoryURI:
+          "Fn::GetAtt": Container.Outputs.CodeRepositoryURI         
+
+  DownloadData:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - BatchEnvironment
+    Condition: DownloadFsxDataCondition
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-download.yaml
+      Parameters:
+        JobQueue:
+          "Fn::GetAtt": BatchEnvironment.Outputs.CPUSpotJobQueue
+        JobDefinition:
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
+
+Outputs:
+  ApplicationName:
+    Description: Name of the application
+    Value:
+      Ref: ApplicationName

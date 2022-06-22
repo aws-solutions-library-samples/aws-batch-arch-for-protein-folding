@@ -1,13 +1,101 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-stages:
-- test
-sast:
-  stage: test
+variables:
+  AWS_CREDS_TARGET_ROLE: arn:aws:iam::264410369698:role/AWS-AlphaFold-GitLab-CI-Role
+  AWS_DEFAULT_REGION: us-east-1
+  DEPLOYMENT_BUCKET_NAME: aws-batch-architecture-for-alphafold-public-artifacts
+  DEV_BUCKET_PREFIX: dev
+  MAIN_BUCKET_PREFIX: main
+
+default:
+  image: public.ecr.aws/amazonlinux/amazonlinux:latest
+
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+stages:
+  - lint
+  - deploy-dev
+  - test
+  - deploy-main
+
+################################
+# .pre
+################################
+
+cfn-lint:
+  image: python:3.8
+  stage: lint
+  before_script:
+    - python --version # For debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install cfn-lint
+    - pip freeze
+  script:
+    - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002 # Ignore warning about cfn package req
+
+cfn-nag:
+  image: stelligent/cfn_nag
+  stage: lint
+  script:
+    - cfn_nag_scan --input-path infrastructure/cloudformation/*.yaml
+
+secret_detection:
+  stage: lint
+  variables:
+    CI_DEBUG_TRACE: "true"
+
+################################
+# deploy-dev
+################################
+
+push-to-s3-dev:
+  stage: deploy-dev
+  before_script:
+    - yum update -y && yum install -y awscli zip
+  script:
+    - zip -r batch-protein-folding.zip . -x .\*/\* -x .gitlab-ci.yml
+    - aws s3 cp batch-protein-folding.zip s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/batch-protein-folding.zip
+    - aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $DEV_BUCKET_PREFIX --region $AWS_DEFAULT_REGION
+    - aws s3 cp infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/batch-protein-folding-cfn-packaged.yaml
+  artifacts:
+    paths:
+      - infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
+    expire_in: 1 day
+  only:
+    - dev
+
+################################
+# test
+################################
+
+test_cfn:
+  image: python:3.8
+  stage: test
+  before_script:
+    - python --version # For debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install taskcat
+    - pip freeze
+  script:
+    - taskcat test run
+  only:
+    - dev
+
+################################
+# deploy-main
+################################
+
+push-to-s3-main:
+  stage: deploy-main
+  before_script:
+    - yum update -y && yum install -y awscli zip
+  script:
+    - zip -r batch-protein-folding.zip . -x .\*/\* -x .gitlab-ci.yml
+    - aws s3 cp batch-protein-folding.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/batch-protein-folding.zip
+    - aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX --region $AWS_DEFAULT_REGION
+    - aws s3 cp infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/batch-protein-folding-cfn-packaged.yaml      
+  only:
+    - main

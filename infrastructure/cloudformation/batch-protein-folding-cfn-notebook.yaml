@@ -1,0 +1,98 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  batch-protein-folding-cfn-notebook.yaml: Creates a SageMaker notebook instance.
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: Unknown
+  DefaultSecurityGroupID:
+    Description: The default security group ID for the VPC
+    Type: String
+  Subnet:
+    Description: Subnet ID for the file system.
+    Type: String
+  CodeRepositoryURI:
+    Description: Code repository URI
+    Type: String
+
+Resources:
+  ##################################################
+  # SageMaker Notebook Instance
+  ##################################################
+
+  EncryptionKey:
+    Type: "AWS::KMS::Key"
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: key-default-1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join: [":", ["arn:aws:iam:", !Ref "AWS::AccountId", "root"]]
+            Action:
+              [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*",
+                "kms:Update*",
+                "kms:Revoke*",
+                "kms:Disable*",
+                "kms:Get*",
+                "kms:Delete*",
+                "kms:TagResource",
+                "kms:UntagResource",
+                "kms:ScheduleKeyDeletion",
+                "kms:CancelKeyDeletion",
+              ]
+            Resource: "*"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  SageMakerNotebookExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSageMakerFullAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCodeCommitReadOnly"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSBatchFullAccess"
+
+  AlphafoldNotebookInstance:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      DirectInternetAccess: Enabled
+      InstanceType: ml.c4.2xlarge
+      DefaultCodeRepository: !Ref CodeRepositoryURI
+      KmsKeyId: !GetAtt EncryptionKey.Arn
+      RoleArn: !GetAtt SageMakerNotebookExecutionRole.Arn
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+        - !Ref DefaultSecurityGroupID
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
