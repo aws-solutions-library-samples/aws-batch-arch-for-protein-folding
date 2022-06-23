@@ -19,6 +19,7 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       wget \
       git \
+      zip \
       cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -33,8 +34,9 @@ RUN git clone --depth 1 https://github.com/aqlaboratory/openfold.git /opt/openfo
 
 # Install mamba packages.
 ENV PATH="/opt/mamba/bin:$PATH"
-RUN mamba env update -n base --file /opt/openfold/environment.yml \
-    && mamba clean --all
+RUN mamba env update -n base --file /opt/openfold/environment.yml 
+RUN wget -q -P /opt/openfold/openfold/resources \
+    https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt    
 
 # Apply OpenMM patch.
 RUN patch -p0 -d /opt/mamba/lib/python3.7/site-packages/ < /opt/openfold/lib/openmm.patch
@@ -42,31 +44,28 @@ RUN patch -p0 -d /opt/mamba/lib/python3.7/site-packages/ < /opt/openfold/lib/ope
 WORKDIR /opt/openfold
 RUN python3 setup.py install
 
-#############################
-# Start AWS-specific updates
-#############################
+#######################################################################################
+# AWS-specific updates
+#######################################################################################
 FROM base_image
 ARG AWS_DEFAULT_REGION
 ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
-# Install the AWS CLI
-RUN mamba install -y -c conda-forge awscli \
-    && mamba clean --all
-
-# Copy stereo_chemical file from s3
-RUN aws s3 cp \
-  s3://aws-batch-architecture-for-alphafold-public-artifacts/stereo_chemical_props/stereo_chemical_props.txt \
-  /opt/openfold/openfold/resources
-
-# Add batch job wrapper
-COPY run_s3_batch_job.sh /opt/run_s3_batch_job.sh
+RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  && unzip awscliv2.zip \
+  && ./aws/install \
+  && rm awscliv2.zip
+  
+# Add Tini (https://github.com/krallin/tini)
+ENV TINI_VERSION v0.19.0
+RUN wget -O "/tini" "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini"  \
+  && chmod +x /tini
 
 # Clean up
 RUN rm -rf \
   /opt/openfold/imgs \
   /opt/openfold/tests \
-  /opt/openfold/notebooks \
-  && chmod +x /opt/run_s3_batch_job.sh
+  /opt/openfold/notebooks
 
-# Set new entrypoint
-ENTRYPOINT ["/opt/run_s3_batch_job.sh"]
+ENTRYPOINT ["/tini", "--", "bash", "-c"]
+CMD ["nvidia-smi"]
