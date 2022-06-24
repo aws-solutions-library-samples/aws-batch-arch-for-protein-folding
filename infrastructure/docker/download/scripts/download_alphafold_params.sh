@@ -20,7 +20,7 @@ if ! command -v aws &> /dev/null ; then
 fi
 
 DOWNLOAD_DIR="$1"
-ROOT_DIR="${DOWNLOAD_DIR}/alphafold2_params"
+ROOT_DIR="${DOWNLOAD_DIR}/params"
 SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/model_parameters/alphafold2/alphafold_params_2022-03-02.tar"
 BASENAME=$(basename "${SOURCE_URL}")
 
