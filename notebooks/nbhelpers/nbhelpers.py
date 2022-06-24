@@ -92,7 +92,7 @@ def get_batch_resources(stack_name):
     stack_resources = cfn.list_stack_resources(StackName=stack_name)
     cpu_job_queue_spot = None
     for resource in stack_resources["StackResourceSummaries"]:
-        if resource["LogicalResourceId"] == "AlphaFold2JobDefinition":
+        if resource["LogicalResourceId"] == "GPUFoldingJobDefinition":
             gpu_job_definition = resource["PhysicalResourceId"]
         if resource["LogicalResourceId"] == "PrivateGPUJobQueue":
             gpu_job_queue = resource["PhysicalResourceId"]
@@ -102,7 +102,7 @@ def get_batch_resources(stack_name):
             cpu_job_queue_od = download_job_queue = resource["PhysicalResourceId"]        
         if resource["LogicalResourceId"] == "PrivateCPUJobQueueSpot":
             cpu_job_queue_spot = resource["PhysicalResourceId"]                    
-        if resource["LogicalResourceId"] == "DownloadJobDefinition":
+        if resource["LogicalResourceId"] == "CPUDownloadJobDefinition":
             download_job_definition = resource["PhysicalResourceId"]
     return {
         "gpu_job_definition": gpu_job_definition,
@@ -280,12 +280,11 @@ def display_structure(
 
 
 def submit_batch_alphafold_job(
-    tag,
-    fasta_s3_uri,
-    msas_s3_uri,
-    output_s3_uri,
+    job_name,
+    fasta_paths,
+    s3_bucket,
     data_dir="/mnt/data_dir/fsx",
-    # output_dir="alphafold",
+    output_dir="alphafold",
     bfd_database_path="/mnt/bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
     mgnify_database_path="/mnt/mgnify_database_path/mgy_clusters_2018_12.fa",
     pdb70_database_path="/mnt/pdb70_database_path/pdb70",
@@ -320,28 +319,19 @@ def submit_batch_alphafold_job(
 
     container_overrides = {
         "command": [
-            f"-i {fasta_s3_uri}|/data/",
-            f"-i {msas_s3_uri}|/data/{tag}/msas",
-            f"-o /data/|{output_s3_uri}",
-            "
-            
-            
-            "
-        ],        
-        # "command": [
-        #     f"--fasta_paths={fasta_paths}",
-        #     f"--uniref90_database_path={uniref90_database_path}",
-        #     f"--mgnify_database_path={mgnify_database_path}",
-        #     f"--data_dir={data_dir}",
-        #     f"--template_mmcif_dir={template_mmcif_dir}",
-        #     f"--obsolete_pdbs_path={obsolete_pdbs_path}",
-        #     f"--output_dir={output_dir}",
-        #     f"--max_template_date={max_template_date}",
-        #     f"--db_preset={db_preset}",
-        #     f"--model_preset={model_preset}",
-        #     f"--s3_bucket={s3_bucket}",
-        #     f"--run_relax={run_relax}",
-        # ],
+            f"--fasta_paths={fasta_paths}",
+            f"--uniref90_database_path={uniref90_database_path}",
+            f"--mgnify_database_path={mgnify_database_path}",
+            f"--data_dir={data_dir}",
+            f"--template_mmcif_dir={template_mmcif_dir}",
+            f"--obsolete_pdbs_path={obsolete_pdbs_path}",
+            f"--output_dir={output_dir}",
+            f"--max_template_date={max_template_date}",
+            f"--db_preset={db_preset}",
+            f"--model_preset={model_preset}",
+            f"--s3_bucket={s3_bucket}",
+            f"--run_relax={run_relax}",
+        ],
         "resourceRequirements": [
             {"value": str(cpu), "type": "VCPU"},
             {"value": str(memory * 1000), "type": "MEMORY"},
