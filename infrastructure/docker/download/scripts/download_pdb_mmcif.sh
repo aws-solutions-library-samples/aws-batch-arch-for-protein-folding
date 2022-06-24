@@ -1,18 +1,8 @@
 #!/bin/bash
 #
-# Copyright 2021 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Original Copyright 2021 DeepMind Technologies Limited
+# Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Downloads, unzips and flattens the PDB database for AlphaFold.
 #
@@ -24,13 +14,8 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-if ! command -v aria2c &> /dev/null ; then
-    echo "Error: aria2c could not be found. Please install aria2c (sudo apt install aria2)."
-    exit 1
-fi
-
-if ! command -v rsync &> /dev/null ; then
-    echo "Error: rsync could not be found. Please install rsync."
+if ! command -v aws &> /dev/null ; then
+    echo "Error: awscli could not be found. Please install awscli."
     exit 1
 fi
 
@@ -39,15 +24,11 @@ ROOT_DIR="${DOWNLOAD_DIR}/pdb_mmcif"
 RAW_DIR="${ROOT_DIR}/raw"
 MMCIF_DIR="${ROOT_DIR}/mmcif_files"
 
-echo "Running rsync to fetch all mmCIF files (note that the rsync progress estimate might be inaccurate)..."
-echo "If the download speed is too slow, try changing the mirror to:"
-echo "  * rsync.ebi.ac.uk::pub/databases/pdb/data/structures/divided/mmCIF/ (Europe)"
-echo "  * ftp.pdbj.org::ftp_data/structures/divided/mmCIF/ (Asia)"
-echo "or see https://www.wwpdb.org/ftp/pdb-ftp-sites for more download options."
 mkdir --parents "${RAW_DIR}"
-rsync --recursive --links --perms --times --compress --info=progress2 --delete --port=33444 \
-  rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ \
-  "${RAW_DIR}"
+
+LATEST_PDB_SNAPSHOT=$(aws s3 ls --no-sign-request s3://pdbsnapshots/ | tail -n 3 | head -n 1 | awk '{print $2}')
+
+aws s3 cp --recursive --no-sign-request s3://pdbsnapshots/"${LATEST_PDB_SNAPSHOT}"pub/pdb/data/structures/divided/mmCIF "${RAW_DIR}"
 
 echo "Unzipping all mmCIF files..."
 find "${RAW_DIR}/" -type f -iname "*.gz" -exec gunzip {} +
@@ -62,4 +43,4 @@ done
 # Delete empty download directory structure.
 find "${RAW_DIR}" -type d -empty -delete
 
-aria2c "ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat" --dir="${ROOT_DIR}"
+aws s3 cp --no-sign-request s3://pdbsnapshots/"${LATEST_PDB_SNAPSHOT}"pub/pdb/data/status/obsolete.dat "${ROOT_DIR}"

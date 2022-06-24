@@ -1,18 +1,8 @@
 #!/bin/bash
 #
-# Copyright 2021 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Original Copyright 2021 DeepMind Technologies Limited
+# Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Downloads and unzips the PDB SeqRes database for AlphaFold.
 #
@@ -24,15 +14,17 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-if ! command -v aria2c &> /dev/null ; then
-    echo "Error: aria2c could not be found. Please install aria2c (sudo apt install aria2)."
+if ! command -v aws &> /dev/null ; then
+    echo "Error: awscli could not be found. Please install awscli."
     exit 1
 fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/pdb_seqres"
-SOURCE_URL="ftp://ftp.wwpdb.org/pub/pdb/derived_data/pdb_seqres.txt"
-BASENAME=$(basename "${SOURCE_URL}")
+LATEST_PDB_SNAPSHOT=$(aws s3 ls --no-sign-request s3://pdbsnapshots/ | tail -n 3 | head -n 1 | awk '{print $2}')
 
+SOURCE_URL="s3://pdbsnapshots/${LATEST_PDB_SNAPSHOT}pub/pdb/derived_data/pdb_seqres.txt"
+BASENAME=$(basename "${SOURCE_URL}")
 mkdir --parents "${ROOT_DIR}"
-aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+
+aws s3 cp --no-sign-request "${SOURCE_URL}" "${ROOT_DIR}"
