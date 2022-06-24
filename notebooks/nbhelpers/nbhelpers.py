@@ -63,23 +63,24 @@ def upload_fasta_to_s3(
     file_out = "_tmp.fasta"
     with open(file_out, "a") as f_out:
         for i, seq in enumerate(sequences):
-            seq_record = SeqRecord(Seq(seq), id=ids[i])
+            tag=ids[i]
+            seq_record = SeqRecord(Seq(seq), id=tag, description="Target sequence")
             SeqIO.write(seq_record, f_out, "fasta")
+            object_key = f"{job_name}/{tag}.fasta"
+            response = s3.upload_file(file_out, bucket, object_key)
+            s3_uri = f"s3://{bucket}/{object_key}"
+            print(f"Sequence file uploaded to {s3_uri}")
 
-    object_key = f"{job_name}/{job_name}.fasta"
-    response = s3.upload_file(file_out, bucket, object_key)
     os.remove(file_out)
-    s3_uri = f"s3://{bucket}/{object_key}"
-    print(f"Sequence file uploaded to {s3_uri}")
-    return object_key
+    return job_name
 
 
-def list_alphafold_stacks():
+def list_folding_stacks():
     af_stacks = []
     for stack in cfn.list_stacks(
         StackStatusFilter=["CREATE_COMPLETE", "UPDATE_COMPLETE"]
     )["StackSummaries"]:
-        if "alphafold-cfn-batch.yaml" in stack.get("TemplateDescription", []):
+        if "batch-protein-folding-cfn-batch.yaml" in stack.get("TemplateDescription", []):
             af_stacks.append(stack)
     return af_stacks
 
@@ -92,26 +93,29 @@ def get_batch_resources(stack_name):
     stack_resources = cfn.list_stack_resources(StackName=stack_name)
     cpu_job_queue_spot = None
     for resource in stack_resources["StackResourceSummaries"]:
-        if resource["LogicalResourceId"] == "GPUFoldingJobDefinition":
-            gpu_job_definition = resource["PhysicalResourceId"]
-        if resource["LogicalResourceId"] == "PrivateGPUJobQueue":
-            gpu_job_queue = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "AlphaFold2JobDefinition":
+            alphafold2_job_definition = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "OpenFoldJobDefinition":
+            openfold_job_definition = resource["PhysicalResourceId"]    
         if resource["LogicalResourceId"] == "CPUFoldingJobDefinition":
             cpu_job_definition = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "DownloadJobDefinition":
+            download_job_definition = resource["PhysicalResourceId"]            
+        if resource["LogicalResourceId"] == "PrivateGPUJobQueue":
+            gpu_job_queue = resource["PhysicalResourceId"]
         if resource["LogicalResourceId"] == "PrivateCPUJobQueueOnDemand":
-            cpu_job_queue_od = download_job_queue = resource["PhysicalResourceId"]        
+            cpu_job_queue_od = resource["PhysicalResourceId"]        
         if resource["LogicalResourceId"] == "PrivateCPUJobQueueSpot":
-            cpu_job_queue_spot = resource["PhysicalResourceId"]                    
-        if resource["LogicalResourceId"] == "CPUDownloadJobDefinition":
-            download_job_definition = resource["PhysicalResourceId"]
+            cpu_job_queue_spot = resource["PhysicalResourceId"]                                    
     return {
-        "gpu_job_definition": gpu_job_definition,
-        "gpu_job_queue": gpu_job_queue,
+        "alphafold2_job_definition": alphafold2_job_definition,
+        "openfold_job_definition": openfold_job_definition,
         "cpu_job_definition": cpu_job_definition,
+        "download_job_definition": download_job_definition,
+        "gpu_job_queue": gpu_job_queue,
         "cpu_job_queue_od": cpu_job_queue_od,
         "cpu_job_queue_spot": cpu_job_queue_spot,
-        "download_job_definition": download_job_definition,
-        "download_job_queue": download_job_queue,
+        "download_job_queue": cpu_job_queue_spot,
     }
 
 
@@ -278,11 +282,151 @@ def display_structure(
     if color == "lDDT":
         plot_plddt_legend().show()
 
+#################################################################        
+        
+        
+def submit_batch_openfold_job(
+    id,
+    fasta_s3_uri,
+    output_s3_uri,
+    job_name = create_job_name(),
+    stack_name=None,
+    depends_on=None,    
+    use_spot_instances=False,
+    template_mmcif_dir="/database/pdb_mmcif/mmcif_files",
+    use_precomputed_alignments=None,
+    model_device="cuda:0",
+    config_preset="model_1",
+    jax_param_path=None,
+    openfold_checkpoint_path=None,
+    save_outputs=False,
+    cpu=4,
+    memory=16,
+    gpu=1,
+    preset="full_dbs",
+    output_postfix=None,
+    data_random_seed=None,
+    skip_relaxation=False,
+    multimer_ri_gap=200,
+    bfd_database_path="/database/bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
+    mgnify_database_path="/database/mgnify_database_path/mgy_clusters_2018_12.fa",
+    pdb70_database_path="/database/pdb70_database_path/pdb70",
+    obsolete_pdbs_path="/database/obsolete_pdbs_path/obsolete.dat",
+    pdb_seqres_database_path="/database/pdb_seqres_database_path/pdb_seqres.txt",
+    small_bfd_database_path="/database/small_bfd_database_path/bfd-first_non_consensus_sequences.fasta",
+    uniclust30_database_path="/database/uniclust30_database_path/uniclust30_2018_08/uniclust30_2018_08",
+    uniprot_database_path="/database/uniprot_database_path/uniprot.fasta",
+    uniref90_database_path="/database/uniref90_database_path/uniref90.fasta",
+    max_template_date=datetime.now().strftime("%Y-%m-%d"),
+
+):
+
+    if stack_name is None:
+        stack_name = list_folding_stacks()[0]["StackName"]
+    batch_resources = get_batch_resources(stack_name)
+    
+    download_string = f"aws s3 cp {fasta_s3_uri} data/fasta/"    
+    if use_precomputed_alignments is not None:
+        download_string += f" && aws s3 cp --recursive {use_precomputed_alignments} data/msas/{id}/ " 
+    
+    command_list = [
+        f"python3 /opt/openfold/run_pretrained_openfold.py data/fasta {template_mmcif_dir}",
+        f"--model_device={model_device}",
+        f"--config_preset={config_preset}",
+        f"--jax_param_path={jax_param_path}",
+        f"--openfold_checkpoint_path={openfold_checkpoint_path}",
+        f"--output_postfix={output_postfix}",
+        f"--data_random_seed={data_random_seed}",
+        f"--multimer_ri_gap={multimer_ri_gap}",
+        "--output_dir data/output"
+    ]
+    
+    upload_string = f"aws s3 cp --recursive data/output/ {output_s3_uri}"
+
+    if use_precomputed_alignments is None:
+        command_list.extend([
+            f"--mgnify_database_path {mgnify_database_path}",
+            f"--pdb70_database_path {pdb70_database_path}",             
+            f"--uniclust30_database_path /{uniclust30_database_path}",
+            f"--uniref90_database_path {uniref90_database_path}"
+        ])
+        if preset == "full_dbs":
+            command_list.extend([
+                f"--bfd_database_path={bfd_database_path}",
+                f"--uniclust30_database_path={uniclust30_database_path}"                       
+                ])
+        elif preset == "reduced_dbs":
+            command_list.extend([
+                f"--small_bfd_database_path={small_bfd_database_path}"
+            ])   
+        else:
+            raise ValueError("preset value must be either 'full_dbs' or 'reduced_dbs'")
+    else:
+        command_list.extend(["--use_precomputed_alignments data/msas"])
+        
+    if skip_relaxation:
+        command_list.extend(["--skip_relaxation"])
+
+    if save_outputs:
+        command_list.extend(["--save_outputs"])        
+
+
+
+        
+    container_overrides = {
+        "command": [download_string + " && " + " ".join(command_list) + " && " + upload_string],
+        "resourceRequirements": [
+            {"value": str(cpu), "type": "VCPU"},
+            {"value": str(memory * 1000), "type": "MEMORY"},
+        ],
+    }            
+        
+    if gpu > 0:
+        if use_spot_instances:
+            print("Spot instance queue not available for GPU jobs. Using on-demand queue instead.")
+        job_definition = batch_resources["openfold_job_definition"]
+        job_queue = batch_resources["gpu_job_queue"]
+        container_overrides["resourceRequirements"].append(
+            {"value": str(gpu), "type": "GPU"}
+        )
+    else:
+        job_definition = batch_resources["cpu_job_definition"]
+        if use_spot_instances and batch_resources["cpu_job_queue_spot"] is not None:
+            job_queue = batch_resources["cpu_job_queue_spot"]
+        elif use_spot_instances and batch_resources["cpu_job_queue_spot"] is None:
+            print("Spot instance queue not available. Using on-demand queue instead.")
+            job_queue = batch_resources["cpu_job_queue_od"]
+        else:
+            job_queue = batch_resources["cpu_job_queue_od"]  
+
+    
+    print(container_overrides)
+    
+    if depends_on is None:
+        response = batch.submit_job(
+            jobDefinition=job_definition,
+            jobName=job_name,
+            jobQueue=job_queue,
+            containerOverrides=container_overrides,
+        )
+    else:
+        response = batch.submit_job(
+            jobDefinition=job_definition,
+            jobName=job_name,
+            jobQueue=job_queue,
+            containerOverrides=container_overrides,
+            dependsOn=[{"jobId": depends_on, "type": "SEQUENTIAL"}],
+        )
+
+    return response        
+        
+#################################################################    
 
 def submit_batch_alphafold_job(
     job_name,
-    fasta_paths,
-    s3_bucket,
+    fasta_s3_uri,
+    msas_s3_uri,
+    output_s3_uri,
     data_dir="/mnt/data_dir/fsx",
     output_dir="alphafold",
     bfd_database_path="/mnt/bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
@@ -314,10 +458,10 @@ def submit_batch_alphafold_job(
 ):
 
     if stack_name is None:
-        stack_name = list_alphafold_stacks()[0]["StackName"]
+        stack_name = list_folding_stacks()[0]["StackName"]
     batch_resources = get_batch_resources(stack_name)
 
-    container_overrides = {
+    container_overrides = {    
         "command": [
             f"--fasta_paths={fasta_paths}",
             f"--uniref90_database_path={uniref90_database_path}",
