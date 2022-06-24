@@ -50,22 +50,23 @@ Resources:
                   LOGGER.info("REQUEST RECEIVED:\n %s", context)
                   if event["RequestType"] == "Create":
                       LOGGER.info("CREATE!")
-                      # all_scripts = [
-                      #     "download_alphafold_params_s3.sh",
-                      #     "download_bfd_s3.sh",
-                      #     "download_mgnify_s3.sh",
-                      #     "download_pdb70_s3.sh",
-                      #     "download_pdb_mmcif_s3.sh",
-                      #     "download_pdb_seqres_s3.sh",
-                      #     "download_small_bfd_s3.sh",
-                      #     "download_uniclust30_s3.sh",
-                      #     "download_uniprot.sh",
-                      #     "download_uniref90.sh",
-                      # ]
+
+                      all_scripts = [
+                          "download_alphafold_params.sh",
+                          "download_openfold_params.sh",
+                          "download_bfd.sh",
+                          "download_mgnify.sh",                          
+                          "download_pdb_mmcif.sh",
+                          "download_pdb_seqres.sh",
+                          "download_pdb70.sh",
+                          "download_small_bfd.sh",
+                          "download_uniclust30.sh",
+                          "download_uniprot.sh",
+                          "download_uniref90.sh",
+                      ]
                       
                       responses = []
-                      # for script in all_scripts:
-                      for script in pathlib.Path('.').glob('*.sh'):
+                      for script in all_scripts:
                           LOGGER.info(script)
                           script_response = submit_download_data_job(
                               job_queue=event["ResourceProperties"]["JobQueue"],
