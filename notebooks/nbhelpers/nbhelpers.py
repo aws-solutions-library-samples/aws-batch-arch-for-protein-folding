@@ -338,7 +338,8 @@ def submit_batch_openfold_job(
         f"--output_postfix={output_postfix}",
         f"--data_random_seed={data_random_seed}",
         f"--multimer_ri_gap={multimer_ri_gap}",
-        "--output_dir data/output"
+        "--output_dir data/output",
+        "--save_outputs"
     ]
     
     upload_string = f"aws s3 cp --recursive data/output/ {output_s3_uri}"
@@ -366,11 +367,13 @@ def submit_batch_openfold_job(
         
     if skip_relaxation:
         command_list.extend(["--skip_relaxation"])
-
-    if save_outputs:
-        command_list.extend(["--save_outputs"])        
-
-
+        
+    if openfold_checkpoint_path is not None:
+        command_list.extend([f"--openfold_checkpoint_path={openfold_checkpoint_path}"])
+    elif jax_param_path is not None:
+        command_list.extend([f"--jax_param_path={jax_param_path}"])
+    else:
+        raise ValueError("Please provide a value for either openfold_checkpoint_path or jax_param_path")
 
         
     container_overrides = {
