@@ -383,42 +383,12 @@ Resources:
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
-          - ContainerPath: /mnt/bfd_database_path
-            ReadOnly: True
-            SourceVolume: bfd
-          - ContainerPath: /mnt/mgnify_database_path
-            ReadOnly: True
-            SourceVolume: mgnify
-          - ContainerPath: /mnt/pdb70_database_path
-            ReadOnly: True
-            SourceVolume: pdb70
-          - ContainerPath: /mnt/template_mmcif_dir
-            ReadOnly: True
-            SourceVolume: pdb_mmcif
-          - ContainerPath: /mnt/obsolete_pdbs_path
-            ReadOnly: True
-            SourceVolume: pdb_mmcif
-          - ContainerPath: /mnt/pdb_seqres_database_path
-            ReadOnly: True
-            SourceVolume: pdb_seqres
-          - ContainerPath: /mnt/small_bfd_database_path
-            ReadOnly: True
-            SourceVolume: small_bfd
-          - ContainerPath: /mnt/uniclust30_database_path
-            ReadOnly: True
-            SourceVolume: uniclust30
-          - ContainerPath: /mnt/uniprot_database_path
-            ReadOnly: True
-            SourceVolume: uniprot
-          - ContainerPath: /mnt/uniref90_database_path
-            ReadOnly: True
-            SourceVolume: uniref90
-          - ContainerPath: /mnt/data_dir
-            ReadOnly: True
-            SourceVolume: data
-          - ContainerPath: /mnt/output
+          - ContainerPath: /data
             ReadOnly: False
-            SourceVolume: output
+            SourceVolume: data
+          - ContainerPath: /database/
+            ReadOnly: True
+            SourceVolume: database
         ResourceRequirements:
           - Type: VCPU
             Value: 8
@@ -427,39 +397,12 @@ Resources:
           - Type: GPU
             Value: 1
         Volumes:
-          - Name: bfd
+          - Name: database
             Host:
-              SourcePath: /fsx/bfd
-          - Name: mgnify
-            Host:
-              SourcePath: /fsx/mgnify
-          - Name: pdb70
-            Host:
-              SourcePath: /fsx/pdb70
-          - Name: pdb_mmcif
-            Host:
-              SourcePath: /fsx/pdb_mmcif
-          - Name: pdb_seqres
-            Host:
-              SourcePath: /fsx/pdb_seqres
-          - Name: small_bfd
-            Host:
-              SourcePath: /fsx/small_bfd
-          - Name: uniclust30
-            Host:
-              SourcePath: /fsx/uniclust30
-          - Name: uniprot
-            Host:
-              SourcePath: /fsx/uniprot
-          - Name: uniref90
-            Host:
-              SourcePath: /fsx/uniref90
+              SourcePath: /fsx/
           - Name: data
             Host:
-              SourcePath: /
-          - Name: output
-            Host:
-              SourcePath: /tmp/alphafold
+              SourcePath: /home/ec2-user/data
       PlatformCapabilities:
         - EC2
       PropagateTags: true
