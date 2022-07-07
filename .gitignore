@@ -12,3 +12,8 @@ random_commands.sh
 .github/
 .pytest_cache/
 delete.sh
+src/batchfold.egg-info/dependency_links.txt
+src/batchfold.egg-info/PKG-INFO
+src/batchfold.egg-info/requires.txt
+src/batchfold.egg-info/SOURCES.txt
+src/batchfold.egg-info/top_level.txt
