@@ -278,7 +278,7 @@ Resources:
     Properties:
       ContainerProperties:
         Command:
-          - "-c echo hello, world"
+          - "echo hello"
         Image: !Join [":", [!Ref OpenFoldContainerRegistryURI, "latest"]]
         LogConfiguration:
           LogDriver: awslogs
@@ -475,7 +475,7 @@ Resources:
     Properties:
       ContainerProperties:
         Command:
-          - "-c echo hello, world"
+          - "echo hello"
         Image: !Join [":", [!Ref DownloadContainerRegistryURI, "latest"]]
         LogConfiguration:
           LogDriver: awslogs
