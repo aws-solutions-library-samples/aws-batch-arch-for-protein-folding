@@ -100,23 +100,28 @@ ARG AWS_DEFAULT_REGION
 ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
 # Install the AWS CLI
-RUN mamba install -y -c conda-forge awscli
+RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  && unzip awscliv2.zip \
+  && ./aws/install \
+  && rm awscliv2.zip
 
 # Copy stereo_chemical file from s3
 RUN aws s3 cp \
   s3://aws-batch-architecture-for-alphafold-public-artifacts/stereo_chemical_props/stereo_chemical_props.txt \
   /app/alphafold/alphafold/common/
 
-# Add batch job wrapper
-COPY run_s3_batch_job.sh /app/run_s3_batch_job.sh
+# Add Tini (https://github.com/krallin/tini)
+ENV TINI_VERSION v0.19.0
+RUN wget -O "/tini" "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini"  \
+  && chmod +x /tini
 
 # Clean up
 RUN rm -rf \
   /app/alphafold/docker \
   /app/alphafold/imgs \
   /app/alphafold/notebooks \
-  /app/alphafold/scripts \
-  && chmod +x /app/run_s3_batch_job.sh
+  /app/alphafold/scripts
 
 # Set new entrypoint
-ENTRYPOINT ["/app/run_s3_batch_job.sh"]
+ENTRYPOINT ["/tini", "--", "bash", "-c"]
+CMD ["nvidia-smi"]
