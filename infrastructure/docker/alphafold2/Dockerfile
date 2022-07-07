@@ -29,6 +29,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       kalign \
       tzdata \
       wget \
+      zip \
       # Address https://ubuntu.com/security/CVE-2022-24407
       libsasl2-modules-sql=2.1.27+dfsg-2ubuntu0.1 \ 
       # Address https://ubuntu.com/security/CVE-2022-24407, https://ubuntu.com/security/CVE-2021-3711,
