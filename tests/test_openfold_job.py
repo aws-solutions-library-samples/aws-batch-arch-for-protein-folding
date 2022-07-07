@@ -38,7 +38,7 @@ def test_openfold_job_submission(batch_environment):
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         msa_s3_uri="s3://aws-af-testing/T1084/msas/",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
-        use_precomputed_msa = True,
+        use_precomputed_msas = True,
         config_preset = "finetuning_ptm",
         openfold_checkpoint_path = "/database/openfold_params/finetuning_ptm_1.pt",
         save_outputs = True        

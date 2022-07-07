@@ -37,7 +37,7 @@ def test_alphafold_2_job_submission(batch_environment):
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         msa_s3_uri = "s3://aws-af-testing/T1084/msas/",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
-        use_precomputed_msa = True,
+        use_precomputed_msas = True,
         model_preset = "monomer"
     )
 

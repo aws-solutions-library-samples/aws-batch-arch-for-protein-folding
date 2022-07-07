@@ -32,6 +32,89 @@ batch = boto_session.client("batch", region_name=region)
 cfn = boto_session.client("cloudformation", region_name=region)
 logs_client = boto_session.client("logs")
 
+
+def create_job_name(suffix=None):
+
+    """
+    Define a simple job identifier
+    """
+
+    if suffix == None:
+        return datetime.now().strftime("%Y%m%dT%H%M%S")
+    else:
+        ## Ensure that the suffix conforms to the Batch requirements, (only letters,
+        ## numbers, hyphens, and underscores are allowed).
+        suffix = re.sub("\W", "_", suffix)
+        return datetime.now().strftime("%Y%m%dT%H%M%S") + "_" + suffix
+
+
+def upload_fasta_to_s3(
+    sequences,
+    ids,
+    bucket=sm_session.default_bucket(),
+    job_name=uuid.uuid4(),
+    region="us-east-1",
+):
+
+    """
+    Create a fasta file and upload it to S3.
+    """
+
+    file_out = "_tmp.fasta"
+    with open(file_out, "a") as f_out:
+        for i, seq in enumerate(sequences):
+            seq_record = SeqRecord(Seq(seq), id=ids[i])
+            SeqIO.write(seq_record, f_out, "fasta")
+
+    object_key = f"{job_name}/{job_name}.fasta"
+    response = s3.upload_file(file_out, bucket, object_key)
+    os.remove(file_out)
+    s3_uri = f"s3://{bucket}/{object_key}"
+    print(f"Sequence file uploaded to {s3_uri}")
+    return object_key
+
+
+def list_alphafold_stacks():
+    af_stacks = []
+    for stack in cfn.list_stacks(
+        StackStatusFilter=["CREATE_COMPLETE", "UPDATE_COMPLETE"]
+    )["StackSummaries"]:
+        if "alphafold-cfn-batch.yaml" in stack.get("TemplateDescription", []):
+            af_stacks.append(stack)
+    return af_stacks
+
+def get_batch_resources(stack_name):
+    """
+    Get the resource names of the Batch resources for running Alphafold jobs.
+    """
+
+    # stack_name = af_stacks[0]["StackName"]
+    stack_resources = cfn.list_stack_resources(StackName=stack_name)
+    cpu_job_queue_spot = None
+    for resource in stack_resources["StackResourceSummaries"]:
+        if resource["LogicalResourceId"] == "AlphaFold2JobDefinition":
+            gpu_job_definition = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "G4dnJobQueue":
+            gpu_job_queue = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "CPUFoldingJobDefinition":
+            cpu_job_definition = resource["PhysicalResourceId"]
+        if resource["LogicalResourceId"] == "PrivateCPUJobQueueOnDemand":
+            cpu_job_queue_od = download_job_queue = resource["PhysicalResourceId"]        
+        if resource["LogicalResourceId"] == "PrivateCPUJobQueueSpot":
+            cpu_job_queue_spot = resource["PhysicalResourceId"]                    
+        if resource["LogicalResourceId"] == "DownloadJobDefinition":
+            download_job_definition = resource["PhysicalResourceId"]
+    return {
+        "gpu_job_definition": gpu_job_definition,
+        "gpu_job_queue": gpu_job_queue,
+        "cpu_job_definition": cpu_job_definition,
+        "cpu_job_queue_od": cpu_job_queue_od,
+        "cpu_job_queue_spot": cpu_job_queue_spot,
+        "download_job_definition": download_job_definition,
+        "download_job_queue": download_job_queue,
+    }
+
+
 def get_batch_job_info(jobId):
 
     """
@@ -57,6 +140,27 @@ def get_batch_job_info(jobId):
             "logStreamName"
         ]
     return output
+
+
+def get_batch_logs(logStreamName):
+
+    """
+    Retrieve and format logs for batch job.
+    """
+
+    try:
+        response = logs_client.get_log_events(
+            logGroupName="/aws/batch/job", logStreamName=logStreamName
+        )
+    except logs_client.meta.client.exceptions.ResourceNotFoundException:
+        return f"Log stream {logStreamName} does not exist. Please try again in a few minutes"
+
+    logs = pd.DataFrame.from_dict(response["events"])
+    logs.timestamp = logs.timestamp.transform(
+        lambda x: datetime.fromtimestamp(x / 1000)
+    )
+    logs.drop("ingestionTime", axis=1, inplace=True)
+    return logs
 
 
 def download_dir(client, bucket, local="data", prefix=""):
@@ -174,14 +278,11 @@ def display_structure(
     if color == "lDDT":
         plot_plddt_legend().show()
 
-#################################################################        
-          
 
 def submit_batch_alphafold_job(
     job_name,
-    fasta_s3_uri,
-    msas_s3_uri,
-    output_s3_uri,
+    fasta_paths,
+    s3_bucket,
     data_dir="/mnt/data_dir/fsx",
     output_dir="alphafold",
     bfd_database_path="/mnt/bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
@@ -213,10 +314,10 @@ def submit_batch_alphafold_job(
 ):
 
     if stack_name is None:
-        stack_name = list_folding_stacks()[0]["StackName"]
+        stack_name = list_alphafold_stacks()[0]["StackName"]
     batch_resources = get_batch_resources(stack_name)
 
-    container_overrides = {    
+    container_overrides = {
         "command": [
             f"--fasta_paths={fasta_paths}",
             f"--uniref90_database_path={uniref90_database_path}",
