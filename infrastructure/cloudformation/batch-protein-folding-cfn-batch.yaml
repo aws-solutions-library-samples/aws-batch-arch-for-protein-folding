@@ -209,7 +209,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"        
 
-  PrivateGPUComputeEnvironment:
+  G4dnComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
       ComputeResources:
@@ -257,11 +257,11 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"        
 
-  PrivateGPUJobQueue:
+  G4dnJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref PrivateGPUComputeEnvironment
+        - ComputeEnvironment: !Ref G4dnComputeEnvironment
           Order: 1
       Priority: 10
       State: ENABLED
@@ -556,9 +556,10 @@ Outputs:
     Description: Job queue for spot CPU instances.
     Value:
       Ref: PrivateCPUJobQueueSpot
-  GPUJobQueue:
+  G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
-    Value: PrivateGPUJobQueue
+    Value: 
+      Ref: G4dnJobQueue
   CPUFoldingJobDefinition:
     Description: Job definition for running folding jobs on CPU instances.
     Value:

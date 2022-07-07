@@ -1,19 +1,20 @@
 from attrs import define, field
 from typing import List, Dict
 import boto3
+from datetime import datetime
 
 @define
 class BatchFoldJob:
     """ Submit protein analysis job to AWS """
 
-    name: str
-    definition: str
+    job_name: str = datetime.now().strftime("%Y%m%dT%H%M%S")
+    job_definition: str = field(kw_only=True)
     cpu: int = 4
     memory: int = 16
     gpu: int = 0
     command: List = ["echo hello"]
-    depends_on: str = ""
-    container_overrides: Dict = field() # type: ignore
+    depends_on: str = ""    
+    container_overrides: Dict = field(kw_only=True) 
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
     id: str = field(init=False)
 

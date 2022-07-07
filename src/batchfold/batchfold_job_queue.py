@@ -30,31 +30,31 @@ class JobQueue:
 
         if job.container_overrides and job.depends_on:
             response = batch.submit_job(
-                jobName=job.name,
+                jobName=job.job_name,
                 jobQueue=self.name,
-                jobDefinition=job.definition,
+                jobDefinition=job.job_definition,
                 containerOverrides=job.container_overrides,
                 dependsOn=job.depends_on
             )
         elif job.container_overrides and not job.depends_on:
             response = batch.submit_job(
-                jobName=job.name,
+                jobName=job.job_name,
                 jobQueue=self.name,
-                jobDefinition=job.definition,
+                jobDefinition=job.job_definition,
                 containerOverrides=job.container_overrides
             )
         elif job.depends_on and not job.container_overrides:
             response = batch.submit_job(
-                jobName=job.name,
+                jobName=job.job_name,
                 jobQueue=self.name,
-                jobDefinition=job.definition,
+                jobDefinition=job.job_definition,
                 dependsOn=job.depends_on
             )     
         else:
             response = batch.submit_job(
-                jobName=job.name,
+                jobName=job.job_name,
                 jobQueue=self.name,
-                jobDefinition=job.definition
+                jobDefinition=job.job_definition
             )
         job.id = response.get("jobId", [])
         return response

@@ -21,9 +21,9 @@ class BatchFoldEnvironment:
     """
     
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
-    stack_name: str = field() # type: ignore
-    queues: dict = field() # type: ignore
-    job_definitions: dict = field() # type: ignore
+    stack_name: str = field(kw_only=True)
+    queues: dict = field(kw_only=True)
+    job_definitions: dict = field(kw_only=True)
 
     @stack_name.default
     def _get_latest_stack(self) -> str:
@@ -42,7 +42,7 @@ class BatchFoldEnvironment:
         return batchfold_stacks[0].get("StackName", [])
 
     @queues.default
-    def _get_queue_dict(self) -> List:
+    def _get_queue_dict(self) -> Dict:
         """Create new JobQueue instances and add them to the BatchFold environment instance."""
         
         queues = self.get_stack_outputs(filter="JobQueue")
