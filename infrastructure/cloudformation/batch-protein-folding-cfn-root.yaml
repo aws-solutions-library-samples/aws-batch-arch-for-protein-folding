@@ -148,6 +148,8 @@ Resources:
           "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         OpenFoldContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
+        OpenFoldMSAContainerRegistryURI:
+          "Fn::GetAtt": Container.Outputs.OpenFoldMSAContainerRegistryURI
 
   Notebook:
     Type: "AWS::CloudFormation::Stack"
