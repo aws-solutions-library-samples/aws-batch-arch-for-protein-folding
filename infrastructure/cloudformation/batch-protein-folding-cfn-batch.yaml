@@ -30,6 +30,9 @@ Parameters:
   OpenFoldContainerRegistryURI:
     Description: URI of the OpenFold container
     Type: String  
+  OpenFoldMSAContainerRegistryURI:
+    Description: URI of the OpenFold MSA container
+    Type: String  
 
 Resources:
   ##################################################
@@ -209,6 +212,36 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"        
 
+  PrivateGravitonComputeEnvironmentSpot:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
+        BidPercentage: 100
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - m6g
+          - r6g
+          - c6g
+        LaunchTemplate:
+          LaunchTemplateId: 
+            Ref: InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        SpotIamFleetRole:
+          "Fn::GetAtt": SpotFleetRole.Arn
+        Subnets:
+          - Ref: Subnet
+        Type: SPOT
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"                
+
   G4dnComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
@@ -255,7 +288,19 @@ Resources:
       State: ENABLED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"        
+        StackId: !Ref "AWS::StackId"      
+
+  PrivateGravitonJobQueueSpot:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref PrivateGravitonComputeEnvironmentSpot
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"              
 
   G4dnJobQueue:
     Type: AWS::Batch::JobQueue
@@ -283,81 +328,18 @@ Resources:
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
-          - ContainerPath: /mnt/bfd_database_path
+          - ContainerPath: /database
             ReadOnly: True
-            SourceVolume: bfd
-          - ContainerPath: /mnt/mgnify_database_path
-            ReadOnly: True
-            SourceVolume: mgnify
-          - ContainerPath: /mnt/pdb70_database_path
-            ReadOnly: True
-            SourceVolume: pdb70
-          - ContainerPath: /mnt/template_mmcif_dir
-            ReadOnly: True
-            SourceVolume: pdb_mmcif
-          - ContainerPath: /mnt/obsolete_pdbs_path
-            ReadOnly: True
-            SourceVolume: pdb_mmcif
-          - ContainerPath: /mnt/pdb_seqres_database_path
-            ReadOnly: True
-            SourceVolume: pdb_seqres
-          - ContainerPath: /mnt/small_bfd_database_path
-            ReadOnly: True
-            SourceVolume: small_bfd
-          - ContainerPath: /mnt/uniclust30_database_path
-            ReadOnly: True
-            SourceVolume: uniclust30
-          - ContainerPath: /mnt/uniprot_database_path
-            ReadOnly: True
-            SourceVolume: uniprot
-          - ContainerPath: /mnt/uniref90_database_path
-            ReadOnly: True
-            SourceVolume: uniref90
-          - ContainerPath: /mnt/data_dir
-            ReadOnly: True
-            SourceVolume: data
-          - ContainerPath: /mnt/output
-            ReadOnly: False
-            SourceVolume: output
+            SourceVolume: database
         ResourceRequirements:
           - Type: VCPU
             Value: 8
           - Type: MEMORY
             Value: 16000
         Volumes:
-          - Name: bfd
+          - Name: database
             Host:
-              SourcePath: /fsx/bfd
-          - Name: mgnify
-            Host:
-              SourcePath: /fsx/mgnify
-          - Name: pdb70
-            Host:
-              SourcePath: /fsx/pdb70
-          - Name: pdb_mmcif
-            Host:
-              SourcePath: /fsx/pdb_mmcif
-          - Name: pdb_seqres
-            Host:
-              SourcePath: /fsx/pdb_seqres
-          - Name: small_bfd
-            Host:
-              SourcePath: /fsx/small_bfd
-          - Name: uniclust30
-            Host:
-              SourcePath: /fsx/uniclust30
-          - Name: uniprot
-            Host:
-              SourcePath: /fsx/uniprot
-          - Name: uniref90
-            Host:
-              SourcePath: /fsx/uniref90
-          - Name: data
-            Host:
-              SourcePath: /
-          - Name: output
-            Host:
-              SourcePath: /tmp/alphafold
+              SourcePath: /fsx
       PlatformCapabilities:
         - EC2
       PropagateTags: true
@@ -383,10 +365,7 @@ Resources:
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
-          - ContainerPath: /data
-            ReadOnly: False
-            SourceVolume: data
-          - ContainerPath: /database/
+          - ContainerPath: /database
             ReadOnly: True
             SourceVolume: database
         ResourceRequirements:
@@ -399,10 +378,7 @@ Resources:
         Volumes:
           - Name: database
             Host:
-              SourcePath: /fsx/
-          - Name: data
-            Host:
-              SourcePath: /home/ec2-user/data
+              SourcePath: /fsx
       PlatformCapabilities:
         - EC2
       PropagateTags: true
@@ -456,10 +432,7 @@ Resources:
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
-          - ContainerPath: /data
-            ReadOnly: False
-            SourceVolume: data
-          - ContainerPath: /database/
+          - ContainerPath: /database
             ReadOnly: True
             SourceVolume: database
         ResourceRequirements:
@@ -472,10 +445,7 @@ Resources:
         Volumes:
           - Name: database
             Host:
-              SourcePath: /fsx/
-          - Name: data
-            Host:
-              SourcePath: /home/ec2-user/data
+              SourcePath: /fsx
       PlatformCapabilities:
         - EC2
       PropagateTags: true
@@ -485,6 +455,38 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
       Type: container
+
+  OpenFoldMSAJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      ContainerProperties:
+        Command:
+          - "nvidia-smi"
+        Image: !Join [":", [!Ref OpenFoldMSAContainerRegistryURI, "latest"]]
+        LogConfiguration:
+          LogDriver: awslogs
+        MountPoints:
+          - ContainerPath: /database
+            ReadOnly: True
+            SourceVolume: database
+        ResourceRequirements:
+          - Type: VCPU
+            Value: 8
+          - Type: MEMORY
+            Value: 16000
+        Volumes:
+          - Name: database
+            Host:
+              SourcePath: /fsx
+      PlatformCapabilities:
+        - EC2
+      PropagateTags: true
+      RetryStrategy:
+        Attempts: 3
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+      Type: container      
 
 Outputs:
   LaunchTemplate:
@@ -503,6 +505,10 @@ Outputs:
     Description: Job queue for on-demand GPU instances.
     Value: 
       Ref: G4dnJobQueue
+  GravitonJobQueueSpot:
+    Description: Job queue for spot Graviton instances.
+    Value: 
+      Ref: PrivateGravitonJobQueueSpot       
   CPUFoldingJobDefinition:
     Description: Job definition for running folding jobs on CPU instances.
     Value:

@@ -133,6 +133,19 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
+  OpenFoldMSAContainerRegistry:
+    Type: AWS::ECR::Repository
+    Properties:
+      EncryptionConfiguration:
+        EncryptionType: AES256
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"          
+
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
@@ -302,14 +315,16 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
-          - Name: ALPHAFOLD2_IMAGE_TAG
+          - Name: IMAGE_TAG
             Value: latest
-          - Name: ALPHAFOLD2_IMAGE_REPO_NAME
+          - Name: IMAGE_REPO_NAME
             Value: !Ref AlphaFold2ContainerRegistry
           - Name: ALPHAFOLD2_VERSION
             Value: v2.2.2
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/alphafold2                  
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -338,12 +353,14 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
-          - Name: DOWNLOAD_IMAGE_TAG
+          - Name: IMAGE_TAG
             Value: latest
-          - Name: DOWNLOAD_IMAGE_REPO_NAME
+          - Name: IMAGE_REPO_NAME
             Value: !Ref DownloadContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/download                 
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -372,12 +389,14 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
-          - Name: OPENFOLD_IMAGE_TAG
+          - Name: IMAGE_TAG
             Value: latest
-          - Name: OPENFOLD_IMAGE_REPO_NAME
+          - Name: IMAGE_REPO_NAME
             Value: !Ref OpenFoldContainerRegistry            
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/openfold          
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -395,6 +414,42 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
+
+  CodeBuildProjectOpenFoldMSA:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Build Docker container for OpenFold MSA algorithm on AWS Batch
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        EnvironmentVariables:
+          - Name: IMAGE_TAG
+            Value: latest
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref OpenFoldMSAContainerRegistry            
+          - Name: ACCOUNT_ID
+            Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/openfoldmsa
+        Image: aws/codebuild/standard:4.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: LINUX_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        BuildSpec: infrastructure/docker/openfoldmsa/buildspec.yaml
+        GitCloneDepth: 1
+        Location: !GetAtt CodeRepository.CloneUrlHttp
+        Type: CODECOMMIT
+      SourceVersion: refs/heads/main
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"          
 
   CodePipelineRole:
     Type: AWS::IAM::Role
@@ -443,13 +498,16 @@ Resources:
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
                   - !GetAtt CodeBuildProjectDownload.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
+                  - !GetAtt CodeBuildProjectOpenFoldMSA.Arn
                 Effect: Allow
               - Effect: Allow
                 Action:
                   - ecr:DescribeImages
                 Resource: 
                   - !GetAtt AlphaFold2ContainerRegistry.Arn
+                  - !GetAtt DownloadContainerRegistry.Arn
                   - !GetAtt OpenFoldContainerRegistry.Arn
+                  - !GetAtt OpenFoldMSAContainerRegistry.Arn
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -528,7 +586,22 @@ Resources:
               OutputArtifacts:
                 - Name: OpenFoldBuildArtifact
               Region: !Ref "AWS::Region"
-              RunOrder: 2                       
+              RunOrder: 2     
+            - Name: BuildOpenFoldMSA
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProjectOpenFoldMSA
+              InputArtifacts:
+                - Name: SourceArtifact
+              Namespace: BuildVariablesOpenFoldMSA
+              OutputArtifacts:
+                - Name: OpenFoldBuildArtifactMSA
+              Region: !Ref "AWS::Region"
+              RunOrder: 2                                  
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -681,6 +754,14 @@ Resources:
       ContainerRepo:
         Ref: OpenFoldContainerRegistry         
 
+  DeleteOpenFoldMSAContainerRepo:
+    Type: Custom::ResourceForDeletingECR
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: DeleteContainerRepoLambda.Arn
+      ContainerRepo:
+        Ref: OpenFoldMSAContainerRegistry              
+
 
 Outputs:
   CodeRepositoryURI:
@@ -711,6 +792,14 @@ Outputs:
     Description: Name of the OpenFold container repository
     Value:
       Ref: OpenFoldContainerRegistry         
+  OpenFoldMSAContainerRegistryURI:
+    Description: URI of the OpenFold MSA container
+    Value:
+      Fn::GetAtt: OpenFoldMSAContainerRegistry.RepositoryUri   
+  OpenFoldMSAContainerRegistryName:
+    Description: Name of the OpenFold MSA container repository
+    Value:
+      Ref: OpenFoldMSAContainerRegistry              
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:

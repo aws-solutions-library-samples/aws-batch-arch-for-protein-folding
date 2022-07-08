@@ -17,13 +17,13 @@ def test_openfold_job_init():
         target_id = "T1084",
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
-        openfold_checkpoint_path = "/database/openfold_params/finetuning_ptm_1.pt",
+        openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",
     )
 
     assert new_job.target_id == "T1084"
     assert new_job.fasta_s3_uri == "s3://aws-af-testing/T1084/fasta/T1084.fasta"
     assert new_job.output_s3_uri == "s3://aws-af-testing/T1084/outputs/"
-    assert new_job.template_mmcif_dir == "/database/pdb_mmcif/mmcif_files" 
+    assert new_job.template_mmcif_dir == "pdb_mmcif/mmcif_files" 
 
 def test_openfold_job_submission(batch_environment):
 
@@ -40,7 +40,7 @@ def test_openfold_job_submission(batch_environment):
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
         use_precomputed_msas = True,
         config_preset = "finetuning_ptm",
-        openfold_checkpoint_path = "/database/openfold_params/finetuning_ptm_1.pt",
+        openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",
         save_outputs = True        
     )
 
