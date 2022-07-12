@@ -20,6 +20,7 @@ def test_get_stack_outputs(batch_environment):
         "CPUSpotJobQueue",
         "DownloadJobDefinition",
         "G4dnJobQueue",
+        "GravitonJobQueueSpot",
         "LaunchTemplate",
         "OpenFoldJobDefinition",
     ]
@@ -36,6 +37,7 @@ def test_get_job_queue_names(batch_environment):
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
         "G4dnJobQueue",
+        "GravitonJobQueueSpot"
     ]
 
 def test_get_job_definition_names(batch_environment):
@@ -52,7 +54,7 @@ def test_get_job_definition_names(batch_environment):
     ]
 
 def test_get_job_queue_objects(batch_environment):
-    assert len(batch_environment.queues) == 3
+    assert len(batch_environment.queues) == 4
     assert batch_environment.queues["CPUOnDemandJobQueue"].type == "CPUOnDemandJobQueue"
     assert batch_environment.queues["CPUOnDemandJobQueue"].jobs == []
 
