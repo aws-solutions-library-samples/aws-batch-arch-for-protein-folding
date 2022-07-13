@@ -7,7 +7,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       cmake \
       wget \
       git \
-      zip \
+      unzip \
+      rsync \
       nano \
       hmmer \
       tar \
