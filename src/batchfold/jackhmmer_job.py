@@ -35,8 +35,8 @@ class JackhmmerJob(BatchFoldJob):
             f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
             f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}",             
             f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}",
-            f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}"
-            f"--bfd_database_path={self.data_dir}/{self.bfd_database_path}",
+            f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
+            f"--bfd_database_path {self.data_dir}/{self.bfd_database_path}",
         ])
         if self.use_small_bfd is False:
             command_list.extend([

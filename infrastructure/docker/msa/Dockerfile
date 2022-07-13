@@ -63,4 +63,4 @@ RUN wget -O "/tini" "https://github.com/krallin/tini/releases/download/v0.19.0/t
 COPY . /opt/msa
 WORKDIR /opt/msa
 
-ENTRYPOINT ["/tini", "--"]
+ENTRYPOINT ["/tini", "--", "bash", "-c"]

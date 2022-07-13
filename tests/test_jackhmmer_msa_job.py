@@ -31,7 +31,7 @@ def test_jackhmmer_job_submission(batch_environment):
 
     job_name = "JackhmmerJob" + datetime.now().strftime("%Y%m%d%s")
     job_queue = batch_environment.queues["GravitonJobQueueSpot"]
-    job_definition = batch_environment.job_definitions["OpenFoldMSAJobDefinition"]
+    job_definition = batch_environment.job_definitions["MSAJobDefinition"]
 
     new_job = JackhmmerJob(
         job_name = job_name,
