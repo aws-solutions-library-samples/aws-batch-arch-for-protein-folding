@@ -133,7 +133,7 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  OpenFoldMSAContainerRegistry:
+  MSAContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
       EncryptionConfiguration:
@@ -415,7 +415,7 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  CodeBuildProjectOpenFoldMSA:
+  CodeBuildProjectMSA:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
@@ -428,11 +428,11 @@ Resources:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref OpenFoldMSAContainerRegistry            
+            Value: !Ref MSAContainerRegistry            
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfoldmsa
+            Value: infrastructure/docker/msa
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -440,7 +440,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/openfoldmsa/buildspec.yaml
+        BuildSpec: infrastructure/docker/msa/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
@@ -498,7 +498,7 @@ Resources:
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
                   - !GetAtt CodeBuildProjectDownload.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
-                  - !GetAtt CodeBuildProjectOpenFoldMSA.Arn
+                  - !GetAtt CodeBuildProjectMSA.Arn
                 Effect: Allow
               - Effect: Allow
                 Action:
@@ -507,7 +507,7 @@ Resources:
                   - !GetAtt AlphaFold2ContainerRegistry.Arn
                   - !GetAtt DownloadContainerRegistry.Arn
                   - !GetAtt OpenFoldContainerRegistry.Arn
-                  - !GetAtt OpenFoldMSAContainerRegistry.Arn
+                  - !GetAtt MSAContainerRegistry.Arn
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -587,17 +587,17 @@ Resources:
                 - Name: OpenFoldBuildArtifact
               Region: !Ref "AWS::Region"
               RunOrder: 2     
-            - Name: BuildOpenFoldMSA
+            - Name: BuildMSA
               ActionTypeId:
                 Category: Build
                 Owner: AWS
                 Provider: CodeBuild
                 Version: 1
               Configuration:
-                ProjectName: !Ref CodeBuildProjectOpenFoldMSA
+                ProjectName: !Ref CodeBuildProjectMSA
               InputArtifacts:
                 - Name: SourceArtifact
-              Namespace: BuildVariablesOpenFoldMSA
+              Namespace: BuildVariablesMSA
               OutputArtifacts:
                 - Name: OpenFoldBuildArtifactMSA
               Region: !Ref "AWS::Region"
@@ -754,13 +754,13 @@ Resources:
       ContainerRepo:
         Ref: OpenFoldContainerRegistry         
 
-  DeleteOpenFoldMSAContainerRepo:
+  DeleteMSAContainerRepo:
     Type: Custom::ResourceForDeletingECR
     Properties:
       ServiceToken:
         Fn::GetAtt: DeleteContainerRepoLambda.Arn
       ContainerRepo:
-        Ref: OpenFoldMSAContainerRegistry              
+        Ref: MSAContainerRegistry              
 
 
 Outputs:
@@ -790,16 +790,16 @@ Outputs:
       Fn::GetAtt: OpenFoldContainerRegistry.RepositoryUri
   OpenFoldContainerRegistryName:
     Description: Name of the OpenFold container repository
-    Value:
+    Value:  
       Ref: OpenFoldContainerRegistry         
-  OpenFoldMSAContainerRegistryURI:
+  MSAContainerRegistryURI:
     Description: URI of the OpenFold MSA container
     Value:
-      Fn::GetAtt: OpenFoldMSAContainerRegistry.RepositoryUri   
-  OpenFoldMSAContainerRegistryName:
+      Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
+  MSAContainerRegistryName:
     Description: Name of the OpenFold MSA container repository
     Value:
-      Ref: OpenFoldMSAContainerRegistry              
+      Ref: MSAContainerRegistry              
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:

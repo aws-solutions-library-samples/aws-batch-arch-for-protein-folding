@@ -30,7 +30,7 @@ Parameters:
   OpenFoldContainerRegistryURI:
     Description: URI of the OpenFold container
     Type: String  
-  OpenFoldMSAContainerRegistryURI:
+  MSAContainerRegistryURI:
     Description: URI of the OpenFold MSA container
     Type: String  
 
@@ -456,13 +456,13 @@ Resources:
         StackId: !Ref "AWS::StackId"
       Type: container
 
-  OpenFoldMSAJobDefinition:
+  MSAJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
       ContainerProperties:
         Command:
           - "nvidia-smi"
-        Image: !Join [":", [!Ref OpenFoldMSAContainerRegistryURI, "latest"]]
+        Image: !Join [":", [!Ref MSAContainerRegistryURI, "latest"]]
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
@@ -525,7 +525,7 @@ Outputs:
     Description: Job definition for running OpenFold jobs on GPU instances.
     Value:
       Ref: OpenFoldJobDefinition    
-  OpenFoldMSAJobDefinition:
+  MSAJobDefinition:
     Description: Job definition for running OpenFold MSA jobs on CPU instances.
     Value:
-      Ref: OpenFoldMSAJobDefinition    
+      Ref: MSAJobDefinition    
