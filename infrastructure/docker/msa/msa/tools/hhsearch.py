@@ -20,7 +20,7 @@ import os
 import subprocess
 from typing import Sequence
 
-from openfoldmsa.tools import utils
+from msa.tools import utils
 
 class HHSearch:
     """Python wrapper of the HHsearch binary."""

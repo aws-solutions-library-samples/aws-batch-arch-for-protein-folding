@@ -22,7 +22,7 @@ import os
 import subprocess
 from typing import Any, Callable, Mapping, Optional, Sequence
 from urllib import request
-from openfoldmsa.tools import utils
+from msa.tools import utils
 
 class Jackhmmer:
     """Python wrapper of the Jackhmmer binary."""

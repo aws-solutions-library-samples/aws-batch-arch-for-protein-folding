@@ -20,7 +20,7 @@ import os
 import subprocess
 from typing import Any, Mapping, Optional, Sequence
 
-from openfoldmsa.tools import utils
+from msa.tools import utils
 
 _HHBLITS_DEFAULT_P = 20
 _HHBLITS_DEFAULT_Z = 500

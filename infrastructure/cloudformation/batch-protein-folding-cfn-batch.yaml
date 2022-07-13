@@ -524,4 +524,8 @@ Outputs:
   OpenFoldJobDefinition:
     Description: Job definition for running OpenFold jobs on GPU instances.
     Value:
-      Ref: OpenFoldJobDefinition      
+      Ref: OpenFoldJobDefinition    
+  OpenFoldMSAJobDefinition:
+    Description: Job definition for running OpenFold MSA jobs on CPU instances.
+    Value:
+      Ref: OpenFoldMSAJobDefinition    

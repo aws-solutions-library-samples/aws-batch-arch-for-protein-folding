@@ -2,7 +2,7 @@ import os
 import logging
 import argparse
 import re
-from openfoldmsa.alignment_runner import AlignmentRunner
+from msa.alignment_runner import AlignmentRunner
 
 logging.basicConfig()
 logger = logging.getLogger(__file__)

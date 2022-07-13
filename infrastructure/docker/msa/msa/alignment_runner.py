@@ -16,9 +16,9 @@ import os
 from multiprocessing import cpu_count
 from typing import Optional
 import logging
-from openfoldmsa.tools import jackhmmer, hhsearch, hhblits
+from msa.tools import jackhmmer, hhsearch, hhblits
 
-from openfoldmsa import parsers
+from msa import parsers
 
 logging.basicConfig()
 logger = logging.getLogger(__file__)
