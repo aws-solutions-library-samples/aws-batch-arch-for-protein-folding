@@ -15,6 +15,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       aria2 \
       python3.7 \
     && apt-get clean \
+    && ln -s /usr/bin/python3.7 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.

@@ -423,7 +423,7 @@ Resources:
       Description: Build Docker container for OpenFold MSA algorithm on AWS Batch
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_LARGE
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
