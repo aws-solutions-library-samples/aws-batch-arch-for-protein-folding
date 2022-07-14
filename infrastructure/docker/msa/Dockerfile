@@ -16,7 +16,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       awscli \
       python3.7 \
     && apt-get clean \
-    && ln -s /usr/bin/python3.7 /usr/bin/python \
+    && rm /usr/bin/python3 \
+    && ln -s /usr/bin/python3.7 /usr/bin/python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.
@@ -25,17 +26,18 @@ RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh
     && pushd /tmp/hh-suite/build \
     && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
     && make && make install \
-    && ln -s /opt/hhsuite/bin/* /usr/local/bin \
+    && ln -s /opt/hhsuite/bin/* /usr/bin \
     && popd \
     && rm -rf /tmp/hh-suite    
 
-# # Compile kalign2 from source
+# Compile kalign2 from source
 RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
   && mkdir -p /tmp/kalign2/build \
   && tar -xvzf current.tar.gz -C /tmp/kalign2 \
   && pushd /tmp/kalign2 \
   && ./configure \
   && make && make install \
+  && mv /usr/local/bin/kalign /usr/bin/kalign \
   && popd \
   && rm -rf /tmp/kalign2
   
@@ -45,11 +47,12 @@ RUN git clone https://github.com/soedinglab/MMseqs2.git \
   && pushd MMseqs2/build \
   && cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. .. \
   && make && make install \
-  && mv bin/mmseqs /usr/local/bin \
+  && mv bin/mmseqs /usr/bin \
   && popd \
   && rm -rf MMseqs2
 
 COPY . /opt/msa
 WORKDIR /opt/msa
+RUN chmod -R 755 scripts
 
 ENTRYPOINT ["bash", "-c"]

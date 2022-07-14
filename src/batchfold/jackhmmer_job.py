@@ -17,7 +17,7 @@ class JackhmmerJob(BatchFoldJob):
     uniclust30_database_path: str = "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
     uniprot_database_path: str = "uniprot/uniprot.fasta"
     uniref90_database_path: str = "uniref90/uniref90.fasta"    
-    use_small_bfd: bool = True
+    use_small_bfd: bool = False
     cpus: int = 4
     
     def __attrs_post_init__(self) -> None:
@@ -40,7 +40,11 @@ class JackhmmerJob(BatchFoldJob):
         ])
         if self.use_small_bfd is False:
             command_list.extend([
-                f"--uniclust30_database_path={self.data_dir}/{self.uniclust30_database_path}"                       
+                f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}"                       
+                ])
+        else:
+            command_list.extend([
+                f"--use_small_bfd True"                       
                 ])
         
         upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}"

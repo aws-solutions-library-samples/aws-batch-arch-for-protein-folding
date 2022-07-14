@@ -40,10 +40,10 @@ def test_jackhmmer_job_submission(batch_environment):
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
         bfd_database_path = "small_bfd/tiny.fasta",
-        mgnify_database_path = "mgnify/mgy_clusters_2018_12.fa",
-        pdb70_database_path = "pdb70/pdb70",
-        uniprot_database_path = "uniprot/uniprot.fasta",
-        uniref90_database_path = "uniref90/uniref90.fasta",    
+        mgnify_database_path = None,
+        pdb70_database_path = None,
+        uniprot_database_path = None,
+        uniref90_database_path = None,
         use_small_bfd = True,
         cpus = 4
     )
