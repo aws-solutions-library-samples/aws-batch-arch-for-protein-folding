@@ -266,7 +266,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
 
-  PrivateCPUJobQueueOnDemand:
+  CPUOnDemandJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
@@ -278,7 +278,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
 
-  PrivateCPUJobQueueSpot:
+  CPUSpotJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
@@ -290,7 +290,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"      
 
-  PrivateGravitonJobQueueSpot:
+  GravitonSpotJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
@@ -496,19 +496,19 @@ Outputs:
   CPUOnDemandJobQueue:
     Description: Job queue for on-demand CPU instances.
     Value:
-      Ref: PrivateCPUJobQueueOnDemand
+      Ref: CPUOnDemandJobQueue
   CPUSpotJobQueue:
     Description: Job queue for spot CPU instances.
     Value:
-      Ref: PrivateCPUJobQueueSpot
+      Ref: CPUSpotJobQueue
   G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
     Value: 
       Ref: G4dnJobQueue
-  GravitonJobQueueSpot:
+  GravitonSpotJobQueue:
     Description: Job queue for spot Graviton instances.
     Value: 
-      Ref: PrivateGravitonJobQueueSpot       
+      Ref: GravitonSpotJobQueue       
   CPUFoldingJobDefinition:
     Description: Job definition for running folding jobs on CPU instances.
     Value:
