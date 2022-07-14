@@ -38,8 +38,8 @@ def test_alphafold_2_job_submission(batch_environment):
         use_precomputed_msas = True,
         model_preset = "monomer"
     )
-    batch_environment.submit_job(new_job, job_queue_name)
-    assert job_name == batch_environment.last_submission.job_name
+    submission = batch_environment.submit_job(new_job, job_queue_name)
+    assert job_name == submission.job_name
     
     job_description = new_job.describe_job()        
     assert job_name == job_description[0].get("jobName", [])

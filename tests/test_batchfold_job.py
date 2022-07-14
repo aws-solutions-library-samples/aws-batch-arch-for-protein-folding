@@ -38,14 +38,11 @@ def test_submit_batchfold_jobs(batch_environment):
     job_queue_name = "CPUOnDemandJobQueue"
 
     new_job = BatchFoldJob(job_name=job_name)
-    batch_environment.submit_job(job=new_job, job_queue_name=job_queue_name)
-    assert job_name == batch_environment.last_submission.job_name
+    submission = batch_environment.submit_job(job=new_job, job_queue_name=job_queue_name)
+    assert job_name == submission.job_name
 
     job_description = new_job.describe_job()
     assert job_name == job_description[0].get("jobName", [])
-
-    pending_jobs = batch_environment.list_jobs(valid_statuses=["PENDING"])
-    assert bool(pending_jobs[job_queue_name]) is False
 
     job_dict = batch_environment.list_jobs()
     job_list = job_dict[job_queue_name]
@@ -59,24 +56,23 @@ def test_submit_batchfold_jobs(batch_environment):
     assert job_info[0].get("jobName") == job_name
 
 
-def test_submit_chained_jobs(batch_environment):
+def test_submit_dependent_jobs(batch_environment):
 
     job_queue_name = "CPUOnDemandJobQueue"
 
     job_1 = BatchFoldJob(job_name="ChainedJob1")
     job_2 = BatchFoldJob(job_name="ChainedJob2")
-    batch_environment \
-        .submit_job(job=job_1, job_queue_name=job_queue_name) \
-        .submit_job(job=job_2, job_queue_name=job_queue_name)
-
-    assert job_1.describe_job()[0].get("jobID", [])  != ""
-    assert job_2.describe_job()[0].get("jobID", [])  != ""
-
     job_3 = BatchFoldJob(job_name="ChainedJob3")
-    job_4 = BatchFoldJob(job_name="ChainedJob4")
-    batch_environment \
-        .submit_job(job=job_3, job_queue_name=job_queue_name) \
-        .submit_job(job=job_4, job_queue_name=job_queue_name, dependent=True)
 
-    assert job_3.describe_job()[0].get("jobID", [])  != ""
-    assert job_4.describe_job()[0].get("jobID", [])  != ""
+    submission_1 = batch_environment.submit_job(job=job_1, job_queue_name=job_queue_name)
+    submission_2 = batch_environment.submit_job(job=job_2, job_queue_name=job_queue_name, depends_on=[submission_1])
+    submission_3 = batch_environment.submit_job(job=job_3, job_queue_name=job_queue_name, depends_on=[submission_1, submission_2])
+
+    assert submission_1.job_name == "ChainedJob1"
+    assert submission_1.depends_on is None
+    assert submission_2.job_name == "ChainedJob2"
+    assert submission_2.depends_on[0].job_id == submission_1.job_id
+    assert submission_3.job_name == "ChainedJob3"
+    assert submission_3.depends_on[0].job_id == submission_1.job_id
+    assert submission_3.depends_on[1].job_id == submission_2.job_id
+    

@@ -27,7 +27,6 @@ class BatchFoldEnvironment:
     stack_name: str = field(kw_only=True)
     queues: dict = field(kw_only=True)
     job_definitions: dict = field(kw_only=True)
-    last_submission: JobSubmission = None
 
     @stack_name.default
     def get_latest_stack(self) -> str:
@@ -87,27 +86,24 @@ class BatchFoldEnvironment:
         self, 
         job: BatchFoldJob, 
         job_queue_name: str, 
-        dependent: bool = False,
+        depends_on: List[JobSubmission] = None,
         ) -> BatchFoldEnvironment:
         """Submit job to specified job queue."""
 
         job_queue = self.queues[job_queue_name]
         job_definition = self.job_definitions[job.job_definition_name]
-        if dependent: 
-            depends_on = self.last_submission
-        else:
-            depends_on = None
-        self.last_submission = job_queue.submit_job(job, job_definition, depends_on)
-        return self
+        return job_queue.submit_job(job, job_definition, depends_on)
 
     def list_jobs(
         self, 
-        valid_statuses: List = ['SUBMITTED','PENDING', 'RUNNABLE', 'STARTING', 'RUNNING', 'SUCCEEDED', 'FAILED']) -> Dict:
+        statuses: List = ['SUBMITTED','PENDING', 'RUNNABLE', 'STARTING', 'RUNNING', 'SUCCEEDED', 'FAILED'],
+        queues: List = None
+        ) -> Dict:
         """List jobs on all job queues."""
-        
+        queues = queues or self.list_job_queue_names()
         all_jobs = {}
-        for _, queue in self.queues.items():
-            jobs = queue.list_jobs(valid_statuses=valid_statuses)
+        for queue in [queue for (name, queue) in self.queues.items() if name in queues]:
+            jobs = queue.list_jobs(statuses=statuses)
             all_jobs[queue.name] = jobs
         
         return all_jobs
