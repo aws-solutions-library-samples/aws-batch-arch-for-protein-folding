@@ -24,7 +24,7 @@ RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh
     && mkdir /tmp/hh-suite/build \
     && pushd /tmp/hh-suite/build \
     && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
-    && make -j 4 && make install \
+    && make && make install \
     && ln -s /opt/hhsuite/bin/* /usr/local/bin \
     && popd \
     && rm -rf /tmp/hh-suite    
@@ -35,15 +35,21 @@ RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
   && tar -xvzf current.tar.gz -C /tmp/kalign2 \
   && pushd /tmp/kalign2 \
   && ./configure \
-  && make -j 4 && make install \
+  && make && make install \
   && popd \
   && rm -rf /tmp/kalign2
   
-# Add Tini (https://github.com/krallin/tini)
-RUN wget -O "/tini" "https://github.com/krallin/tini/releases/download/v0.19.0/tini-arm64" \
-  && chmod +x /tini
+# Compile mmseqs2 from source
+RUN git clone https://github.com/soedinglab/MMseqs2.git \
+  && mkdir MMseqs2/build -p \
+  && pushd MMseqs2/build \
+  && cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. .. \
+  && make && make install \
+  && mv bin/mmseqs /usr/local/bin \
+  && popd \
+  && rm -rf MMseqs2
 
 COPY . /opt/msa
 WORKDIR /opt/msa
 
-ENTRYPOINT ["/tini", "--", "bash", "-c"]
+ENTRYPOINT ["bash", "-c"]

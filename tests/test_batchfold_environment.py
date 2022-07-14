@@ -22,6 +22,7 @@ def test_get_stack_outputs(batch_environment):
         "G4dnJobQueue",
         "GravitonJobQueueSpot",
         "LaunchTemplate",
+        "MSAJobDefinition",
         "OpenFoldJobDefinition",
     ]
 
@@ -50,6 +51,7 @@ def test_get_job_definition_names(batch_environment):
         "AlphaFold2JobDefinition",
         "CPUFoldingJobDefinition",
         "DownloadJobDefinition",
+        "MSAJobDefinition",
         "OpenFoldJobDefinition",
     ]
 
