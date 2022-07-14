@@ -6,6 +6,7 @@ import logging
 @define
 class OpenFoldJob(BatchFoldJob):
     """ Define OpenFold Job """
+    job_definition_name: str = "OpenFoldJobDefinition"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     fasta_s3_uri: str = ""
     msa_s3_uri: str = ""

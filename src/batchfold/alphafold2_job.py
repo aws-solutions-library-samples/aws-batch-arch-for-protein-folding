@@ -6,6 +6,7 @@ import logging
 @define
 class AlphaFold2Job(BatchFoldJob):
     """ Define AlphaFold 2 Job """
+    job_definition_name: str = "AlphaFold2JobDefinition"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     fasta_s3_uri: str = ""
     msa_s3_uri: str = ""
@@ -32,7 +33,7 @@ class AlphaFold2Job(BatchFoldJob):
     logtostderr: str = True
     run_relax: bool = True
     use_gpu_relax: bool = True
-    num_multimer_predictions_per_model: int = 1   
+    num_multimer_predictions_per_model: int = 1
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""

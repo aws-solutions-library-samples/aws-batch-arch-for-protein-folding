@@ -1,7 +1,6 @@
 import pytest
 import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
-from batchfold.batchfold_job import BatchFoldJob
 
 @pytest.fixture()
 def batch_environment():
@@ -20,7 +19,7 @@ def test_get_stack_outputs(batch_environment):
         "CPUSpotJobQueue",
         "DownloadJobDefinition",
         "G4dnJobQueue",
-        "GravitonJobQueueSpot",
+        "GravitonSpotJobQueue",
         "LaunchTemplate",
         "MSAJobDefinition",
         "OpenFoldJobDefinition",
@@ -31,23 +30,17 @@ def test_get_stack_outputs(batch_environment):
     assert "JobQueue" in outputs["G4dnJobQueue"]
 
 def test_get_job_queue_names(batch_environment):
-    outputs = batch_environment.get_stack_outputs(filter="JobQueue")
-    output_keys = list(outputs)
-    output_keys.sort()
-    assert output_keys == [
+    job_queue_names = batch_environment.list_job_queue_names()
+    assert job_queue_names == [
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
         "G4dnJobQueue",
-        "GravitonJobQueueSpot"
+        "GravitonSpotJobQueue"
     ]
 
 def test_get_job_definition_names(batch_environment):
-    outputs = batch_environment.get_stack_outputs(filter="JobDefinition")
-    output_keys = list(outputs)
-    output_keys.sort()
-    job_defs = list(batch_environment.job_definitions)
-    job_defs.sort()
-    assert output_keys == job_defs == [
+    job_def_names = batch_environment.list_job_definition_names()
+    assert job_def_names == [
         "AlphaFold2JobDefinition",
         "CPUFoldingJobDefinition",
         "DownloadJobDefinition",
@@ -57,6 +50,6 @@ def test_get_job_definition_names(batch_environment):
 
 def test_get_job_queue_objects(batch_environment):
     assert len(batch_environment.queues) == 4
-    assert batch_environment.queues["CPUOnDemandJobQueue"].type == "CPUOnDemandJobQueue"
+    assert batch_environment.queues["CPUOnDemandJobQueue"].name == "CPUOnDemandJobQueue"
     assert batch_environment.queues["CPUOnDemandJobQueue"].jobs == []
 

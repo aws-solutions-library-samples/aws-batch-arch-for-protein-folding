@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import boto3
 from attrs import define
 from typing import List, Dict
@@ -7,8 +9,8 @@ from batchfold.batchfold_job import BatchFoldJob
 @define
 class JobQueue:
 
-    type: str
     name: str
+    id: str
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
     jobs: list = []
 
@@ -18,43 +20,64 @@ class JobQueue:
         """List jobs on the Job Queue instance."""
         
         batch = self.boto_session.client("batch")
-        jobs = batch.list_jobs(jobQueue = self.name, filters = [{"name":"BEFORE_CREATED_AT", "values":[str(int(time.time()))]}])
+        jobs = batch.list_jobs(jobQueue = self.id, filters = [{"name":"BEFORE_CREATED_AT", "values":[str(int(time.time()))]}])
         filtered_jobs = [job for job in jobs.get("jobSummaryList", []) if job.get("status") in valid_statuses]
         return filtered_jobs
 
     def submit_job(self, 
-        job: BatchFoldJob
+        job: BatchFoldJob,
+        job_definition: str,
+        depends_on: JobSubmission
         ) -> Dict:
         """Submit Batch job"""
         batch = self.boto_session.client("batch")
 
-        if job.container_overrides and job.depends_on:
+        if job.container_overrides and depends_on:
             response = batch.submit_job(
                 jobName=job.job_name,
-                jobQueue=self.name,
-                jobDefinition=job.job_definition,
+                jobQueue=self.id,
+                jobDefinition=job_definition,
                 containerOverrides=job.container_overrides,
-                dependsOn=job.depends_on
+                dependsOn=[{"jobId": depends_on.job_id, "type": "Sequential"}]
             )
-        elif job.container_overrides and not job.depends_on:
+        elif job.container_overrides and not depends_on:
             response = batch.submit_job(
                 jobName=job.job_name,
-                jobQueue=self.name,
-                jobDefinition=job.job_definition,
+                jobQueue=self.id,
+                jobDefinition=job_definition,
                 containerOverrides=job.container_overrides
             )
-        elif job.depends_on and not job.container_overrides:
+        elif depends_on and not job.container_overrides:
             response = batch.submit_job(
                 jobName=job.job_name,
-                jobQueue=self.name,
-                jobDefinition=job.job_definition,
-                dependsOn=job.depends_on
+                jobQueue=self.id,
+                jobDefinition=job_definition,
+                dependsOn=[{"jobId": depends_on.job_id, "type": "Sequential"}]
             )     
         else:
             response = batch.submit_job(
                 jobName=job.job_name,
-                jobQueue=self.name,
-                jobDefinition=job.job_definition
+                jobQueue=self.id,
+                jobDefinition=job_definition
             )
         job.id = response.get("jobId", [])
-        return response
+
+        submission = JobSubmission(
+            job_arn = response.get("jobArn", []),
+            job_name = response.get("jobName", []),
+            job_id = response.get("jobId", []),
+            job_queue = self.id,
+            job_definition = job_definition,
+            job_type = type(job).__name__
+        )
+
+        return submission
+
+@define
+class JobSubmission:
+    job_arn: str
+    job_name: str
+    job_id: str
+    job_queue: str
+    job_definition: str
+    job_type: str

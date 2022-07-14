@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import boto3
 from attrs import define, field
 from typing import List, Dict
-from batchfold.batchfold_job_queue import JobQueue
+from batchfold.batchfold_job_queue import JobQueue, JobSubmission
+from batchfold.batchfold_job import BatchFoldJob
 
 @define
 class BatchFoldEnvironment:
@@ -24,9 +27,10 @@ class BatchFoldEnvironment:
     stack_name: str = field(kw_only=True)
     queues: dict = field(kw_only=True)
     job_definitions: dict = field(kw_only=True)
+    last_submission: JobSubmission = None
 
     @stack_name.default
-    def _get_latest_stack(self) -> str:
+    def get_latest_stack(self) -> str:
         """Get the latest batchfold cloudformation stack."""
 
         cfn = self.boto_session.client("cloudformation")
@@ -42,22 +46,34 @@ class BatchFoldEnvironment:
         return batchfold_stacks[0].get("StackName", [])
 
     @queues.default
-    def _get_queue_dict(self) -> Dict:
+    def load_queues(self) -> Dict:
         """Create new JobQueue instances and add them to the BatchFold environment instance."""
         
         queues = self.get_stack_outputs(filter="JobQueue")
         queue_dict = {}
-        for queue_type, queue_name in queues.items():
-            queue = JobQueue(queue_type, queue_name)
-            queue_dict[queue_type] = queue
+        for queue_name, queue_id in queues.items():
+            queue = JobQueue(queue_name, queue_id, boto_session = self.boto_session)
+            queue_dict[queue_name] = queue
         return queue_dict
 
+    def list_job_queue_names(self) -> List:
+        """List the names of all available job queues."""
+        queue_names = list(self.queues.keys())
+        queue_names.sort()
+        return queue_names
+
     @job_definitions.default
-    def _get_job_definitions_names(self) -> Dict:
+    def load_job_definitions(self) -> Dict:
         """Get the valid job definition names and add them to the BatchFold Environment instance."""
         
         job_definitions = self.get_stack_outputs(filter="JobDefinition")
         return job_definitions
+
+    def list_job_definition_names(self) -> List:
+        """List the names of all available job definitions."""
+        names = list(self.job_definitions.keys())
+        names.sort()
+        return names
 
     def get_stack_outputs(self, filter: str = "") -> Dict:
         """Get a dict of the cloudformation stack outputs, optionally with key filtered by a string"""
@@ -67,3 +83,31 @@ class BatchFoldEnvironment:
         output_dict = {output["OutputKey"]:output["OutputValue"] for output in output_list if filter in output["OutputKey"]}
         return output_dict
     
+    def submit_job(
+        self, 
+        job: BatchFoldJob, 
+        job_queue_name: str, 
+        dependent: bool = False,
+        ) -> BatchFoldEnvironment:
+        """Submit job to specified job queue."""
+
+        job_queue = self.queues[job_queue_name]
+        job_definition = self.job_definitions[job.job_definition_name]
+        if dependent: 
+            depends_on = self.last_submission
+        else:
+            depends_on = None
+        self.last_submission = job_queue.submit_job(job, job_definition, depends_on)
+        return self
+
+    def list_jobs(
+        self, 
+        valid_statuses: List = ['SUBMITTED','PENDING', 'RUNNABLE', 'STARTING', 'RUNNING', 'SUCCEEDED', 'FAILED']) -> Dict:
+        """List jobs on all job queues."""
+        
+        all_jobs = {}
+        for _, queue in self.queues.items():
+            jobs = queue.list_jobs(valid_statuses=valid_statuses)
+            all_jobs[queue.name] = jobs
+        
+        return all_jobs
