@@ -30,21 +30,26 @@ class JackhmmerJob(BatchFoldJob):
             f"--output_dir {self.output_dir}/output",
             f"--cpus {self.cpus}",
         ]
-
-        command_list.extend([
-            f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
-            f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}",             
-            f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}",
-            f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
-            f"--bfd_database_path {self.data_dir}/{self.bfd_database_path}",
-        ])
+        command_list.extend([f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}"]) if self.mgnify_database_path else None
+        command_list.extend([f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"]) if self.pdb70_database_path else None
+        command_list.extend([f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}"]) if self.uniclust30_database_path else None
+        command_list.extend([f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}"]) if self.uniref90_database_path else None
+        command_list.extend([f"--bfd_database_path {self.data_dir}/{self.bfd_database_path}"]) if self.bfd_database_path else None
+        # command_list.extend([
+        #     f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
+        #     f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}",             
+        #     f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}",
+        #     f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
+        #     f"--bfd_database_path {self.data_dir}/{self.bfd_database_path}",
+        # ])
         if self.use_small_bfd is False:
-            command_list.extend([
-                f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}"                       
-                ])
+            command_list.extend([f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}"]) if self.uniclust30_database_path else None
+            # command_list.extend([
+            #     f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}"                       
+            #     ])
         else:
             command_list.extend([
-                f"--use_small_bfd True"                       
+                f"--use_small_bfd {self.use_small_bfd}"                       
                 ])
         
         upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}"

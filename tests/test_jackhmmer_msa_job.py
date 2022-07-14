@@ -40,6 +40,7 @@ def test_jackhmmer_job_submission(batch_environment):
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
         bfd_database_path = "small_bfd/tiny.fasta",
+        uniclust30_database_path = None,
         mgnify_database_path = None,
         pdb70_database_path = None,
         uniprot_database_path = None,
