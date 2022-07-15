@@ -128,7 +128,7 @@ Resources:
             download_dir="/fsx",
           ):
             container_overrides = {
-                "command": [script, download_dir],
+                "command": [f"./scripts/{script} {download_dir}"],
                 "resourceRequirements": [
                     {"value": str(cpu), "type": "VCPU"},
                     {"value": str(memory * 1000), "type": "MEMORY"},
