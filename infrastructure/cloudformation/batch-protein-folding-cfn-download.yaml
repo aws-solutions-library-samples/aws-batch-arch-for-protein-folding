@@ -53,16 +53,19 @@ Resources:
 
                       all_scripts = [
                           "download_alphafold_params.sh",
-                          "download_openfold_params.sh",
                           "download_bfd.sh",
-                          "download_mgnify.sh",                          
+                          "download_colabfold_envdb.sh",
+                          "download_mgnify.sh",
+                          "download_mmseqs_db.sh",
+                          "download_openfold_params.sh",
                           "download_pdb_mmcif.sh",
                           "download_pdb_seqres.sh",
                           "download_pdb70.sh",
                           "download_small_bfd.sh",
                           "download_uniclust30.sh",
                           "download_uniprot.sh",
-                          "download_uniref90.sh",
+                          "download_uniref30.sh",
+                          "download_uniref90.sh"
                       ]
                       
                       responses = []

@@ -97,7 +97,8 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup
-        FSXForLustreStorageCapacity: 1200
+        # FSXForLustreStorageCapacity: 1200
+        FSXForLustreStorageCapacity: 2400
         FSxForLustreThroughput: 500
         Subnet:
           "Fn::If":
@@ -181,9 +182,9 @@ Resources:
       TemplateURL: batch-protein-folding-cfn-download.yaml
       Parameters:
         JobQueue:
-          "Fn::GetAtt": BatchEnvironment.Outputs.CPUSpotJobQueue
+          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
+          "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
 
 Outputs:
   ApplicationName:
