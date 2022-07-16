@@ -184,7 +184,7 @@ Resources:
         JobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
 
 Outputs:
   ApplicationName:

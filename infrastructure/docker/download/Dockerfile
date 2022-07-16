@@ -6,7 +6,8 @@ COPY scripts /
 RUN amazon-linux-extras install epel -y \
   && yum update -y \
   && yum install aria2 tar rsync unzip awscli -y \
-  && yum clean all
+  && yum clean all \
+  && rm -rf /var/cache/yum
 VOLUME /fsx
 
 ENTRYPOINT ["bash", "-c"]
