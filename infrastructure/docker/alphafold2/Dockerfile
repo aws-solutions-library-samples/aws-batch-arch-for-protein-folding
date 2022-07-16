@@ -3,79 +3,70 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ARG CUDA=11.1.1
-ARG ALPHAFOLD2_VERSION=v2.2.2
-ARG UBUNTU_VERSION=20.04
-# ARG AWS_DEFAULT_REGION
-# ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu${UBUNTU_VERSION} as base_image
-
+ARG ALPHAFOLD2_VERSION=2.2.2
+FROM nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
 ARG CUDA
 ARG ALPHAFOLD2_VERSION
-# ARG AWS_DEFAULT_REGION
-# ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-### ---------------------------------------------
 
 # Use bash to support string substitution.
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential \
-      cmake \
-      cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \      
-      git \
-      hmmer \
-      kalign \
-      tzdata \
-      wget \
-      zip \
-      # Address https://ubuntu.com/security/CVE-2022-24407
-      libsasl2-modules-sql=2.1.27+dfsg-2ubuntu0.1 \ 
-      # Address https://ubuntu.com/security/CVE-2022-24407, https://ubuntu.com/security/CVE-2021-3711,
-      # and https://ubuntu.com/security/CVE-2022-0778
-      openssl=1.1.1f-1ubuntu2.13 \
-      # Address https://ubuntu.com/security/CVE-2021-33910
-      systemd=245.4-4ubuntu3.17 \
-      # Address additional MEDIUM vulnerabilities
-      apt dpkg e2fsprogs gcc libc6 gzip libgcrypt20 libzstd1 zstd lz4 libnettle7 slapd=2.4.49+dfsg-2ubuntu1.9 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    cmake \
+    cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \
+    git \
+    hmmer \
+    kalign \
+    tzdata \
+    wget \
+    awscli \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install mambaforge package manager.
+# Compile HHsuite from source.
+RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
+  && mkdir /tmp/hh-suite/build \
+  && pushd /tmp/hh-suite/build \
+  && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
+  && make -j 4 && make install \
+  && ln -s /opt/hhsuite/bin/* /usr/bin \
+  && popd \
+  && rm -rf /tmp/hh-suite
+
+# Install Miniconda package manager.
 RUN wget -q -P /tmp \
-  https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
-  && bash /tmp/Mambaforge-Linux-x86_64.sh -b -p /opt/mamba \
-  && rm /tmp/Mambaforge-Linux-x86_64.sh
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \ 
+  && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+  && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
 
 # Install conda packages.
-ENV PATH="/opt/mamba/bin:$PATH"
-RUN mamba update -qy mamba \
-    && mamba install -y -c conda-forge -c bioconda \
-      openmm=7.5.1 \
-      cudatoolkit=${CUDA_VERSION} \
-      pdbfixer \
-      pip \
-      python=3.9 \
-      boto3 \
-      protobuf=3.20.1 \
-      six=1.15.0 \
-      bioconda::hhsuite=3.3.0 \
-    && mamba clean --all
+ENV PATH="/opt/conda/bin:$PATH"
+RUN conda update -qy conda \
+  && conda install -y -c conda-forge \
+    openmm=7.5.1 \
+    cudatoolkit==${CUDA_VERSION} \
+    pdbfixer \
+    pip \
+    python=3.7
 
 RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
 
+RUN wget -q -P /app/alphafold/alphafold/common/ \
+    https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
+
 # Install pip packages.
 RUN pip3 install --upgrade pip \
-    && pip3 install -r /app/alphafold/requirements.txt \
-    && pip3 install --upgrade \
-      jax==0.2.14 \
-      jaxlib==0.1.69+cuda$(cut -f1,2 -d. <<< ${CUDA} | sed 's/\.//g') \
-      -f https://storage.googleapis.com/jax-releases/jax_releases.html \
-      -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+  && pip3 install -r /app/alphafold/requirements.txt \
+  && pip3 install --upgrade \
+    jax==0.2.14 \
+    jaxlib==0.1.69+cuda$(cut -f1,2 -d. <<< ${CUDA} | sed 's/\.//g') \
+    -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Apply OpenMM patch.
-WORKDIR /opt/mamba/lib/python3.9/site-packages
+WORKDIR /opt/conda/lib/python3.7/site-packages
 RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
@@ -91,38 +82,5 @@ RUN echo $'#!/bin/bash\n\
 ldconfig\n\
 python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
   && chmod +x /app/run_alphafold.sh
-ENTRYPOINT ["/app/run_alphafold.sh"]
 
-#############################
-# Start AWS-specific updates
-#############################
-FROM base_image
-ARG AWS_DEFAULT_REGION
-ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-
-# Install the AWS CLI
-RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-  && unzip awscliv2.zip \
-  && ./aws/install \
-  && rm awscliv2.zip
-
-# Copy stereo_chemical file from s3
-RUN aws s3 cp \
-  s3://aws-batch-architecture-for-alphafold-public-artifacts/stereo_chemical_props/stereo_chemical_props.txt \
-  /app/alphafold/alphafold/common/
-
-# Add Tini (https://github.com/krallin/tini)
-ENV TINI_VERSION v0.19.0
-RUN wget -O "/tini" "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini"  \
-  && chmod +x /tini
-
-# Clean up
-RUN rm -rf \
-  /app/alphafold/docker \
-  /app/alphafold/imgs \
-  /app/alphafold/notebooks \
-  /app/alphafold/scripts
-
-# Set new entrypoint
-ENTRYPOINT ["/tini", "--", "bash", "-c"]
-CMD ["nvidia-smi"]
+ENTRYPOINT ["bash", "-c"]

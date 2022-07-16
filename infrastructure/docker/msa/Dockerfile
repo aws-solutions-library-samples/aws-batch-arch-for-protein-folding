@@ -1,3 +1,8 @@
+# Original Copyright 2021 DeepMind Technologies Limited
+# Modification Copyright 2022 # Copyright 2021 AlQuraishi Laboratory
+# Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 FROM public.ecr.aws/lts/ubuntu:18.04_stable as base_image
 
 SHELL ["/bin/bash", "-c"]
