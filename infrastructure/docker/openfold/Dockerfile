@@ -38,4 +38,4 @@ RUN patch -p0 -d /opt/conda/lib/python3.7/site-packages/ < /opt/openfold/lib/ope
 WORKDIR /opt/openfold
 RUN python3 setup.py install
 
-ENTRYPOINT ["/usr/bin/bash", "-c"]
+ENTRYPOINT ["bash", "-c"]

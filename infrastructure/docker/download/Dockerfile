@@ -9,4 +9,4 @@ RUN amazon-linux-extras install epel -y \
   && yum clean all
 VOLUME /fsx
 
-ENTRYPOINT ["usr/bin/bash", "-c"]
+ENTRYPOINT ["bash", "-c"]
