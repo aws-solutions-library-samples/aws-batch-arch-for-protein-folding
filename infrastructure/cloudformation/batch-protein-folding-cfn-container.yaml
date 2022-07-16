@@ -319,8 +319,8 @@ Resources:
             Value: latest
           - Name: IMAGE_REPO_NAME
             Value: !Ref AlphaFold2ContainerRegistry
-          - Name: ALPHAFOLD2_VERSION
-            Value: v2.2.2
+          # - Name: ALPHAFOLD2_VERSION
+          #   Value: v2.2.2
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
@@ -332,7 +332,8 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/alphafold2/buildspec.yaml
+        # BuildSpec: infrastructure/docker/alphafold2/buildspec.yaml
+        BuildSpec: infrastructure/docker/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
@@ -368,7 +369,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/download/buildspec.yaml
+        BuildSpec: infrastructure/docker/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
@@ -404,7 +405,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/openfold/buildspec.yaml
+        BuildSpec: infrastructure/docker/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
@@ -440,7 +441,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/msa/buildspec.yaml
+        BuildSpec: infrastructure/docker/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
