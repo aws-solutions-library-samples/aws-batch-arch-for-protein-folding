@@ -319,8 +319,6 @@ Resources:
             Value: latest
           - Name: IMAGE_REPO_NAME
             Value: !Ref AlphaFold2ContainerRegistry
-          # - Name: ALPHAFOLD2_VERSION
-          #   Value: v2.2.2
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
@@ -332,7 +330,6 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        # BuildSpec: infrastructure/docker/alphafold2/buildspec.yaml
         BuildSpec: infrastructure/docker/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
@@ -352,7 +349,7 @@ Resources:
       Description: Build download Docker container
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -362,10 +359,10 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/download                 
-        Image: aws/codebuild/standard:4.0
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
