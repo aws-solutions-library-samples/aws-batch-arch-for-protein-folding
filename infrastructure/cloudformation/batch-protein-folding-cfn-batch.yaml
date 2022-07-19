@@ -33,6 +33,11 @@ Parameters:
   MSAContainerRegistryURI:
     Description: URI of the OpenFold MSA container
     Type: String  
+  S3BucketName:
+    Description: Optional S3 Bucket Name
+    Type: String
+    Default: ""
+    
 
 Resources:
   ##################################################
@@ -530,3 +535,7 @@ Outputs:
     Description: Job definition for running OpenFold MSA jobs on CPU instances.
     Value:
       Ref: MSAJobDefinition    
+  S3BucketName:
+    Description: Optional S3 Bucket name.
+    Value:
+      Ref: S3BucketName

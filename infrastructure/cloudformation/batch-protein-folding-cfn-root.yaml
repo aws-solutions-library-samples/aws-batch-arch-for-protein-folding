@@ -151,6 +151,8 @@ Resources:
           "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
         MSAContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.MSAContainerRegistryURI
+        S3BucketName:
+          "Fn::GetAtt": Container.Outputs.s3Bucket
 
   Notebook:
     Type: "AWS::CloudFormation::Stack"
