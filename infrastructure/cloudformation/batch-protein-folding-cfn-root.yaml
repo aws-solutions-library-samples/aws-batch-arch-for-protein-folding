@@ -97,7 +97,6 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup
-        # FSXForLustreStorageCapacity: 1200
         FSXForLustreStorageCapacity: 2400
         FSxForLustreThroughput: 500
         Subnet:

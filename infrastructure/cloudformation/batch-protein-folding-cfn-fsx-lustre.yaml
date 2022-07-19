@@ -20,7 +20,7 @@ Parameters:
       - 2400
       - 4800
       - 7200
-    Default: 1200
+    Default: 2400
   FSxForLustreThroughput:
     Description: Throughput for unit storage (MB/s/TB) to provision for FSx for Lustre file system.
     Type: Number
