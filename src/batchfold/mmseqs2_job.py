@@ -14,7 +14,7 @@ class MMseqs2Job(BatchFoldJob):
     data_dir: str = "/database"
     mmseqs_database_path: str = "mmseqs_dbs"
     mmseqs_binary_path: str = "/usr/bin/mmseqs"
-    hhsearch_binary_path:str = "/usr/bin/hsearch"
+    hhsearch_binary_path:str = "/usr/bin/hhsearch"
     uniref_db: str = "uniref30_2103_db"
     env_db: str = "colabfold_envdb_202108_db"
     pdb70_database_path: str = "pdb70/pdb70"
