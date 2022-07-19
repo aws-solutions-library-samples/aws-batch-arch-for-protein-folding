@@ -2,9 +2,7 @@ import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.download_job import DownloadJob
 import logging
-
-import boto3
-
+from datetime import datetime
 from __future__ import print_function
 import urllib3
 import json
@@ -21,77 +19,77 @@ def main(job_queue_name="GravitonSpotJobQueue"):
     batch_environment = BatchFoldEnvironment(boto_session = boto_session, region_name=region)
     
     download_test_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_test.sh"),
+        DownloadJob(job_name="download_test" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_test.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_alphafold_params_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_alphafold_params.sh"),
+        DownloadJob(job_name="download_alphafold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_alphafold_params.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_bfd_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_bfd.sh"),
+        DownloadJob(job_name="download_bfd" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_bfd.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_mgnify_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_mgnify.sh"),
+        DownloadJob(job_name="download_mgnify" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_mgnify.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_openfold_params_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_openfold_params.sh"),
+        DownloadJob(job_name="download_openfold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_openfold_params.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_pdb70_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_pdb70.sh"),
+        DownloadJob(job_name="download_pdb70" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb70.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_pdb_mmcif_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_pdb_mmcif.sh"),
+        DownloadJob(job_name="download_pdb_mmcif" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb_mmcif.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_pdb_seqres_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_pdb_seqres.sh"),
+        DownloadJob(job_name="download_pdb_seqres" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb_seqres.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_small_bfd_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_small_bfd.sh"),
+        DownloadJob(job_name="download_small_bfd" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_small_bfd.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_uniclust30_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_uniclust30.sh"),
+        DownloadJob(job_name="download_uniclust30" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniclust30.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_uniprot_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_uniprot.sh"),
+        DownloadJob(job_name="download_uniprot" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniprot.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_uniref30_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_uniref30.sh"),
+        DownloadJob(job_name="download_uniref30" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniref30.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_uniref90_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_uniref90.sh"),
+        DownloadJob(job_name="download_uniref90" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniref90.sh"),
         job_queue_name=job_queue_name,
     )
 
     download_colabfold_envdb_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/download_colabfold_envdb.sh"),
+        DownloadJob(job_name="download_colabfold_envdb" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_colabfold_envdb.sh"),
         job_queue_name=job_queue_name,
     )
 
     prep_mmseqs_dbs_submission = batch_environment.submit_job(
-        DownloadJob(script="./scripts/prep_mmseqs_dbs.sh", memory=500, cpu=64),
+        DownloadJob(job_name="prep_mmseqs_dbs" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/prep_mmseqs_dbs.sh", memory=500, cpu=64),
         job_queue_name=job_queue_name,
         depends_on=[download_uniref30_submission, download_colabfold_envdb_submission],
     )

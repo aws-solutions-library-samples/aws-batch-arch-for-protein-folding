@@ -26,7 +26,7 @@ def test_download_job_submission(batch_environment):
     job_queue_name = "GravitonSpotJobQueue"
 
     new_job = DownloadJob(
-        job_name = job_name,
+        job_name = job_name, 
         script = "./scripts/download_test.sh",
         cpu = 4
     )
