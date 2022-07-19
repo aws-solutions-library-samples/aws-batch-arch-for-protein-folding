@@ -1,9 +1,10 @@
+from __future__ import print_function
 import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.download_job import DownloadJob
 import logging
 from datetime import datetime
-from __future__ import print_function
+
 import urllib3
 import json
 
@@ -15,8 +16,7 @@ def main(job_queue_name="GravitonSpotJobQueue"):
     """ Download all data to file system """
 
     boto_session = boto3.session.Session(profile_name="bloyal+proteinfolding-Admin")
-    region = boto_session.region_name
-    batch_environment = BatchFoldEnvironment(boto_session = boto_session, region_name=region)
+    batch_environment = BatchFoldEnvironment(boto_session = boto_session)
     
     download_test_submission = batch_environment.submit_job(
         DownloadJob(job_name="download_test" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_test.sh"),
