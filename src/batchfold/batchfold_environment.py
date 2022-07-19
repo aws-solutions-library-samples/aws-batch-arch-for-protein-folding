@@ -27,6 +27,7 @@ class BatchFoldEnvironment:
     stack_name: str = field(kw_only=True)
     queues: dict = field(kw_only=True)
     job_definitions: dict = field(kw_only=True)
+    default_bucket: str = field(kw_only=True)
 
     @stack_name.default
     def get_latest_stack(self) -> str:
@@ -73,6 +74,11 @@ class BatchFoldEnvironment:
         names = list(self.job_definitions.keys())
         names.sort()
         return names
+
+    @default_bucket.default
+    def load_default_bucket(self):
+        return self.get_stack_outputs().get("S3BucketName", [])
+
 
     def get_stack_outputs(self, filter: str = "") -> Dict:
         """Get a dict of the cloudformation stack outputs, optionally with key filtered by a string"""

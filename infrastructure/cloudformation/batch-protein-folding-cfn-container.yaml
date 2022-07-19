@@ -22,7 +22,7 @@ Resources:
   # S3
   ##################################################
 
-  CodePipelineS3Bucket:
+  BatchFoldS3Bucket:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketEncryption:
@@ -41,7 +41,7 @@ Resources:
   S3BucketPolicy:
     Type: "AWS::S3::BucketPolicy"
     Properties:
-      Bucket: !Ref CodePipelineS3Bucket
+      Bucket: !Ref BatchFoldS3Bucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -51,7 +51,7 @@ Resources:
               - s3:GetObjectVersion
             Effect: Allow
             Resource:
-              - !Sub arn:aws:s3:::${CodePipelineS3Bucket}/*
+              - !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*
             Principal:
               AWS: !Ref AWS::AccountId
           - Action:
@@ -60,7 +60,7 @@ Resources:
               - s3:PutBucketPolicy
             Effect: Allow
             Resource:
-              - !GetAtt CodePipelineS3Bucket.Arn
+              - !GetAtt BatchFoldS3Bucket.Arn
             Principal:
               AWS: !Ref AWS::AccountId
 
@@ -194,7 +194,7 @@ Resources:
                       "-",
                       ["arn:aws:s3:::codepipeline", !Ref "AWS::Region", "*"],
                     ]
-                  - !Join ["", [!GetAtt CodePipelineS3Bucket.Arn, "*"]]
+                  - !Join ["", [!GetAtt BatchFoldS3Bucket.Arn, "*"]]
                   - "arn:aws:s3:::aws-batch-architecture-for-alphafold-public-artifacts/*"
               - Effect: Allow
                 Action:
@@ -480,12 +480,12 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:GetObjectVersion
-                Resource: !Sub arn:aws:s3:::${CodePipelineS3Bucket}/*
+                Resource: !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*
                 Effect: Allow
               - Action:
                   - s3:GetBucketAcl
                   - s3:GetBucketLocation
-                Resource: !GetAtt CodePipelineS3Bucket.Arn
+                Resource: !GetAtt BatchFoldS3Bucket.Arn
                 Effect: Allow
               - Action:
                   - codebuild:BatchGetBuilds
@@ -516,7 +516,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       ArtifactStore:
-        Location: !Ref CodePipelineS3Bucket
+        Location: !Ref BatchFoldS3Bucket
         Type: S3
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt CodePipelineRole.Arn
@@ -679,7 +679,7 @@ Resources:
       ServiceToken:
         Fn::GetAtt: DeleteBucketLambda.Arn
       S3Bucket:
-        Ref: CodePipelineS3Bucket
+        Ref: BatchFoldS3Bucket
 
   DeleteContainerRepoLambda:
     Type: AWS::Lambda::Function
@@ -801,4 +801,4 @@ Outputs:
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:
-      Ref: CodePipelineS3Bucket
+      Ref: BatchFoldS3Bucket
