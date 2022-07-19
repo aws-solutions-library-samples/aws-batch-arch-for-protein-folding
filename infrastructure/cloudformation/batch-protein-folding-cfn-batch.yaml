@@ -467,7 +467,8 @@ Resources:
           LogDriver: awslogs
         MountPoints:
           - ContainerPath: /database
-            ReadOnly: True
+            # ReadOnly: True
+            ReadOnly: False
             SourceVolume: database
         ResourceRequirements:
           - Type: VCPU

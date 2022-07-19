@@ -1,5 +1,5 @@
 from batchfold.batchfold_environment import BatchFoldEnvironment
-from batchfold.jackhmmer_job import JackhmmerJob
+from batchfold.mmseqs2_job import MMseqs2Job
 import pytest
 import boto3
 from datetime import datetime
@@ -10,39 +10,33 @@ def batch_environment():
     assert "BatchEnvironment" in stack.stack_name
     return(stack)
 
-def test_jackhmmer_job_init():
-    new_job = JackhmmerJob(
+def test_mmseqs2_job_init():
+    new_job = MMseqs2Job(
         target_id = "T1084",
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
-        bfd_database_path = "TESTA",
-        uniclust30_database_path = "TESTB"
+        mmseqs_database_path = "TESTA",
+        pdb70_database_path = "TESTB"
     )
 
     assert new_job.job_definition_name == "MSAJobDefinition"
     assert new_job.target_id == "T1084"
     assert new_job.fasta_s3_uri == "s3://aws-af-testing/T1084/fasta/T1084.fasta"
     assert new_job.output_s3_uri == "s3://aws-af-testing/T1084/outputs/"
-    assert new_job.bfd_database_path == "TESTA" 
-    assert new_job.uniclust30_database_path == "TESTB" 
+    assert new_job.mmseqs_database_path == "TESTA" 
+    assert new_job.pdb70_database_path == "TESTB" 
 
-def test_jackhmmer_job_submission(batch_environment):
-    job_name = "JackhmmerJob" + datetime.now().strftime("%Y%m%d%s")
+def test_mmseqs2_job_submission(batch_environment):
+    job_name = "MMseqs2Job" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "GravitonSpotJobQueue"
 
-    new_job = JackhmmerJob(
+    new_job = MMseqs2Job(
         job_name = job_name,
         target_id = "T1084",
         fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
         output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
-        bfd_database_path = "test/tiny.fasta",
-        uniclust30_database_path = None,
-        mgnify_database_path = None,
-        pdb70_database_path = None,
-        uniprot_database_path = None,
-        uniref90_database_path = None,
-        use_small_bfd = True,
-        cpu = 4
+        cpu = 64,
+        memory = 500
     )
 
     submission = batch_environment.submit_job(new_job, job_queue_name)

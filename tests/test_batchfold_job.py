@@ -2,6 +2,7 @@ import pytest
 import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.batchfold_job import BatchFoldJob
+from datetime import datetime
 
 
 @pytest.fixture()
@@ -34,7 +35,7 @@ def test_job_init():
 
 
 def test_submit_batchfold_jobs(batch_environment):
-    job_name = "TestJobNoOverrides"
+    job_name = "BatchFoldTestJobNoOverrides" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "CPUOnDemandJobQueue"
 
     new_job = BatchFoldJob(job_name=job_name)
