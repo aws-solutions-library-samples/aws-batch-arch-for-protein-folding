@@ -45,6 +45,15 @@ class BatchFoldTarget:
         self.sequences.append(seq_record)
         return self
 
+    def add_fasta(self, path: str) -> BatchFoldTarget:
+        """Add an existing fasta file to the target object."""
+        with open(path) as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                self.sequences.append(record)
+
+        return self
+
+
     def upload_fasta(self) -> BatchFoldTarget:
         """Create and upload a fasta file to s3"""
         file_out = f"{self.target_id}.fasta"

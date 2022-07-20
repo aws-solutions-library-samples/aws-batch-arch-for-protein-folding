@@ -51,3 +51,15 @@ def test_add_sequence(fold_target):
                 record.description == "T1084 Meio, Meiothermus silvanus, 73 residues|"
             )
     os.remove(file)
+
+def test_add_fasta():
+    target_id = "T1078"
+    bucket = "aws-af-testing"
+    target = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
+    assert target.target_id == target_id
+    assert target.s3_bucket == bucket
+
+    target.add_fasta("tests/data/T1078.fa")
+    assert target.sequences[0].id == "T1078"
+    assert target.sequences[0].seq == "MAAPTPADKSMMAAVPEWTITNLKRVCNAGNTSCTWTFGVDTHLATATSCTYVVKANANASQASGGPVTCGPYTITSSWSGQFGPNNGFTTFAVTDFSKKLIVWPAYTDVQVQAGKVVSPNQSYAPANLPLEHHHHHH"
+    assert target.sequences[0].description == "T1078 Tsp1, Trichoderma virens, 138 residues|"
