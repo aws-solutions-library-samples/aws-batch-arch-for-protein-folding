@@ -12,7 +12,7 @@ class JackhmmerJob(BatchFoldJob):
     output_s3_uri: str = ""
     output_dir: str = "/tmp/msa"
     data_dir: str = "/database"
-    bfd_database_path: str = "small_bfd/bfd-first_non_consensus_sequences.fasta"
+    bfd_database_path: str = "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     mgnify_database_path: str = "mgnify/mgy_clusters_2018_12.fa"
     pdb70_database_path: str = "pdb70/pdb70"
     uniclust30_database_path: str = "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
