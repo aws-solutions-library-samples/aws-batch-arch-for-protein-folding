@@ -1,6 +1,14 @@
 from __future__ import annotations
+from typing import List
+from Bio.Seq import Seq
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+from Bio.SeqIO.FastaIO import FastaIterator
+from attrs import define, field
+import boto3
+import re
+import os
 
-from attr import define
 from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -20,7 +28,7 @@ class BatchFoldTarget:
     s3_msas_prefix: str = "msas"
     s3_predictions_prefix: str = "predictions"
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
-    sequences: list = []
+    sequences: list = field(kw_only=True)
 
     @s3_bucket.validator
     def check_bucket_exists(self, attribute, value):
@@ -28,8 +36,13 @@ class BatchFoldTarget:
         self.boto_session.client("s3").head_bucket(Bucket=value)
 
     @s3_base_prefix.default
-    def define_s3_base_prefix(self) -> None:
+    def define_s3_base_prefix(self) -> str:
         return self.target_id
+
+    @sequences.default
+    def init_sequences(self) -> List:
+        return []
+
 
     def add_sequence(self, seq: str, seq_id: str = "", description: str = "") -> BatchFoldTarget:
         """Add sequence to target object."""
@@ -42,11 +55,16 @@ class BatchFoldTarget:
             description=description,
             annotations={"molecule_type": "protein"},
         )
-        self.sequences.append(seq_record)
+
+        if hasattr(self, "sequences"):
+            self.sequences.append(seq_record)
+        else:
+            self.sequences = seq_record
         return self
 
     def add_fasta(self, path: str) -> BatchFoldTarget:
         """Add an existing fasta file to the target object."""
+        # print(self.sequences)
         with open(path) as handle:
             for record in SeqIO.parse(handle, "fasta"):
                 self.sequences.append(record)
