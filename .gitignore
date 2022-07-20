@@ -18,3 +18,4 @@ src/batchfold.egg-info/requires.txt
 src/batchfold.egg-info/SOURCES.txt
 src/batchfold.egg-info/top_level.txt
 *egg-info
+notebooks/data/
