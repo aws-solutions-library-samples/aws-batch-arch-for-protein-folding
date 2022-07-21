@@ -90,10 +90,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: !Ref StackAvailabilityZone
-      CidrBlock:
-        Fn::Select:
-          - 0
-          - Fn::Cidr: [!GetAtt VPC.CidrBlock, 6, 8]
+      CidrBlock: "10.0.255.224/28"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -109,10 +106,7 @@ Resources:
         Ref: VPC
       AvailabilityZone: !Ref StackAvailabilityZone
       MapPublicIpOnLaunch: false
-      CidrBlock:
-        Fn::Select:
-          - 3
-          - Fn::Cidr: [!GetAtt VPC.CidrBlock, 6, 8]
+      CidrBlock: "10.0.224.0/20"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
