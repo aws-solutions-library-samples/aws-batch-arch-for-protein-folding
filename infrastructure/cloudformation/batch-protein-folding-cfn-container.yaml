@@ -16,6 +16,10 @@ Parameters:
     AllowedValues:
       - main
       - dev
+  DownloadFsxData:
+    Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
+    Type: String
+    Default: "Y"    
 
 Resources:
   ##################################################
@@ -431,6 +435,8 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/msa
+          - Name: DOWNLOAD_FSX_DATA
+            Value: !Ref DownloadFsxData
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -438,7 +444,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml
+        BuildSpec: infrastructure/docker/msa/buildspec.yaml
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
