@@ -177,6 +177,11 @@ class AlignmentRunner:
             jackhmmer_uniref90_result = self.jackhmmer_uniref90_runner.query(
                 fasta_path
             )[0]
+
+            uniref90_out_path_sto = os.path.join(output_dir, "uniref90_hits.sto")
+            with open(uniref90_out_path_sto, "w") as f:
+                f.write(jackhmmer_uniref90_result["sto"])
+
             uniref90_msa_as_a3m = parsers.convert_stockholm_to_a3m(
                 jackhmmer_uniref90_result["sto"], 
                 max_sequences=self.uniref_max_hits
@@ -197,6 +202,11 @@ class AlignmentRunner:
             jackhmmer_mgnify_result = self.jackhmmer_mgnify_runner.query(
                 fasta_path
             )[0]
+
+            mgnify_out_path_sto = os.path.join(output_dir, "mgnify_hits.sto")
+            with open(mgnify_out_path_sto, "w") as f:
+                f.write(jackhmmer_mgnify_result["sto"])
+
             mgnify_msa_as_a3m = parsers.convert_stockholm_to_a3m(
                 jackhmmer_mgnify_result["sto"], 
                 max_sequences=self.mgnify_max_hits
