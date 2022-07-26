@@ -12,7 +12,7 @@ class OpenFoldJob(BatchFoldJob):
     msa_s3_uri: str = ""
     output_s3_uri: str = ""
     use_precomputed_msas: bool = True
-    output_dir: str = "/tmp/openfold"
+    output_dir: str = "/tmp/openfold/output"
     data_dir: str = "/database"
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files" 
     bfd_database_path: str = "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
@@ -23,9 +23,10 @@ class OpenFoldJob(BatchFoldJob):
     small_bfd_database_path: str = "small_bfd/bfd-first_non_consensus_sequences.fasta"
     uniclust30_database_path: str = "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
     uniprot_database_path: str = "uniprot/uniprot.fasta"
-    uniref90_database_path: str = "uniref90/uniref90.fasta"    
+    uniref90_database_path: str = "uniref90/uniref90.fasta" 
+    max_template_date: str = datetime.now().strftime("%Y-%m-%d")   
     model_device: str = "cuda:0"
-    config_preset: str = "model_1"
+    config_preset: str = "finetuning_ptm"
     jax_param_path: str = ""
     openfold_checkpoint_path: str = ""
     save_outputs: bool = False
@@ -34,8 +35,8 @@ class OpenFoldJob(BatchFoldJob):
     data_random_seed: str = ""
     skip_relaxation: bool = False
     multimer_ri_gap: int = 200
-    
-    max_template_date=datetime.now().strftime("%Y-%m-%d")
+    trace_model: bool = False
+    subtract_plddt: bool = False
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -49,7 +50,8 @@ class OpenFoldJob(BatchFoldJob):
             f"--model_device={self.model_device}",
             f"--config_preset={self.config_preset}",
             f"--multimer_ri_gap={self.multimer_ri_gap}",
-            f"--output_dir {self.output_dir}/output",
+            f"--output_dir {self.output_dir}",
+            f"--max_template_date={self.max_template_date}",
             "--save_outputs"
         ]
 
@@ -89,8 +91,14 @@ class OpenFoldJob(BatchFoldJob):
             command_list.extend([f"--jax_param_path={self.data_dir}/{self.jax_param_path}"])
         else:
             raise ValueError("Please provide a value for either openfold_checkpoint_path or jax_param_path")
-        
-        upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}"
+
+        if self.trace_model:
+            command_list.extend(["--trace_model"])
+
+        if self.subtract_plddt:
+            command_list.extend(["--subtract_plddt"])
+
+        upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions {self.output_s3_uri}"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")

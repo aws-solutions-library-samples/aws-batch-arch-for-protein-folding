@@ -43,7 +43,7 @@ class JackhmmerJob(BatchFoldJob):
                 f"--use_small_bfd {self.use_small_bfd}"                       
                 ])
         
-        upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}"
+        upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}/jackhmmr"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")
