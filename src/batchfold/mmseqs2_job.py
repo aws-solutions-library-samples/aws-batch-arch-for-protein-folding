@@ -37,7 +37,7 @@ class MMseqs2Job(BatchFoldJob):
         command_list.extend([f"--env_db {self.env_db}"]) if self.env_db else None
         command_list.extend([f"--pdb70 {self.data_dir}/{self.pdb70_database_path}"]) if self.pdb70_database_path else None
         
-        upload_string = f"aws s3 cp --recursive {self.output_dir} {self.output_s3_uri}/mmseqs2"
+        upload_string = f"aws s3 cp --recursive {self.output_dir}/{self.target_id} {self.output_s3_uri}/mmseqs2"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")

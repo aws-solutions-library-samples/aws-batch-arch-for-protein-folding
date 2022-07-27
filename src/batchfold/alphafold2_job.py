@@ -83,7 +83,7 @@ class AlphaFold2Job(BatchFoldJob):
                 f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"
             ])            
 
-        upload_string = f"aws s3 cp --recursive /tmp/alphafold2/{self.target_id}/outputs/ {self.output_s3_uri}"
+        upload_string = f"aws s3 cp --recursive /tmp/alphafold2/outputs/ {self.output_s3_uri}"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")
