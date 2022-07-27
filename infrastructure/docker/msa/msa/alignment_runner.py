@@ -178,9 +178,9 @@ class AlignmentRunner:
                 fasta_path
             )[0]
 
-            # uniref90_out_path_sto = os.path.join(output_dir, "uniref90_hits.sto")
-            # with open(uniref90_out_path_sto, "w") as f:
-            #     f.write(jackhmmer_uniref90_result["sto"])
+            uniref90_out_path_sto = os.path.join(output_dir, "uniref90_hits.sto")
+            with open(uniref90_out_path_sto, "w") as f:
+                f.write(jackhmmer_uniref90_result["sto"])
 
             uniref90_msa_as_a3m = parsers.convert_stockholm_to_a3m(
                 jackhmmer_uniref90_result["sto"], 
@@ -203,9 +203,9 @@ class AlignmentRunner:
                 fasta_path
             )[0]
 
-            # mgnify_out_path_sto = os.path.join(output_dir, "mgnify_hits.sto")
-            # with open(mgnify_out_path_sto, "w") as f:
-            #     f.write(jackhmmer_mgnify_result["sto"])
+            mgnify_out_path_sto = os.path.join(output_dir, "mgnify_hits.sto")
+            with open(mgnify_out_path_sto, "w") as f:
+                f.write(jackhmmer_mgnify_result["sto"])
 
             mgnify_msa_as_a3m = parsers.convert_stockholm_to_a3m(
                 jackhmmer_mgnify_result["sto"], 
