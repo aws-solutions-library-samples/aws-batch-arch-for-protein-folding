@@ -32,8 +32,9 @@ RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh
     && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
     && make && make install \
     && ln -s /opt/hhsuite/bin/* /usr/bin \
-    && popd \
-    && rm -rf /tmp/hh-suite    
+    && popd
+    # && popd \
+    # && rm -rf /tmp/hh-suite    
 
 # Compile kalign2 from source
 RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
@@ -55,6 +56,8 @@ RUN git clone https://github.com/soedinglab/MMseqs2.git \
   && mv bin/mmseqs /usr/bin \
   && popd \
   && rm -rf MMseqs2
+
+
 
 COPY . /opt/msa
 WORKDIR /opt/msa
