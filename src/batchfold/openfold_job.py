@@ -12,7 +12,7 @@ class OpenFoldJob(BatchFoldJob):
     msa_s3_uri: str = ""
     output_s3_uri: str = ""
     use_precomputed_msas: bool = True
-    output_dir: str = "/tmp/openfold/output"
+    output_dir: str = "/tmp/openfold"
     data_dir: str = "/database"
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files" 
     bfd_database_path: str = "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
@@ -74,7 +74,7 @@ class OpenFoldJob(BatchFoldJob):
             else:
                 raise ValueError("preset value must be either 'full_dbs' or 'reduced_dbs'")
         else:
-            command_list.extend([f"--use_precomputed_alignments {self.output_dir}/msas"])
+            command_list.extend([f"--use_precomputed_alignments {self.output_dir}/msas/"])
             
         if self.skip_relaxation:
             command_list.extend(["--skip_relaxation"])
@@ -98,7 +98,7 @@ class OpenFoldJob(BatchFoldJob):
         if self.subtract_plddt:
             command_list.extend(["--subtract_plddt"])
 
-        upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions {self.output_s3_uri}"
+        upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions/ {self.output_s3_uri}"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")

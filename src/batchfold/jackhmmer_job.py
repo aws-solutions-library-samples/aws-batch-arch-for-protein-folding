@@ -44,7 +44,7 @@ class JackhmmerJob(BatchFoldJob):
                 ])
         
         upload_string = f"perl /tmp/hh-suite/scripts/reformat.pl a3m sto '{self.output_dir}/output/alignments/{self.target_id}/*.a3m' .sto"
-        upload_string += f" && aws s3 cp --recursive {self.output_dir}/output/alignments/{self.target_id} {self.output_s3_uri}/jackhmmr"        
+        upload_string += f" && aws s3 cp --recursive {self.output_dir}/output/alignments/{self.target_id} {self.output_s3_uri}/jackhmmer"
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")
         self.container_overrides["command"] = [command_string]

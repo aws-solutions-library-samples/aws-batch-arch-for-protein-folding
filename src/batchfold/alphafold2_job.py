@@ -38,9 +38,9 @@ class AlphaFold2Job(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
-        download_string = f"aws s3 cp {self.fasta_s3_uri} /tmp/alphafold2/fasta/"    
+        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"    
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri} /tmp/alphafold2/{self.target_id}/msas/" 
+            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri} {self.output_dir}/{self.target_id}/msas/"
 
         command_list = [
             "/app/run_alphafold.sh",
@@ -83,7 +83,7 @@ class AlphaFold2Job(BatchFoldJob):
                 f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"
             ])            
 
-        upload_string = f"aws s3 cp --recursive /tmp/alphafold2/outputs/ {self.output_s3_uri}"
+        upload_string = f'aws s3 cp {self.output_dir}/{self.target_id}/ {self.output_s3_uri} --recursive --exclude "*.a3m" --exclude "*.sto" --exclude "*.hhr" '
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")
