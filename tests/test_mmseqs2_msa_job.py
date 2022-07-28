@@ -50,7 +50,6 @@ def test_mmseqs2_job_submission(batch_environment):
     job_list = job_dict[job_queue_name]
     assert len(job_list) > 0
     
-    time.sleep(5)
     job_info = [job for job in job_list if job.get("jobName", []) == job_name]    
     assert job_info[0].get("jobDefinition") == batch_environment.job_definitions["MSAJobDefinition"]
     assert job_info[0].get("jobName") == job_name
