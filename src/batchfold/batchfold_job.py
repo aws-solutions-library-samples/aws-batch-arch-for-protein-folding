@@ -3,19 +3,24 @@ from typing import List, Dict
 import boto3
 from datetime import datetime
 
+
 @define
 class BatchFoldJob:
-    """ Submit protein analysis job to AWS """
+    """Base class to submit protein analysis job to AWS"""
 
-    job_name: str = datetime.now().strftime("%Y%m%dT%H%M%S")
-    job_definition_name: str = "CPUFoldingJobDefinition"
-    cpu: int = 4
-    memory: int = 16
-    gpu: int = 0
-    command: List = ["echo hello"]
-    container_overrides: Dict = field(kw_only=True) 
-    boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
+    boto_session: boto3.session.Session = field(
+        kw_only=True, default=boto3.DEFAULT_SESSION or boto3.Session()
+    )
+    command: List = field(kw_only=True, default=["echo hello"])
+    cpu: int = field(kw_only=True, default=4)
+    job_name: str = field(
+        kw_only=True, default=datetime.now().strftime("%Y%m%dT%H%M%S")
+    )
+    job_definition_name: str = field(kw_only=True, default="CPUFoldingJobDefinition")
+    gpu: int = field(kw_only=True, default=0)
     id: str = field(init=False)
+    memory: int = field(kw_only=True, default=16)
+    container_overrides: Dict = field(kw_only=True)  # Depends on cpu
 
     @container_overrides.default
     def _define_container_overrides(self):
@@ -25,7 +30,7 @@ class BatchFoldJob:
             "resourceRequirements": [
                 {"value": str(self.cpu), "type": "VCPU"},
                 {"value": str(self.memory * 1000), "type": "MEMORY"},
-            ]
+            ],
         }
 
         if self.gpu > 0:

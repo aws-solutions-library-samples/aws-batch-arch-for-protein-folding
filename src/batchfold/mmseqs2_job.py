@@ -1,11 +1,13 @@
-from attrs import define
+from attrs import define, field
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
+from typing import Dict
 import logging
 
 @define
 class MMseqs2Job(BatchFoldJob):
     """ Define MMSeqs2 MSA Creation Job """
+
     job_definition_name: str = "MSAJobDefinition"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     fasta_s3_uri: str = ""
@@ -18,7 +20,7 @@ class MMseqs2Job(BatchFoldJob):
     uniref_db: str = "uniref30_2103_db"
     env_db: str = "colabfold_envdb_202108_db"
     pdb70_database_path: str = "pdb70/pdb70"
-    
+
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
@@ -37,8 +39,8 @@ class MMseqs2Job(BatchFoldJob):
         command_list.extend([f"--env_db {self.env_db}"]) if self.env_db else None
         command_list.extend([f"--pdb70 {self.data_dir}/{self.pdb70_database_path}"]) if self.pdb70_database_path else None
         
-        upload_string += f"perl /tmp/hh-suite/scripts/reformat.pl a3m sto '{self.output_dir}/{self.target_id}/*.a3m' .sto"
-        upload_string = f" && aws s3 cp --recursive {self.output_dir}/{self.target_id} {self.output_s3_uri}/mmseqs2"
+        upload_string = f"perl /tmp/hh-suite/scripts/reformat.pl a3m sto '{self.output_dir}/{self.target_id}/*.a3m' .sto"
+        upload_string += f" && aws s3 cp --recursive {self.output_dir}/{self.target_id} {self.output_s3_uri}/mmseqs2"
 
         command_string = download_string + " && " + " ".join(command_list) + " && " + upload_string
         logging.info(f"Command is \n{command_string}")
