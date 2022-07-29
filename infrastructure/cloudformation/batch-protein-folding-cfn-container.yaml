@@ -425,8 +425,8 @@ Resources:
       Description: Build Docker container for OpenFold MSA algorithm on AWS Batch
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        # ComputeType: BUILD_GENERAL1_SMALL
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
+        # ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -438,12 +438,12 @@ Resources:
             Value: infrastructure/docker/msa
           - Name: DOWNLOAD_FSX_DATA
             Value: !Ref DownloadFsxData
-        # Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-        Image: aws/codebuild/standard:4.0
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        # Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        # Type: ARM_CONTAINER
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
+        # Type: LINUX_CONTAINER
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
