@@ -19,13 +19,19 @@ if ! command -v aws &> /dev/null ; then
     exit 1
 fi
 
-DOWNLOAD_DIR="$1"
-ROOT_DIR="${DOWNLOAD_DIR}/openfold_params"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/model_parameters/openfold/openfold_params_06_22.tar.gz"
-BASENAME=$(basename "${SOURCE_URL}")
+# DOWNLOAD_DIR="$1"
+# ROOT_DIR="${DOWNLOAD_DIR}/openfold_params"
+# SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/model_parameters/openfold/openfold_params_06_22.tar.gz"
+# SOURCE_URL=
+# BASENAME=$(basename "${SOURCE_URL}")
 
-mkdir --parents "${ROOT_DIR}"
-aws s3 cp --no-sign-request "${SOURCE_URL}" "${ROOT_DIR}"
-tar --extract --ungzip --verbose --file="${ROOT_DIR}/${BASENAME}" \
-  --directory="${ROOT_DIR}" --preserve-permissions
-rm "${ROOT_DIR}/${BASENAME}"
+# mkdir --parents "${ROOT_DIR}"
+# aws s3 cp --no-sign-request "${SOURCE_URL}" "${ROOT_DIR}"
+# tar --extract --ungzip --verbose --file="${ROOT_DIR}/${BASENAME}" \
+#   --directory="${ROOT_DIR}" --preserve-permissions
+# rm "${ROOT_DIR}/${BASENAME}"
+
+
+DOWNLOAD_DIR="${1}/openfold_params"
+mkdir -p "${DOWNLOAD_DIR}"
+aws s3 cp --no-sign-request --region us-east-1 s3://openfold/openfold_params/ "${DOWNLOAD_DIR}" --recursive
