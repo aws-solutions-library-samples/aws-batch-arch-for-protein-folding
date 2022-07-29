@@ -23,9 +23,10 @@ DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/mmseqs_dbs"
 mkdir -p $ROOT_DIR
 
-for f in $(ls ${DOWNLOAD_DIR}/*.tar.gz)
+# for f in $(ls ${DOWNLOAD_DIR}/*.tar.gz)
+for f in colabfold_envdb_202108.tar.gz uniref30_2103.tar.gz
 do
-  tar --extract --verbose --file="${f}" \
+  tar --extract --verbose --file="${DOWNLOAD_DIR}/${f}" \
       --directory=$ROOT_DIR
   rm "${f}"
   BASENAME="$(basename ${f%%.*})"
@@ -36,3 +37,7 @@ do
   mmseqs createindex "${DB_NAME}" "${DOWNLOAD_DIR}/tmp/"
   cd "${OLD_PWD}"
 done
+
+colabfold_envdb_202108.tar.gz
+
+uniref30_2103.tar.gz
