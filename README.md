@@ -7,7 +7,10 @@ Many AI-driven folding algorithms use a multi-track transformer architecture tra
 
 Running both the MSA and structure prediction steps in the same computing environment can be cost inefficient, because the expensive GPU resources required for the prediction sit unused while the MSA step runs. Instead, using a high-performance computing (HPC) service like [AWS Batch](https://aws.amazon.com/batch/) allows us to run each step as a containerized job with the best fit of CPU, memory, and GPU resources.
 
-This repository includes the CloudFormation template, Jupyter Notebook, and supporting code to run protein folding algorithms on AWS Batch. 
+This repository includes the CloudFormation template, Jupyter Notebook, and supporting code to run protein folding algorithms on AWS Batch. This includes:
+
+- Jackhmmer and MMseqs2for MSA generation
+- AlphaFold2 and OpenFold for protein structure prediction
 
 -----
 ## Architecture Diagram
@@ -48,7 +51,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ```
 > pip install -r notebooks/notebook-requirements.txt
-> python notebooks/download_ref_data.py
+> python notebooks/nbhelper/download_ref_data.py
 ```
 
 2. It will take 3 to 4 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
@@ -58,8 +61,6 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 -----
 ## Optional Template Parameters
-  - Select a different value for **FSXForLustreStorageCapacity** if you want to provision a larger file system. The default value of 1200 GB is sufficient to store compressed instances of the OpenFold model parameters and all standard sequence databases, BFD (small and reduced), Mgnify, PDB70, PDB mmCIF, Uniclust30, Uniref90, UniProt, and PDB SeqRes datasets. However, you can specify a larger value if you need to store additional data.
-  - Select a different value for for **FSxForLustreThroughput** if you have unique performance needs. The default is 500 MB/s/TB. Select a higher value for performance-sensitive workloads and a lower value for cost-sensitive workloads.
   - Select "Y" for **LaunchSageMakerNotebook** if you want to launch a managed sagemaker notebook instance to quickly run the provided Jupyter notebook.
   - Provide values for the **VPC**, **Subnet**, and **DefaultSecurityGroup** parameters to use existing network resources. If one or more of those parameters are left empty, CloudFormation will create a new VPC and FSx for Lustre instance for the stack.
   - Provide values for the **FileSystemId** and **FileSystemMountName** parameters to use an existing FSx for Lustre file system. If one or more of these parameters are left empty, CloudFormation will create a new file system for the stack.
@@ -67,7 +68,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 -----
 ## Usage
-Use the provided `batch-Protein-Folding.ipynb` notebook to submit sequences for analysis and download the results.
+Use the provided `quick-start.ipynb` notebook to submit sequences for analysis and download the results.
 
 -----
 ## Performance
@@ -165,5 +166,16 @@ The AlphaFold-Multimer paper is
   doi          = {10.1101/2021.10.04.463034},
   URL          = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034},
   eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
+}
+```
+OpenFold may be cited as 
+```
+@software{Ahdritz_OpenFold_2021,
+  author = {Ahdritz, Gustaf and Bouatta, Nazim and Kadyan, Sachin and Xia, Qinghui and Gerecke, William and AlQuraishi, Mohammed},
+  doi = {10.5281/zenodo.5709539},
+  month = {11},
+  title = {{OpenFold}},
+  url = {https://github.com/aqlaboratory/openfold},
+  year = {2021}
 }
 ```
