@@ -69,8 +69,8 @@ Conditions:
       ]
   CreateSageMakerNotebook:
     "Fn::Equals": [Ref: "LaunchSageMakerNotebook", "Y"]
-  # DownloadFsxDataCondition:
-  #   "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
+  DownloadFsxDataCondition:
+    "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
 
 Resources:
   Network:
@@ -176,18 +176,18 @@ Resources:
         CodeRepositoryURI:
           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI         
 
-  # DownloadData:
-  #   Type: "AWS::CloudFormation::Stack"
-  #   DependsOn:
-  #     - BatchEnvironment
-  #   Condition: DownloadFsxDataCondition
-  #   Properties:
-  #     TemplateURL: batch-protein-folding-cfn-download.yaml
-  #     Parameters:
-  #       JobQueue:
-  #         "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
-  #       JobDefinition:
-  #         "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
+  DownloadData:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - BatchEnvironment
+    Condition: DownloadFsxDataCondition
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-download.yaml
+      Parameters:
+        JobQueue:
+          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
+        JobDefinition:
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
 
 Outputs:
   ApplicationName:
