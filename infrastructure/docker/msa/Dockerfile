@@ -33,7 +33,6 @@ RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh
     && make && make install \
     && ln -s /opt/hhsuite/bin/* /usr/bin \
     && popd
-    # && popd \
     # && rm -rf /tmp/hh-suite    
 
 # Compile kalign2 from source
@@ -56,8 +55,6 @@ RUN git clone https://github.com/soedinglab/MMseqs2.git \
   && mv bin/mmseqs /usr/bin \
   && popd \
   && rm -rf MMseqs2
-
-
 
 COPY . /opt/msa
 WORKDIR /opt/msa

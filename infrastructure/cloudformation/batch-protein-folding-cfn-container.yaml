@@ -426,7 +426,6 @@ Resources:
       EncryptionKey: !Ref EncryptionKey
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        # ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -439,15 +438,13 @@ Resources:
           - Name: DOWNLOAD_FSX_DATA
             Value: !Ref DownloadFsxData
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-        # Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: ARM_CONTAINER
-        # Type: LINUX_CONTAINER
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/msa/buildspec.yaml
+        BuildSpec: infrastructure/docker/buildspec.yaml        
         GitCloneDepth: 1
         Location: !GetAtt CodeRepository.CloneUrlHttp
         Type: CODECOMMIT
