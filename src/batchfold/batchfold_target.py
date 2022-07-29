@@ -44,7 +44,6 @@ class BatchFoldTarget:
     def init_sequences(self) -> Dict:
         return {}
 
-
     def __attrs_post_init__(self) -> None:
         """ Check and see if data already exists in S3 for this target and if so, load it"""
         s3 = self.boto_session.client("s3")
@@ -174,3 +173,29 @@ class BatchFoldTarget:
                 f"Input sequence contains invalid amino acid symbols." f"{sequence}"
             )
         return True
+
+    def list_job_names(self, bucket = None, client = None, job_type=""):
+
+        bucket = bucket or self.s3_bucket
+        client = client or self.boto_session.client("s3")
+        paginator = client.get_paginator("list_objects_v2")
+
+        if job_type not in [ "", "OpenFold", "AlphaFold2", "AlphaFold"]:
+            raise ValueError("Valid job types are 'jackhmmer', 'mmseqs2', 'openfold', and 'alphafold2'")
+
+        # Create a PageIterator from the Paginator
+        page_iterator = paginator.paginate(
+            Bucket=self.s3_bucket,
+            Prefix=self.target_id+"/predictions")
+        jobs = []
+        for page in page_iterator:
+            for key in page["Contents"]:
+                jobs.append(re.search("predictions/(.*)/", key["Key"]).group(1))
+
+        jobs = [*set(jobs)]
+
+        if job_type != "":
+            jobs = [job for job in jobs if job_type in job]
+
+        jobs.sort()
+        return jobs
