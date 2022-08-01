@@ -24,15 +24,15 @@ Parameters:
   AlphaFold2ContainerRegistryURI:
     Description: URI of the AlphaFold2 container
     Type: String
-  DownloadContainerRegistryURI:
-    Description: URI of the download container
-    Type: String
+    Default: public.ecr.aws/alphafold-on-aws/aws-alphafold2
   OpenFoldContainerRegistryURI:
     Description: URI of the OpenFold container
     Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold
   MSAContainerRegistryURI:
     Description: URI of the OpenFold MSA container
     Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa
   S3BucketName:
     Description: Optional S3 Bucket Name
     Type: String
@@ -394,39 +394,6 @@ Resources:
         StackId: !Ref "AWS::StackId"
       Type: container
 
-  DownloadJobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "echo hello"
-        Image: !Join [":", [!Ref DownloadContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /fsx
-            ReadOnly: False
-            SourceVolume: fsx
-        Privileged: False
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 4
-          - Type: MEMORY
-            Value: 16000
-        Volumes:
-          - Name: fsx
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container
-
   OpenFoldJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
@@ -466,13 +433,12 @@ Resources:
     Properties:
       ContainerProperties:
         Command:
-          - "nvidia-smi"
+          - "echo hello"
         Image: !Join [":", [!Ref MSAContainerRegistryURI, "latest"]]
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
           - ContainerPath: /database
-            # ReadOnly: True
             ReadOnly: False
             SourceVolume: database
         ResourceRequirements:
@@ -523,10 +489,6 @@ Outputs:
     Description: Job definition for running AlphaFold2 jobs on GPU instances.
     Value:
       Ref: AlphaFold2JobDefinition
-  DownloadJobDefinition:
-    Description: Job definition for running download jobs on CPU instances.
-    Value:
-      Ref: DownloadJobDefinition
   OpenFoldJobDefinition:
     Description: Job definition for running OpenFold jobs on GPU instances.
     Value:

@@ -16,10 +16,18 @@ Parameters:
     AllowedValues:
       - main
       - dev
-  DownloadFsxData:
-    Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
+  AlphaFold2ContainerRegistryURI:
+    Description: URI of the AlphaFold2 container
     Type: String
-    Default: "Y"    
+    Default: public.ecr.aws/alphafold-on-aws/aws-alphafold2
+  OpenFoldContainerRegistryURI:
+    Description: URI of the OpenFold container
+    Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold
+  MSAContainerRegistryURI:
+    Description: URI of the OpenFold MSA container
+    Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa      
 
 Resources:
   ##################################################
@@ -326,7 +334,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/alphafold2                  
+            Value: infrastructure/docker/alphafold2  
+          - Name: SOURCE_URI
+            Value: !Ref AlphaFold2ContainerRegistryURI
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -343,43 +353,7 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  CodeBuildProjectDownload:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Build download Docker container
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
-          - Name: IMAGE_REPO_NAME
-            Value: !Ref DownloadContainerRegistry
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/download                 
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: ARM_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"          
+          Value: !Ref "AWS::StackId"       
 
   CodeBuildProjectOpenFold:
     Type: AWS::CodeBuild::Project
@@ -398,7 +372,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfold          
+            Value: infrastructure/docker/openfold     
+          - Name: SOURCE_URI
+            Value: !Ref OpenFoldContainerRegistryURI                 
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -435,8 +411,8 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/msa
-          - Name: DOWNLOAD_FSX_DATA
-            Value: !Ref DownloadFsxData
+          - Name: SOURCE_URI
+            Value: !Ref MSAContainerRegistryURI                    
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -500,7 +476,6 @@ Resources:
                   - codebuild:StartBuildBatch
                 Resource: 
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
-                  - !GetAtt CodeBuildProjectDownload.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
                   - !GetAtt CodeBuildProjectMSA.Arn
                 Effect: Allow
@@ -545,22 +520,7 @@ Resources:
               Region: !Ref "AWS::Region"
               RunOrder: 1
         - Name: Build
-          Actions:
-            - Name: BuildDownload
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectDownload
-              InputArtifacts:
-                - Name: SourceArtifact
-              Namespace: BuildVariablesDownload
-              OutputArtifacts:
-                - Name: DownloadBuildArtifact
-              Region: !Ref "AWS::Region"
-              RunOrder: 2                 
+          Actions:           
             - Name: BuildAlphaFold2
               ActionTypeId:
                 Category: Build

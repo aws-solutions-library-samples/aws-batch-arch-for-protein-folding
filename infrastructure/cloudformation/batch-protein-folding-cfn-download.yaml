@@ -39,11 +39,13 @@ Resources:
           import cfnresponse
           import logging
           import pathlib
+
           LOGGER = logging.getLogger()
           LOGGER.setLevel(logging.INFO)
           boto_session = boto3.session.Session()
           region = boto_session.region_name
           batch = boto_session.client("batch", region_name=region)
+
           def lambda_handler(event, context):
               try:
                   LOGGER.info("REQUEST RECEIVED:\n %s", event)
@@ -55,7 +57,6 @@ Resources:
                           "download_alphafold_params.sh",
                           "download_bfd.sh",
                           "download_mgnify.sh",
-                          "download_mmseqs_db.sh",
                           "download_openfold_params.sh",
                           "download_pdb_mmcif.sh",
                           "download_pdb_seqres.sh",
@@ -125,14 +126,14 @@ Resources:
 
                       response = str(responses)
                       cfnresponse.send(
-                          event, context, cfnresponse.SUCCESS, {"response": "Resource creation successful!"}
+                          event, context, SUCCESS, {"response": "Resource creation successful!"}
                       )
                   elif event["RequestType"] == "Update":
                       LOGGER.info("UPDATE!")
                       cfnresponse.send(
                           event,
                           context,
-                          cfnresponse.SUCCESS,
+                          SUCCESS,
                           {"response": "Resource update successful!"},
                       )
                   elif event["RequestType"] == "Delete":
@@ -140,7 +141,7 @@ Resources:
                       cfnresponse.send(
                           event,
                           context,
-                          cfnresponse.SUCCESS,
+                          SUCCESS,
                           {"response": "Resource deletion successful!"},
                       )
                   else:
@@ -148,7 +149,7 @@ Resources:
                       cfnresponse.send(
                           event,
                           context,
-                          cfnresponse.FAILED,
+                          "FAILED",
                           {"response": "Unexpected event received from CloudFormation"},
                       )
               except:
@@ -156,7 +157,7 @@ Resources:
                   cfnresponse.send(
                       event,
                       context,
-                      cfnresponse.FAILED,
+                      "FAILED",
                       {"response": "Exception during processing"},
                   )
 
@@ -197,7 +198,8 @@ Resources:
                   containerOverrides=container_overrides
               )
             LOGGER.info(f"Response is {response}")
-            return response
+            return response         
+                
       Description: Download data to FSx
       Handler: index.lambda_handler
       MemorySize: 512

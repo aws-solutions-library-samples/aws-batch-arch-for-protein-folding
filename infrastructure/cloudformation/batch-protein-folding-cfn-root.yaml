@@ -49,7 +49,18 @@ Parameters:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
     Default: "Y"
-
+  AlphaFold2ContainerRegistryURI:
+    Description: URI of the AlphaFold2 container
+    Type: String
+    Default: public.ecr.aws/alphafold-on-aws/aws-alphafold2
+  OpenFoldContainerRegistryURI:
+    Description: URI of the OpenFold container
+    Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold
+  MSAContainerRegistryURI:
+    Description: URI of the OpenFold MSA container
+    Type: String  
+    Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa
 Conditions:
   CreateFileSystem:
     "Fn::Or":
@@ -114,8 +125,12 @@ Resources:
           Ref: ApplicationName
         Environment:
           Ref: Environment
-        DownloadFsxData:
-          Ref: DownloadFsxData
+        AlphaFold2ContainerRegistryURI:
+          Ref: AlphaFold2ContainerRegistryURI
+        OpenFoldContainerRegistryURI:
+          Ref: OpenFoldContainerRegistryURI
+        MSAContainerRegistryURI:
+          Ref: MSAContainerRegistryURI
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -146,8 +161,6 @@ Resources:
             - Ref: FileSystemMountName
         AlphaFold2ContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.AlphaFold2ContainerRegistryURI
-        DownloadContainerRegistryURI:
-          "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         OpenFoldContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
         MSAContainerRegistryURI:
@@ -187,7 +200,7 @@ Resources:
         JobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
+          "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
 
 Outputs:
   ApplicationName:
