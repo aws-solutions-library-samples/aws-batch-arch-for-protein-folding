@@ -173,6 +173,7 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicReadOnly
       Policies:
         - PolicyName: CodeBuildPolicy
           PolicyDocument:
@@ -740,14 +741,6 @@ Outputs:
     Description: Name of the AlphaFold2 container repository
     Value:
       Ref: AlphaFold2ContainerRegistry
-  DownloadContainerRegistryURI:
-    Description: URI of the download container
-    Value:
-      Fn::GetAtt: DownloadContainerRegistry.RepositoryUri
-  DownloadContainerRegistryName:
-    Description: Name of the download container repository
-    Value:
-      Ref: DownloadContainerRegistry   
   OpenFoldContainerRegistryURI:
     Description: URI of the OpenFold container
     Value:
