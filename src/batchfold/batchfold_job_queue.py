@@ -38,7 +38,6 @@ class JobQueue:
                 jobQueue=self.id,
                 jobDefinition=job_definition,
                 containerOverrides=job.container_overrides,
-                # dependsOn=[{"jobId": depends_on.job_id, "type": "Sequential"}]
                 dependsOn=[{"jobId":job.job_id, "type":"Sequential"} for job in depends_on]
             )
         elif job.container_overrides and not depends_on:

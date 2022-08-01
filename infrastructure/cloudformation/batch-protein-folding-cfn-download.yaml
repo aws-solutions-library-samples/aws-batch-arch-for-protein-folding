@@ -77,8 +77,9 @@ Resources:
                               script=script,
                               cpu=4,
                               memory=16,
-                              download_dir="/fsx",
+                              download_dir="/database",
                           )
+                          LOGGER.info(f"Job ID {script_response.get('jobId', [])} submitted")
                           responses.append(script_response)
 
                       script = "download_colabfold_envdb.sh"
@@ -90,9 +91,10 @@ Resources:
                           script=script,
                           cpu=4,
                           memory=16,
-                          download_dir="/fsx",
+                          download_dir="/database",
                       )
                       colabfold_job_id = colabfold_script_response.get("jobId", [])
+                      LOGGER.info(f"Job ID {colabfold_job_id} submitted")
                       responses.append(colabfold_script_response)
 
                       script = "download_uniref30.sh"
@@ -104,10 +106,10 @@ Resources:
                           script=script,
                           cpu=4,
                           memory=16,
-                          download_dir="/fsx",
+                          download_dir="/database",
                       )
                       uniref30_job_id = uniref30_script_response.get("jobId", [])
-
+                      LOGGER.info(f"Job ID {uniref30_job_id} submitted")
                       responses.append(uniref30_script_response)         
 
                       script = "prep_mmseqs_dbs.sh"
@@ -119,21 +121,19 @@ Resources:
                           script=script,
                           cpu=64,
                           memory=500,
-                          download_dir="/fsx",
+                          download_dir="/database",
                           depends_on=[colabfold_job_id,uniref30_job_id] 
                       )
-                      responses.append(prep_mmseqs2_script_response)                                            
-
-                      response = str(responses)
+                      LOGGER.info(f"Job ID {prep_mmseqs2_script_response.get('jobId', [])} submitted")
                       cfnresponse.send(
-                          event, context, SUCCESS, {"response": "Resource creation successful!"}
+                          event, context, cfnresponse.SUCCESS, {"response": "Resource creation successful!"}
                       )
                   elif event["RequestType"] == "Update":
                       LOGGER.info("UPDATE!")
                       cfnresponse.send(
                           event,
                           context,
-                          SUCCESS,
+                          cfnresponse.SUCCESS,
                           {"response": "Resource update successful!"},
                       )
                   elif event["RequestType"] == "Delete":
@@ -141,7 +141,7 @@ Resources:
                       cfnresponse.send(
                           event,
                           context,
-                          SUCCESS,
+                          cfnresponse.SUCCESS,
                           {"response": "Resource deletion successful!"},
                       )
                   else:
@@ -168,7 +168,7 @@ Resources:
             script="all",
             cpu=4,
             memory=16,
-            download_dir="/fsx",
+            download_dir="/database",
             depends_on=None
           ):
             container_overrides = {
@@ -188,7 +188,7 @@ Resources:
                   jobName=job_name,
                   jobQueue=job_queue,
                   containerOverrides=container_overrides,
-                  dependsOn=[{"jobId":job.job_id, "type":"Sequential"} for job in depends_on]  
+                  dependsOn=[{"jobId":job_id, "type":"Sequential"} for job_id in depends_on]  
               )
             else:
               response = batch.submit_job(

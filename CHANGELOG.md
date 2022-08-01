@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Significant refactoring of code and tests
+- Copy container images from public ECR rather than build in private account repo
 
 ## [1.0.4] - 2022-06-24
 
