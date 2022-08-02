@@ -6,9 +6,12 @@ Description: >-
   batch-protein-folding-cfn-download.yaml: Download data to FSx for Lustre.
 
 Parameters:
-  JobQueue:
+  DownloadJobQueue:
     Description: Batch job queue for running download job.
     Type: String
+  MMSeqs2JobQueue:
+    Description: Batch job queue for running MMSeqs2 prep.
+    Type: String    
   JobDefinition:
     Description: Batch job definition for running download job.
     Type: String
@@ -72,7 +75,7 @@ Resources:
                       for script in all_scripts:
                           LOGGER.info(script)
                           script_response = submit_download_data_job(
-                              job_queue=event["ResourceProperties"]["JobQueue"],
+                              job_queue=event["ResourceProperties"]["DownloadJobQueue"],
                               job_definition=event["ResourceProperties"]["JobDefinition"],
                               job_name=pathlib.Path(script).stem,
                               script=script,
@@ -86,7 +89,7 @@ Resources:
                       script = "download_colabfold_envdb.sh"
                       LOGGER.info(script)
                       colabfold_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["JobQueue"],
+                          job_queue=event["ResourceProperties"]["DownloadJobQueue"],
                           job_definition=event["ResourceProperties"]["JobDefinition"],
                           job_name=pathlib.Path(script).stem,
                           script=script,
@@ -101,7 +104,7 @@ Resources:
                       script = "download_uniref30.sh"
                       LOGGER.info(script)
                       uniref30_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["JobQueue"],
+                          job_queue=event["ResourceProperties"]["DownloadJobQueue"],
                           job_definition=event["ResourceProperties"]["JobDefinition"],
                           job_name=pathlib.Path(script).stem,
                           script=script,
@@ -116,7 +119,7 @@ Resources:
                       script = "prep_mmseqs_dbs.sh"
                       LOGGER.info(script)
                       prep_mmseqs2_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["JobQueue"],
+                          job_queue=event["ResourceProperties"]["MMSeqs2JobQueue"],
                           job_definition=event["ResourceProperties"]["JobDefinition"],
                           job_name=pathlib.Path(script).stem,
                           script=script,
@@ -214,7 +217,9 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: DownloadFsxDataLambda.Arn
-      JobQueue:
-        Ref: JobQueue
+      DownloadJobQueue:
+        Ref: DownloadJobQueue
+      MMSeqs2JobQueue:
+        Ref: MMSeqs2JobQueue        
       JobDefinition:
         Ref: JobDefinition
