@@ -254,9 +254,9 @@ Resources:
         AllocationStrategy: BEST_FIT_PROGRESSIVE
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - m5g
-          - r5g
-          - c5g
+          - m6g
+          - r6g
+          - c6g
         LaunchTemplate:
           LaunchTemplateId: !Ref InstanceLaunchTemplate
           Version: $Latest
@@ -555,10 +555,18 @@ Outputs:
     Description: Job queue for on-demand GPU instances.
     Value: 
       Ref: G4dnJobQueue
+  G5JobQueue:
+    Description: Job queue for on-demand G5 instances.
+    Value: 
+      Ref: G5JobQueue      
   GravitonSpotJobQueue:
     Description: Job queue for spot Graviton instances.
     Value: 
       Ref: GravitonSpotJobQueue       
+  GravitonOnDemandJobQueue:
+    Description: Job queue for On-Demand Graviton instances.
+    Value: 
+      Ref: GravitonOnDemandJobQueue         
   CPUFoldingJobDefinition:
     Description: Job definition for running folding jobs on CPU instances.
     Value:

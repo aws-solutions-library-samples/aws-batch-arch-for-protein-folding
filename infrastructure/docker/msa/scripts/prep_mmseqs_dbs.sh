@@ -25,7 +25,7 @@ mkdir -p $ROOT_DIR
 
 for f in $(ls ${DOWNLOAD_DIR}/*.tar.gz)
 do
-  tar --extract --verbose --file="${DOWNLOAD_DIR}/${f}" \
+  tar --extract --verbose --file="${f}" \
       --directory=$ROOT_DIR
   rm "${f}"
   BASENAME="$(basename ${f%%.*})"
@@ -36,7 +36,3 @@ do
   mmseqs createindex "${DB_NAME}" "${DOWNLOAD_DIR}/tmp/"
   cd "${OLD_PWD}"
 done
-
-colabfold_envdb_202108.tar.gz
-
-uniref30_2103.tar.gz
