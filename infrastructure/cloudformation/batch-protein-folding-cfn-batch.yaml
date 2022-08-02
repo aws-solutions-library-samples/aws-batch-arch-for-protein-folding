@@ -124,36 +124,6 @@ Resources:
                 ],
               ]
 
-  ##################################################
-  # Batch Environment
-  ##################################################
-
-  PrivateCPUComputeEnvironmentOnDemand:
-    Type: AWS::Batch::ComputeEnvironment
-    Properties:
-      ComputeResources:
-        AllocationStrategy: BEST_FIT_PROGRESSIVE
-        InstanceRole: !Ref InstanceProfile
-        InstanceTypes:
-          - m5
-          - r5
-          - c5
-        LaunchTemplate:
-          LaunchTemplateId: !Ref InstanceLaunchTemplate
-          Version: $Latest
-        MaxvCpus: 256
-        MinvCpus: 0
-        SecurityGroupIds:
-          - !Ref DefaultSecurityGroupID
-        Subnets:
-          - !Ref Subnet
-        Type: EC2
-      State: ENABLED
-      Type: MANAGED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-
   SpotFleetRole:
     Type: AWS::IAM::Role
     Properties:
@@ -187,7 +157,37 @@ Resources:
       AWSServiceName: spotfleet.amazonaws.com
       Description: Default EC2 Spot Fleet Service Linked Role
 
-  PrivateCPUComputeEnvironmentSpot:
+  ####################################################################################################
+  # Batch Compute Environments
+  ####################################################################################################
+
+  CPUComputeEnvironmentOnDemand:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - m5
+          - r5
+          - c5
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - !Ref DefaultSecurityGroupID
+        Subnets:
+          - !Ref Subnet
+        Type: EC2
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+
+  CPUComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
       ComputeResources:
@@ -217,7 +217,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"        
 
-  PrivateGravitonComputeEnvironmentSpot:
+  GravitonComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
       ComputeResources:
@@ -245,7 +245,33 @@ Resources:
       Type: MANAGED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"                
+        StackId: !Ref "AWS::StackId"            
+
+  GravitonComputeEnvironmentOnDemand:
+    Type: AWS::Batch::ComputeEnvironment      
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - m5g
+          - r5g
+          - c5g
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - !Ref DefaultSecurityGroupID
+        Subnets:
+          - !Ref Subnet
+        Type: EC2
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
 
   G4dnComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
@@ -271,11 +297,39 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
 
+  G5ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - g5
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        Subnets:
+          - Ref: Subnet
+        Type: EC2
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"        
+
+  ####################################################################################################
+  # Batch Job Queues
+  ####################################################################################################
+
   CPUOnDemandJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref PrivateCPUComputeEnvironmentOnDemand
+        - ComputeEnvironment: !Ref CPUComputeEnvironmentOnDemand
           Order: 1
       Priority: 10
       State: ENABLED
@@ -287,7 +341,7 @@ Resources:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref PrivateCPUComputeEnvironmentSpot
+        - ComputeEnvironment: !Ref CPUComputeEnvironmentSpot
           Order: 1
       Priority: 10
       State: ENABLED
@@ -295,11 +349,23 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"      
 
+  GravitonOnDemandJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref GravitonComputeEnvironmentOnDemand
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"   
+
   GravitonSpotJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref PrivateGravitonComputeEnvironmentSpot
+        - ComputeEnvironment: !Ref GravitonComputeEnvironmentSpot
           Order: 1
       Priority: 10
       State: ENABLED
@@ -319,9 +385,21 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
 
-  ##################################################
-  # Job Definitions
-  ##################################################
+  G5JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref G5ComputeEnvironment
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"        
+
+  ####################################################################################################
+  # Batch Job Definitions
+  ####################################################################################################
 
   CPUFoldingJobDefinition:
     Type: AWS::Batch::JobDefinition
