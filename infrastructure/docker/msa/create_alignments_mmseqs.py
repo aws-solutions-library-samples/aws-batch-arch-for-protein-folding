@@ -1,3 +1,7 @@
+# Original Copyright 2022 # Copyright 2021 AlQuraishi Laboratory
+# Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 import argparse
 import logging
 import os

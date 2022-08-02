@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 from attrs import define
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime

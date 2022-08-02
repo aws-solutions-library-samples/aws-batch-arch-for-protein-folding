@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 variables:
   AWS_CREDS_TARGET_ROLE: arn:aws:iam::264410369698:role/Batch-Protein-Folding-Role
   AWS_DEFAULT_REGION: us-east-1

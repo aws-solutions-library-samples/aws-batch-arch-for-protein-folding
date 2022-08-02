@@ -1,4 +1,9 @@
 from __future__ import annotations
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 from typing import List, Dict
 from Bio.Seq import Seq
 from Bio import SeqIO
@@ -85,8 +90,8 @@ class BatchFoldTarget:
         with open(path) as handle:
             for seq_record in SeqIO.parse(handle, "fasta"):
                 self.sequences[seq_record.id] = seq_record
-
-        return self
+        
+        return(self.upload_fasta(path))
 
     def upload_fasta(self) -> BatchFoldTarget:
         """Create and upload a fasta file to s3"""
@@ -96,7 +101,7 @@ class BatchFoldTarget:
         s3_fasta_key = os.path.join(self.s3_base_prefix, self.s3_fastas_prefix, file_out)
         self.boto_session.client("s3").upload_file(file_out, self.s3_bucket, s3_fasta_key)
         os.remove(file_out)
-        return self
+        return os.join("s3://", self.s3_bucket, s3_fasta_key)
 
     def get_fasta_s3_uri(self) -> str:
         """Get the s3 uri for the fasta file"""

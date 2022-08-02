@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.alphafold2_job import AlphaFold2Job
 import pytest

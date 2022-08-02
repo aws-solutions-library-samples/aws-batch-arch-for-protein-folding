@@ -1,8 +1,10 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.mmseqs2_job import MMseqs2Job
 import pytest
 import boto3
-import time
 from datetime import datetime
 
 @pytest.fixture()

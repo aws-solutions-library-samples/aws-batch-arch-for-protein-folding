@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 import boto3
 from attrs import define
 from typing import List, Dict
@@ -52,7 +55,6 @@ class JobQueue:
                 jobName=job.job_name,
                 jobQueue=self.id,
                 jobDefinition=job_definition,
-                # dependsOn=[{"jobId": depends_on.job_id, "type": "Sequential"}]
                 dependsOn=[{"jobId":job.job_id, "type":"Sequential"} for job in depends_on]                
             )     
         else:

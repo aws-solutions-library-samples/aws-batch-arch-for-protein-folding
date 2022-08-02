@@ -1,4 +1,9 @@
 from __future__ import print_function
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+# 
+
 import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.download_job import DownloadJob
@@ -12,12 +17,13 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 http = urllib3.PoolManager()
 
-def main(job_queue_name="GravitonSpotJobQueue"):
+def main():
     """ Download all data to file system """
 
-    boto_session = boto3.session.Session(profile_name="bloyal+proteinfolding-Admin")
+    boto_session = boto3.session.Session()
     batch_environment = BatchFoldEnvironment(boto_session = boto_session)
     
+    job_queue_name="GravitonSpotJobQueue"
     download_test_submission = batch_environment.submit_job(
         DownloadJob(job_name="download_test" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_test.sh"),
         job_queue_name=job_queue_name,
@@ -88,6 +94,7 @@ def main(job_queue_name="GravitonSpotJobQueue"):
         job_queue_name=job_queue_name,
     )
 
+    job_queue_name="GravitonOnDemandJobQueue"
     prep_mmseqs_dbs_submission = batch_environment.submit_job(
         DownloadJob(job_name="prep_mmseqs_dbs" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/prep_mmseqs_dbs.sh", memory=500, cpu=64),
         job_queue_name=job_queue_name,

@@ -22,6 +22,26 @@ from Bio.PDB import PDBParser
 from Bio.PDB.PDBIO import PDBIO
 from Bio.PDB.PDBList import PDBList
 from Bio.PDB.Polypeptide import PPBuilder
+import requests
+
+
+def download_pdb_file(pdb_code, output_dir, file_format="pdb"):
+    pdb_code = str.upper(pdb_code)
+    pdbl = PDBList()
+    os.makedirs(output_dir, exist_ok=True)
+    ent_filename = (pdbl.retrieve_pdb_file(pdb_code=pdb_code, file_format=file_format, pdir=output_dir, overwrite=True))
+    pdb_filename = os.path.join(output_dir, pdb_code+".pdb")
+    os.rename(ent_filename, pdb_filename)
+    return(pdb_filename)
+
+def download_fasta_file(pdb_code, output_dir):
+    pdb_code = str.upper(pdb_code)
+    os.makedirs(output_dir, exist_ok=True)
+    r = requests.get(f"https://www.rcsb.org/fasta/entry/{pdb_code}")
+    fasta_filename = os.path.join(output_dir, pdb_code +".fasta")
+    with open(fasta_filename, 'wb') as f:
+        f.write(r.content)
+    return(fasta_filename)
 
 def get_pdb_data(pdb_list):
     
@@ -29,6 +49,8 @@ def get_pdb_data(pdb_list):
     parser = PDBParser(PERMISSIVE = True, QUIET = True) 
     writer = PDBIO()
     ppb = PPBuilder()
+    os.makedirs("data/pdb", exist_ok=True)
+    os.makedirs("data/fasta", exist_ok=True)
 
     for id in pdb_list:
         structure_id, chain_id = id.split("_")
@@ -37,7 +59,6 @@ def get_pdb_data(pdb_list):
         
         filename = pdbl.retrieve_pdb_file(pdb_code=structure_id, file_format="pdb", pdir="data")
         structure = parser.get_structure(structure_id, filename)
-        description = structure.header["name"]
         chain = structure[0][chain_id]
         writer.set_structure(chain)
         pdb_file = "data/pdb/" + structure_id + "_" + chain_id + ".pdb"

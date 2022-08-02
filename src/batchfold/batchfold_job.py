@@ -3,6 +3,8 @@ from typing import List, Dict
 import boto3
 from datetime import datetime
 
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
 @define
 class BatchFoldJob:
