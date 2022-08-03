@@ -37,7 +37,14 @@ Parameters:
     Description: Optional S3 Bucket Name
     Type: String
     Default: ""
+  CreateG5ComputeEnvironment:
+    Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
+    Type: String
+    Default: "N"    
     
+Conditions:
+  CreateG5ComputeEnvironment:
+    "Fn::Equals": [Ref: "CreateG5ComputeEnvironment", "Y"]  
 
 Resources:
   ##################################################
@@ -299,6 +306,7 @@ Resources:
 
   G5ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
+    Condition: CreateG5ComputeEnvironment
     Properties:
       ComputeResources:
         AllocationStrategy: BEST_FIT_PROGRESSIVE
@@ -387,6 +395,7 @@ Resources:
 
   G5JobQueue:
     Type: AWS::Batch::JobQueue
+    Condition: CreateG5ComputeEnvironment    
     Properties:
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref G5ComputeEnvironment
@@ -556,6 +565,7 @@ Outputs:
     Value: 
       Ref: G4dnJobQueue
   G5JobQueue:
+    Condition: CreateG5ComputeEnvironment
     Description: Job queue for on-demand G5 instances.
     Value: 
       Ref: G5JobQueue      

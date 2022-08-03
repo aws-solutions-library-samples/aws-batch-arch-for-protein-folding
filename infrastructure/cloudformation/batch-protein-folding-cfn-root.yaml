@@ -61,6 +61,12 @@ Parameters:
     Description: URI of the OpenFold MSA container
     Type: String  
     Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa
+  CreateG5ComputeEnvironment:
+    Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
+    Type: String
+    Default: "N"
+
+
 Conditions:
   CreateFileSystem:
     "Fn::Or":
@@ -82,6 +88,7 @@ Conditions:
     "Fn::Equals": [Ref: "LaunchSageMakerNotebook", "Y"]
   DownloadFsxDataCondition:
     "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
+   
 
 Resources:
   Network:
@@ -137,6 +144,8 @@ Resources:
     Properties:
       TemplateURL: batch-protein-folding-cfn-batch.yaml
       Parameters:
+        CreateG5ComputeEnvironment:
+          Ref: CreateG5ComputeEnvironment
         ApplicationName:
           Ref: ApplicationName
         Subnet:
@@ -197,8 +206,10 @@ Resources:
     Properties:
       TemplateURL: batch-protein-folding-cfn-download.yaml
       Parameters:
-        JobQueue:
+        DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
+        MMSeqs2JobQueue:
+          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonOnDemandJobQueue
         JobDefinition:
           "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
 
