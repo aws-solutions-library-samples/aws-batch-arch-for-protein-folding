@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from Bio import SeqIO
 import os
 import shutil
+import boto3
 
 @pytest.fixture
 def fold_target():
@@ -34,7 +35,7 @@ def test_add_sequence(fold_target):
         description="Meio, Meiothermus silvanus, 73 residues|",
     )
     
-    fold_target.upload_fasta()
+    # fold_target.upload_fasta()
 
     assert fold_target.sequences[sequence_id].id == sequence_id
     assert (
@@ -61,17 +62,29 @@ def test_add_sequence(fold_target):
 
 
 def test_add_fasta():
-    target_id = "T1078"
+    target_id = "TEST"
     bucket = "aws-af-testing"
     mytarget = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
     assert mytarget.target_id == target_id
     assert mytarget.s3_bucket == bucket
-    assert mytarget.sequences == {}
+    # assert mytarget.sequences == {}
 
-    mytarget.add_fasta("tests/data/T1078.fa")
+    mytarget.add_fasta("tests/data/TEST.fa")
     assert mytarget.sequences[target_id].id == target_id
     assert mytarget.sequences[target_id].seq == "MAAPTPADKSMMAAVPEWTITNLKRVCNAGNTSCTWTFGVDTHLATATSCTYVVKANANASQASGGPVTCGPYTITSSWSGQFGPNNGFTTFAVTDFSKKLIVWPAYTDVQVQAGKVVSPNQSYAPANLPLEHHHHHH"
-    assert mytarget.sequences[target_id].description == "T1078 Tsp1, Trichoderma virens, 138 residues|"
+    assert mytarget.sequences[target_id].description == "TEST Tsp1, Trichoderma virens, 138 residues|"
+
+    s3 = boto3.client("s3")
+
+    s3.delete_objects(
+        Bucket = mytarget.s3_bucket,
+        Delete = {
+            'Objects': [
+                {
+                    'Key': os.path.join(mytarget.s3_base_prefix, mytarget.s3_fastas_prefix, mytarget.target_id + ".fasta")
+                }
+            ]
+        } )
 
 @pytest.fixture
 def test_load_existing_s3_data():

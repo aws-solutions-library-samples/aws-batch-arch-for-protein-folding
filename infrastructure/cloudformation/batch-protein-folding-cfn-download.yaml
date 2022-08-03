@@ -57,7 +57,7 @@ Resources:
                   if event["RequestType"] == "Create":
                       LOGGER.info("CREATE!")
 
-                      all_scripts = [
+                      download_scripts = [
                           "download_alphafold_params.sh",
                           "download_bfd.sh",
                           "download_mgnify.sh",
@@ -72,7 +72,7 @@ Resources:
                       ]
                       
                       responses = []
-                      for script in all_scripts:
+                      for script in download_scripts:
                           LOGGER.info(script)
                           script_response = submit_download_data_job(
                               job_queue=event["ResourceProperties"]["DownloadJobQueue"],

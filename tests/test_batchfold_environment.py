@@ -20,8 +20,9 @@ def test_get_stack_outputs(batch_environment):
         "CPUFoldingJobDefinition",
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
-        "DownloadJobDefinition",
         "G4dnJobQueue",
+        # "G5JobQueue",        
+        "GravitonOnDemandJobQueue",
         "GravitonSpotJobQueue",
         "LaunchTemplate",
         "MSAJobDefinition",
@@ -40,6 +41,8 @@ def test_get_job_queue_names(batch_environment):
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
         "G4dnJobQueue",
+        # "G5JobQueue",        
+        "GravitonOnDemandJobQueue",
         "GravitonSpotJobQueue"
     ]
 
@@ -48,15 +51,13 @@ def test_get_job_definition_names(batch_environment):
     assert job_def_names == [
         "AlphaFold2JobDefinition",
         "CPUFoldingJobDefinition",
-        "DownloadJobDefinition",
         "MSAJobDefinition",
         "OpenFoldJobDefinition",
     ]
 
 def test_get_job_queue_objects(batch_environment):
-    assert len(batch_environment.queues) == 4
+    assert len(batch_environment.queues) == 5
     assert batch_environment.queues["CPUOnDemandJobQueue"].name == "CPUOnDemandJobQueue"
-    assert batch_environment.queues["CPUOnDemandJobQueue"].jobs == []
 
 def test_get_default_bucket(batch_environment):
     assert "batchfolds3bucket" in batch_environment.default_bucket
