@@ -83,7 +83,9 @@ class BatchFoldTarget:
         )
 
         self.sequences[seq_record.id] = seq_record
-        return self
+        # return self
+        return(self.upload_fasta())
+
 
     def add_fasta(self, path: str) -> BatchFoldTarget:
         """Add an existing fasta file to the target object."""
