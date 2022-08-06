@@ -35,8 +35,6 @@ def test_add_sequence(fold_target):
         description="Meio, Meiothermus silvanus, 73 residues|",
     )
     
-    # fold_target.upload_fasta()
-
     assert fold_target.sequences[sequence_id].id == sequence_id
     assert (
         fold_target.sequences[sequence_id].seq
@@ -67,7 +65,6 @@ def test_add_fasta():
     mytarget = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
     assert mytarget.target_id == target_id
     assert mytarget.s3_bucket == bucket
-    # assert mytarget.sequences == {}
 
     mytarget.add_fasta("tests/data/TEST.fa")
     assert mytarget.sequences[target_id].id == target_id

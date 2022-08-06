@@ -53,9 +53,6 @@ def test_submit_batchfold_jobs(batch_environment):
     assert len(job_list) > 0
 
     job_info = [job for job in job_list if job.get("jobName", []) == job_name]
-    assert (
-        job_info[0].get("jobDefinition") == batch_environment.job_definitions["CPUFoldingJobDefinition"]
-    )
     assert job_info[0].get("jobName") == job_name
 
 
