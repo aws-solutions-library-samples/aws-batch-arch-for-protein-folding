@@ -66,7 +66,7 @@ class OpenFoldJob(BatchFoldJob):
             f"--hhblits_binary_path={self.hhblits_binary_path}",
             f"--hhsearch_binary_path={self.hhsearch_binary_path}",
             f"--kalign_binary_path={self.kalign_binary_path}",
-            f"--obsolete_pdbs_path={self.obsolete_pdbs_path}",
+            f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
         ]
 
         if self.use_precomputed_msas is False:
@@ -74,7 +74,7 @@ class OpenFoldJob(BatchFoldJob):
                 [
                     f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
                     f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}",
-                    f"--uniclust30_database_path {self.data_dir}//{self.uniclust30_database_path}",
+                    f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}",
                     f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
                 ]
             )
