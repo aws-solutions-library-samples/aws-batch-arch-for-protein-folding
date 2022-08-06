@@ -21,11 +21,9 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/test"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/test/test.tar.gz"
+SOURCE_URL="s3://openfold/LICENSE"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
 aws s3 cp --no-sign-request "${SOURCE_URL}" "${ROOT_DIR}"
-tar --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
-  --directory="${ROOT_DIR}" --preserve-permissions
-rm "${ROOT_DIR}/${BASENAME}"
+rm -rf "${ROOT_DIR}/"

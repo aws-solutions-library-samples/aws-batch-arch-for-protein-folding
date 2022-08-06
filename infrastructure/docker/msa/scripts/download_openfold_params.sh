@@ -4,7 +4,7 @@
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Downloads and unzips the AlphaFold parameters.
+# Downloads and unzips the OpenFold parameters.
 #
 # Usage: bash download_openfold_params.sh /path/to/download/directory
 set -e
