@@ -31,6 +31,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 4. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.
 5. Choose **Create stack**.
 6. Wait 15 minutes for AWS CloudFormation to create the infrastructure stack and AWS CodeBuild to build and publish the AWS-AlphaFold container to Amazon Elastic Container Registry (Amazon ECR).
+7. Once the stack is active, AWS Batch will begin downloading the necessary reference data to the Amazon FSx for Lustre file system. This process will take about 8 hours to finish. 
 
 ### Launch SageMaker Notebook
 (If **LaunchSageMakerNotebook** set to Y)
@@ -50,11 +51,11 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 1. If you set the **DownloadFsxData** parameter to **Y**, CloudFormation will automatically start a series of Batch jobs to populate the FSx for Lustre instance with a number of common sequence databases. If you set this parameter to **N** you will instead need to manually populate the file system. Once the CloudFormation stack is in a CREATE_COMPLETE status, you can begin populating the FSx for Lustre file system with the necessary sequence databases. To do this automatically, open a terminal in your notebooks environment and run the following commands from the **batch-protein-folding** directory:
 
 ```
-> pip install -r notebooks/notebook-requirements.txt
-> python notebooks/nbhelper/download_ref_data.py
+> pip install .
+> python prep_databases.py
 ```
 
-2. It will take 3 to 4 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
+2. It will take 8 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
 
 ### Cleaning Up
 1. To delete all provisioned resources from from your account, navigate to [Cloud Formation](https://console.aws.amazon.com/cloudformation), select your stack, and then **Delete**. 
@@ -68,49 +69,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 -----
 ## Usage
-Use the provided `quick-start.ipynb` notebook to submit sequences for analysis and download the results.
-
------
-## Performance
-To determine the optimal compute settings, we used the [CASP14 target list](https://predictioncenter.org/casp14/targetlist.cgi) to test various CPU, memory, and GPU settings for the data preparation and prediction jobs. Using the full BFD database can increase the duration of data preparation jobs by as much as 10x. However the resulting increase in MSA coverage can increase the maximum pLDDT scores for some targets.
-
-![Job Performance Depends on Target Size and DB Type](imgs/performance.png)
-![Using Reduced BFD Can Affect Prediction Quality](imgs/plddt.png)
-
-Based on this analysis, we recommend the following AWS Batch compute resource settings:
-
-### Data Preparation (Reduced BFD)
-- CPsU: 4 vCPU
-- Memory: 16 GiB
-- GPUs: 0
-
-### Data Preparation (Full BFD)
-- CPUs: 16 vCPU
-- Memory: 32 GiB
-- GPUs: 0
-
-### Prediction (Sequence Length < 700)
-- CPUs: 4
-- Memory: 16 GiB
-- GPUs: 1
-
-### Prediction (Sequence Length > 700)
-- CPUs: 16
-- Memory: 64 GiB
-- GPUs: 1
-
------
-## Cost Estimation
-Follow these steps to estimate the per-run costs asociated with a protein of size X:
-
-1. Pick either the full or reduced bfd database
-1. Find the length of your target sequence on the x-axis.
-1. Use the plotted curves to identify the estimated data prep and prediction job durations.
-1. Refer to the [EC2 On-Demand pricing page](https://aws.amazon.com/ec2/pricing/on-demand/) to obtain the hourly rate for the data prep job instance type equivalent (m5.xlarge or c5.4xlarge, depending on bfd database type) and prediction job instance type equivalent (g4dn.xlarge or g4dn.4xlarge, depending on sequence length).
-
-![AWS Batch Run Time Estimation](imgs/cost-estimation.png)
-
-For example, analyzing a 625-residue sequence using the reduced bfd database will take approximately 0.3 hours of data prep time, plus 1 hour of prediction time. As of February 2022, the on-demand rate for a m5.xlarge instance in the us-east-1 Region is $0.192/hr. and the rate for a g4dn.xlarge instance is $0.526/hr., for a total estimated cost of $0.72 per run. Please note that this pricing is subject to change at any time.
+Use the provided `quick-start.-openfoldipynb` notebook to submit sequences for analysis and download the results.
 
 -----
 ## Security
@@ -126,7 +85,7 @@ This project is licensed under the Apache-2.0 License.
 ## Additional Information
 
 ### OpenFold Repository
-Please visit https://github.com/aqlaboratory/openfold for more information about the AlphaFold algorithm.
+Please visit https://github.com/aqlaboratory/openfold for more information about the OpenFold algorithm.
 
 ### Citations
 
