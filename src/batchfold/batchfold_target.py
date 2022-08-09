@@ -206,3 +206,6 @@ class BatchFoldTarget:
 
         jobs.sort()
         return jobs
+
+    def get_last_job_name(self, bucket = None, client = None, job_type=""):
+        return self.list_job_names(bucket, client, job_type)[-1]
