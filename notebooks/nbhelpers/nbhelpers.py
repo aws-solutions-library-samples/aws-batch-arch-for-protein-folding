@@ -23,7 +23,9 @@ from Bio.PDB.PDBIO import PDBIO
 from Bio.PDB.PDBList import PDBList
 from Bio.PDB.Polypeptide import PPBuilder
 import requests
-
+import subprocess
+import boto3
+from datetime import datetime
 
 def download_pdb_file(pdb_code, output_dir, file_format="pdb"):
     pdb_code = str.upper(pdb_code)
@@ -230,3 +232,93 @@ def pdb_plot(pdb_path, show_sidechains = True):
         plt.ylabel('Aligned residue')
 
     return plt
+
+
+def run_tmscore(pdb1, pdb2):
+    
+    cmd = [
+        "TMscore",
+        "-seq",
+        pdb1,
+        pdb2,
+        ]
+    output = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    parse_float = lambda x: float(x.split("=")[1].split()[0])
+    o = {}
+    for line in output.stdout.split("\n"):
+        line = line.rstrip()
+        if line.startswith("RMSD"):
+            o["rms"] = parse_float(line)
+        if line.startswith("TM-score"):
+            o["tms"] = parse_float(line)
+        if line.startswith("GDT-TS-score"):
+            o["gdt"] = parse_float(line)
+    return o
+
+
+
+def get_batch_logs(logStreamName, boto_session = boto3.session.Session()):
+
+    """
+    Retrieve and format logs for batch job.
+    """
+
+    logs_client = boto_session.client("logs")
+
+    try:
+        response = logs_client.get_log_events(
+            logGroupName="/aws/batch/job", logStreamName=logStreamName
+        )
+    except logs_client.meta.client.exceptions.ResourceNotFoundException:
+        return f"Log stream {logStreamName} does not exist. Please try again in a few minutes"
+
+    logs = pd.DataFrame.from_dict(response["events"])
+    logs.timestamp = logs.timestamp.transform(
+        lambda x: datetime.fromtimestamp(x / 1000)
+    )
+    logs.drop("ingestionTime", axis=1, inplace=True)
+    return logs
+
+def get_openfold_timings_for_job_id(job_id, boto_session = boto3.session.Session()):
+
+    batch = boto_session.client("batch")
+    job_description = batch.describe_jobs(jobs=[job_id]).get("jobs", [])[0]
+    log_stream_name = job_description["container"]["logStreamName"]
+    logs = get_batch_logs(log_stream_name, boto_session)
+    results= logs['message'].str.extract('[Inference|Relaxation] time: (.*)').dropna()[0]
+    results.iloc[0]
+    return {"inference": results.iloc[0], "relaxation": results.iloc[1]}
+
+def get_openfold_timings_for_job_name(batch_environment, job_name, boto_session = boto3.session.Session()):
+
+    last_job_id = get_last_batch_job_id(batch_environment, job_name, boto_session)
+    if last_job_id == "":
+        return None
+    else:
+        return(get_openfold_timings_for_job_id(last_job_id, boto_session))
+
+
+def get_last_batch_job_id(batch_environment, job_name, boto_session = boto3.session.Session()):
+    batch = boto_session.client("batch")
+    jobs = []
+    for queue in batch_environment.get_stack_outputs(filter="JobQueue").values():
+        hits = batch.list_jobs(
+                jobQueue = queue,
+                filters = [
+                    {
+                        'name': 'JOB_NAME',
+                        'values': [job_name]
+                    }
+                ]
+            ).get("jobSummaryList",[])
+        jobs.extend(hits) if hits != [] else next
+
+    if jobs == []:
+        return ""
+    else:
+        return jobs[-1].get("jobId", [])
