@@ -28,6 +28,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN git clone --depth 1 https://github.com/aqlaboratory/openfold.git /opt/openfold
 
+
 # installing into the base environment since the docker container wont do anything other than run openfold
 RUN conda env update -n base --file /opt/openfold/environment.yml && conda clean --all
 
@@ -36,6 +37,7 @@ RUN wget -q -P /opt/openfold/openfold/resources \
 RUN patch -p0 -d /opt/conda/lib/python3.7/site-packages/ < /opt/openfold/lib/openmm.patch
 
 WORKDIR /opt/openfold
+COPY setup.py /opt/openfold/setup.py
 RUN python3 setup.py install
 
 ENTRYPOINT ["bash", "-c"]
