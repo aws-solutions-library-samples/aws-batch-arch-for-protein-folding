@@ -284,7 +284,7 @@ def get_batch_logs(logStreamName, boto_session = boto3.session.Session()):
     logs.drop("ingestionTime", axis=1, inplace=True)
     return logs
 
-def get_openfold_timings_for_job_id(job_id, boto_session = boto3.session.Session()):
+def get_openfold_timings_for_job_id(job_id, prefix = "", boto_session = boto3.session.Session()):
 
     batch = boto_session.client("batch")
     job_description = batch.describe_jobs(jobs=[job_id]).get("jobs", [])[0]
@@ -292,15 +292,15 @@ def get_openfold_timings_for_job_id(job_id, boto_session = boto3.session.Session
     logs = get_batch_logs(log_stream_name, boto_session)
     results= logs['message'].str.extract('[Inference|Relaxation] time: (.*)').dropna()[0]
     results.iloc[0]
-    return {"inference": results.iloc[0], "relaxation": results.iloc[1]}
+    return {prefix+"inference": results.iloc[0], prefix+"relaxation": results.iloc[1]}
 
-def get_openfold_timings_for_job_name(batch_environment, job_name, boto_session = boto3.session.Session()):
+def get_openfold_timings_for_job_name(batch_environment, job_name, prefix = "", boto_session = boto3.session.Session()):
 
     last_job_id = get_last_batch_job_id(batch_environment, job_name, boto_session)
     if last_job_id == "":
         return None
     else:
-        return(get_openfold_timings_for_job_id(last_job_id, boto_session))
+        return(get_openfold_timings_for_job_id(last_job_id, prefix, boto_session = boto3.session.Session()))
 
 
 def get_last_batch_job_id(batch_environment, job_name, boto_session = boto3.session.Session()):

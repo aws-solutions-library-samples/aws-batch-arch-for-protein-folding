@@ -187,8 +187,8 @@ class BatchFoldTarget:
         client = client or self.boto_session.client("s3")
         paginator = client.get_paginator("list_objects_v2")
 
-        if job_type not in [ "", "OpenFold", "AlphaFold2", "AlphaFold"]:
-            raise ValueError("Valid job types are 'jackhmmer', 'mmseqs2', 'openfold', and 'alphafold2'")
+        # if job_type not in [ "", "OpenFold", "AlphaFold2", "AlphaFold"]:
+        #     raise ValueError("Valid job types are 'jackhmmer', 'mmseqs2', 'openfold', and 'alphafold2'")
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate(
