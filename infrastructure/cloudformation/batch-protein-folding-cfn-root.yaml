@@ -208,8 +208,6 @@ Resources:
       Parameters:
         DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
-        MMSeqs2JobQueue:
-          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonOnDemandJobQueue
         JobDefinition:
           "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
 

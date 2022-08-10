@@ -9,7 +9,7 @@ Running both the MSA and structure prediction steps in the same computing enviro
 
 This repository includes the CloudFormation template, Jupyter Notebook, and supporting code to run protein folding algorithms on AWS Batch. This includes:
 
-- Jackhmmer and MMseqs2for MSA generation
+- Jackhmmer for MSA generation
 - AlphaFold2 and OpenFold for protein structure prediction
 
 -----

@@ -45,16 +45,6 @@ RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
   && mv /usr/local/bin/kalign /usr/bin/kalign \
   && popd \
   && rm -rf /tmp/kalign2
-  
-# Compile mmseqs2 from source
-RUN git clone https://github.com/soedinglab/MMseqs2.git \
-  && mkdir MMseqs2/build -p \
-  && pushd MMseqs2/build \
-  && cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. .. \
-  && make && make install \
-  && mv bin/mmseqs /usr/bin \
-  && popd \
-  && rm -rf MMseqs2
 
 COPY . /opt/msa
 WORKDIR /opt/msa

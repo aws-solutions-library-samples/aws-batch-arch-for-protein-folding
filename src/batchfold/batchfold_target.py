@@ -127,7 +127,7 @@ class BatchFoldTarget:
         """Download msa files from s3"""
         
         prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix)
-        if type in ["jackhmmer", "mmseqs2"]:
+        if type in ["jackhmmer"]:
             prefix += "/" + type           
 
         return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix)
@@ -186,9 +186,6 @@ class BatchFoldTarget:
         bucket = bucket or self.s3_bucket
         client = client or self.boto_session.client("s3")
         paginator = client.get_paginator("list_objects_v2")
-
-        # if job_type not in [ "", "OpenFold", "AlphaFold2", "AlphaFold"]:
-        #     raise ValueError("Valid job types are 'jackhmmer', 'mmseqs2', 'openfold', and 'alphafold2'")
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate(

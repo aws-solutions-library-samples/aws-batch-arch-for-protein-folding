@@ -8,10 +8,7 @@ Description: >-
 Parameters:
   DownloadJobQueue:
     Description: Batch job queue for running download job.
-    Type: String
-  MMSeqs2JobQueue:
-    Description: Batch job queue for running MMSeqs2 prep.
-    Type: String    
+    Type: String  
   JobDefinition:
     Description: Batch job definition for running download job.
     Type: String
@@ -86,52 +83,6 @@ Resources:
                           LOGGER.info(f"Job ID {script_response.get('jobId', [])} submitted")
                           responses.append(script_response)
 
-                      script = "download_colabfold_envdb.sh"
-                      LOGGER.info(script)
-                      colabfold_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["DownloadJobQueue"],
-                          job_definition=event["ResourceProperties"]["JobDefinition"],
-                          job_name=pathlib.Path(script).stem,
-                          script=script,
-                          cpu=4,
-                          memory=16,
-                          download_dir="/database",
-                      )
-                      colabfold_job_id = colabfold_script_response.get("jobId", [])
-                      LOGGER.info(f"Job ID {colabfold_job_id} submitted")
-                      responses.append(colabfold_script_response)
-
-                      script = "download_uniref30.sh"
-                      LOGGER.info(script)
-                      uniref30_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["DownloadJobQueue"],
-                          job_definition=event["ResourceProperties"]["JobDefinition"],
-                          job_name=pathlib.Path(script).stem,
-                          script=script,
-                          cpu=4,
-                          memory=16,
-                          download_dir="/database",
-                      )
-                      uniref30_job_id = uniref30_script_response.get("jobId", [])
-                      LOGGER.info(f"Job ID {uniref30_job_id} submitted")
-                      responses.append(uniref30_script_response)         
-
-                      script = "prep_mmseqs_dbs.sh"
-                      LOGGER.info(script)
-                      prep_mmseqs2_script_response = submit_download_data_job(
-                          job_queue=event["ResourceProperties"]["MMSeqs2JobQueue"],
-                          job_definition=event["ResourceProperties"]["JobDefinition"],
-                          job_name=pathlib.Path(script).stem,
-                          script=script,
-                          cpu=64,
-                          memory=500,
-                          download_dir="/database",
-                          depends_on=[colabfold_job_id,uniref30_job_id] 
-                      )
-                      LOGGER.info(f"Job ID {prep_mmseqs2_script_response.get('jobId', [])} submitted")
-                      cfnresponse.send(
-                          event, context, cfnresponse.SUCCESS, {"response": "Resource creation successful!"}
-                      )
                   elif event["RequestType"] == "Update":
                       LOGGER.info("UPDATE!")
                       cfnresponse.send(
@@ -218,8 +169,6 @@ Resources:
       ServiceToken:
         Fn::GetAtt: DownloadFsxDataLambda.Arn
       DownloadJobQueue:
-        Ref: DownloadJobQueue
-      MMSeqs2JobQueue:
-        Ref: MMSeqs2JobQueue        
+        Ref: DownloadJobQueue  
       JobDefinition:
         Ref: JobDefinition
