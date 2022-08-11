@@ -19,3 +19,4 @@ src/batchfold.egg-info/SOURCES.txt
 src/batchfold.egg-info/top_level.txt
 *egg-info
 notebooks/data/
+notebooks/TMscore*
