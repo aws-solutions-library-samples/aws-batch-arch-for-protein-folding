@@ -50,4 +50,9 @@ COPY . /opt/msa
 WORKDIR /opt/msa
 RUN chmod -R 755 scripts
 
+# RUN pip3 install --upgrade pip \
+RUN python3 -m ensurepip --upgrade \
+    # && python3 -m pip install -r /opt/msa/requirements.txt 
+  && python3 -m pip install -r /opt/msa/
+
 ENTRYPOINT ["bash", "-c"]
