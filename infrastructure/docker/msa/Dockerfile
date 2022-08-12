@@ -20,6 +20,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       aria2 \
       awscli \
       python3.7 \
+      python3-pip \
     && apt-get clean \
     && rm /usr/bin/python3 \
     && ln -s /usr/bin/python3.7 /usr/bin/python3 \
@@ -50,9 +51,7 @@ COPY . /opt/msa
 WORKDIR /opt/msa
 RUN chmod -R 755 scripts
 
-# RUN pip3 install --upgrade pip \
-RUN python3 -m ensurepip --upgrade \
-    # && python3 -m pip install -r /opt/msa/requirements.txt 
-  && python3 -m pip install -r /opt/msa/
+RUN pip3 install --upgrade pip \
+    && python3 -m pip install -r /opt/msa/requirements.txt 
 
 ENTRYPOINT ["bash", "-c"]

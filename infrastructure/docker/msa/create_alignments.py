@@ -29,7 +29,6 @@ flags.DEFINE_list(
     'separated by commas. All FASTA paths must have a unique basename as the '
     'basename is used to name the output directories for each prediction.')
 
-flags.DEFINE_string('data_dir', None, 'Path to directory of supporting data.')
 flags.DEFINE_string('output_dir', None, 'Path to a directory that will '
                     'store the results.')
 flags.DEFINE_string('jackhmmer_binary_path', shutil.which('jackhmmer'),
@@ -225,7 +224,6 @@ if __name__ == '__main__':
     flags.mark_flags_as_required([
             'fasta_paths',
             'output_dir',
-            'data_dir',
             'uniref90_database_path',
             'mgnify_database_path',
             'template_mmcif_dir',
