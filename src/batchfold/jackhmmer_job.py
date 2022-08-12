@@ -23,16 +23,16 @@ class JackhmmerJob(BatchFoldJob):
     job_definition_name: str = "MSAJobDefinition"
     pdb70_database_path: str = "pdb70/pdb70"
     bfd_database_path: str = (
-        "bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+        "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
     small_bfd_database_path: str = (
-        "bfd_database_path/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
+        "small_bfd/bfd-first_non_consensus_sequences.fasta"
     )
     uniclust30_database_path: str = (
-        "uniclust30_database_path/uniclust30_2018_08/uniclust30_2018_08"
+        "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
     )
-    uniprot_database_path: str = "uniprot_database_path/uniprot.fasta"
-    pdb_seqres_database_path: str = "pdb_seqres_database_path/pdb_seqres.txt"
+    uniprot_database_path: str = "uniprot/uniprot.fasta"
+    pdb_seqres_database_path: str = "pdb_seqres/pdb_seqres.txt"
     db_preset: str = "full_dbs"
     model_preset: str = "monomer"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
@@ -40,16 +40,16 @@ class JackhmmerJob(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
-        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"
+        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/{self.target_id}.fasta"
 
         command_list = [
             f"python3 /opt/msa/create_alignments.py",
-            f"--fasta_paths {self.output_dir}/fasta",
+            f"--fasta_paths {self.output_dir}/fasta/{self.target_id}.fasta",
             f"--output_dir {self.output_dir}/output",
             f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
             f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
             f"--template_mmcif_dir {self.data_dir}/{self.template_mmcif_dir}",
-            f"--max_template_date {self.data_dir}/{self.template_mmcif_dir}",
+            f"--max_template_date {self.max_template_date}",
             f"--obsolete_pdbs_path {self.data_dir}/{self.obsolete_pdbs_path}",
             f"--db_preset {self.db_preset}",
             f"--model_preset {self.model_preset}",
