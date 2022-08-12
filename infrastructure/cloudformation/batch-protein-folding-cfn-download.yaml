@@ -82,6 +82,9 @@ Resources:
                           )
                           LOGGER.info(f"Job ID {script_response.get('jobId', [])} submitted")
                           responses.append(script_response)
+                      cfnresponse.send(
+                          event, context, cfnresponse.SUCCESS, {"response": "Resource creation successful!"}
+                      )
 
                   elif event["RequestType"] == "Update":
                       LOGGER.info("UPDATE!")
