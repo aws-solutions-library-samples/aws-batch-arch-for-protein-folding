@@ -46,7 +46,6 @@ class JackhmmerJob(BatchFoldJob):
             f"python3 /opt/msa/create_alignments.py",
             f"--fasta_paths {self.output_dir}/fasta",
             f"--output_dir {self.output_dir}/output",
-            f"--cpu {self.cpu}",
             f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
             f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
             f"--template_mmcif_dir {self.data_dir}/{self.template_mmcif_dir}",
