@@ -27,7 +27,7 @@ Parameters:
   MSAContainerRegistryURI:
     Description: URI of the OpenFold MSA container
     Type: String  
-    Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa      
+    Default: public.ecr.aws/alphafold-on-aws/aws-jackhmmer-msa      
 
 Resources:
   ##################################################
