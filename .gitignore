@@ -6,7 +6,6 @@ batch-protein-folding.zip
 .venv/
 .vscode/
 infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
-notebooks/data/*
 taskcat_outputs/
 random_commands.sh
 .github/
@@ -18,5 +17,8 @@ src/batchfold.egg-info/requires.txt
 src/batchfold.egg-info/SOURCES.txt
 src/batchfold.egg-info/top_level.txt
 *egg-info
+notebooks/data/*
 notebooks/data/
 notebooks/TMscore*
+notebooks/cameo*
+tests/*

@@ -79,26 +79,9 @@ def main():
         job_queue_name=job_queue_name,
     )
 
-    download_uniref30_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_uniref30" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniref30.sh"),
-        job_queue_name=job_queue_name,
-    )
-
     download_uniref90_submission = batch_environment.submit_job(
         DownloadJob(job_name="download_uniref90" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniref90.sh"),
         job_queue_name=job_queue_name,
-    )
-
-    download_colabfold_envdb_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_colabfold_envdb" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_colabfold_envdb.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    job_queue_name="GravitonOnDemandJobQueue"
-    prep_mmseqs_dbs_submission = batch_environment.submit_job(
-        DownloadJob(job_name="prep_mmseqs_dbs" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/prep_mmseqs_dbs.sh", memory=500, cpu=64),
-        job_queue_name=job_queue_name,
-        depends_on=[download_uniref30_submission, download_colabfold_envdb_submission],
     )
 
     response = [
@@ -114,10 +97,7 @@ def main():
         download_small_bfd_submission,
         download_uniclust30_submission,
         download_uniprot_submission,
-        download_uniref30_submission,
         download_uniref90_submission,
-        download_colabfold_envdb_submission,
-        prep_mmseqs_dbs_submission,
     ]
 
     return(response)
