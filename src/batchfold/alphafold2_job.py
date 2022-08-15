@@ -13,6 +13,7 @@ class AlphaFold2Job(BatchFoldJob):
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     fasta_s3_uri: str = ""
     msa_s3_uri: str = ""
+    msa_s3_uri: str = ""
     output_s3_uri: str = ""
     use_precomputed_msas: bool = True
     output_dir: str = "/tmp/alphafold2"
@@ -43,7 +44,9 @@ class AlphaFold2Job(BatchFoldJob):
 
         download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"    
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri} {self.output_dir}/{self.target_id}/msas/"
+            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer {self.output_dir}/{self.target_id}/msas/"
+            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/features {self.output_dir}/{self.target_id}/"
+
 
         command_list = [
             "/app/run_alphafold.sh",

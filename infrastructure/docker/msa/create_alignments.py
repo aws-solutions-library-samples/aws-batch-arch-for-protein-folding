@@ -76,6 +76,7 @@ flags.DEFINE_enum('model_preset', 'monomer',
                   'Choose preset model configuration - the monomer model, '
                   'the monomer model with extra ensembling, monomer model with '
                   'pTM head, or multimer model')
+flags.DEFINE_integer('n_cpu', 8, 'The number of CPUs to give Jackhmmer and HHblits.')
 
 FLAGS = flags.FLAGS
 
@@ -199,13 +200,15 @@ def main(argv):
         small_bfd_database_path=FLAGS.small_bfd_database_path,
         template_searcher=template_searcher,
         template_featurizer=template_featurizer,
-        use_small_bfd=use_small_bfd)
+        use_small_bfd=use_small_bfd,
+        n_cpu=FLAGS.n_cpu)
 
     if run_multimer_system:
         data_pipeline = pipeline_multimer.DataPipeline(
             monomer_data_pipeline=monomer_data_pipeline,
             jackhmmer_binary_path=FLAGS.jackhmmer_binary_path,
-            uniprot_database_path=FLAGS.uniprot_database_path)
+            uniprot_database_path=FLAGS.uniprot_database_path,
+            n_cpu=FLAGS.n_cpu)
     else:
         data_pipeline = monomer_data_pipeline
 

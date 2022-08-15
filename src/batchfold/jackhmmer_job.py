@@ -53,6 +53,7 @@ class JackhmmerJob(BatchFoldJob):
             f"--obsolete_pdbs_path {self.data_dir}/{self.obsolete_pdbs_path}",
             f"--db_preset {self.db_preset}",
             f"--model_preset {self.model_preset}",
+            f"--n_cpu {self.cpu}",
         ]
 
         if self.db_preset == "reduced_dbs":
