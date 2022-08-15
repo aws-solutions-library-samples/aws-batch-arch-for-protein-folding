@@ -69,7 +69,36 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 -----
 ## Usage
-Use the provided `quick-start.-openfoldipynb` notebook to submit sequences for analysis and download the results.
+Use the provided `quick-start-openfold.ipynb` notebook to submit sequences for analysis and download the results.
+
+-----
+## Infrastructure Details
+This architecture uses a nested CloudFormation template to create various resources in a particular sequence.
+
+### Step 1: Provision Network Resources
+![Step 1: Provision Network Resources](imgs/cfn_1.png)
+
+(Optional) If existing resources are not provided as template parameters, create a VPC, subnets, NAT gateway, elastic IP, routes, and S3 endpoint.
+
+### Step 2: Provision File System
+![Step 2: Provision File System](imgs/cfn_2.png)
+
+(Optional) If existing resources are not provided as template parameters, create a FSx for Lustre file system.
+
+### Step 3: Build Container Images
+![Step 3: Build Container Images](imgs/cfn_3.png)
+
+Download several container images from a public ECR repository and push them to a new, private repository in your account. Also download a .zip file with the example notebooks and other code into a CodeCommit repository.
+
+### Step 4: Provision AWS Batch Environment
+![Step 4: Provision AWS Batch ENvironment](imgs/cfn_4.png)
+
+Create the launch template, compute environments, job queues, and job definitions needed to submit jobs to AWS Batch.
+
+### Step 5: Download Reference Data
+![Step 5: Download Reference Data](imgs/cfn_5.png)
+
+(Optional) If requested via a template parameter, create and run a Amazon Lambda-backed custom resource to download several open source proteomic data sets to the FSx Lustre instance.
 
 -----
 ## Security
