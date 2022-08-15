@@ -45,7 +45,7 @@ class JackhmmerJob(BatchFoldJob):
         command_list = [
             f"python3 /opt/msa/create_alignments.py",
             f"--fasta_paths {self.output_dir}/fasta/{self.target_id}.fasta",
-            f"--output_dir {self.output_dir}/output",
+            f"--output_dir {self.output_dir}",
             f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
             f"--mgnify_database_path {self.data_dir}/{self.mgnify_database_path}",
             f"--template_mmcif_dir {self.data_dir}/{self.template_mmcif_dir}",
@@ -81,7 +81,7 @@ class JackhmmerJob(BatchFoldJob):
                 [f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"]
             )
 
-        upload_string = f"aws s3 cp --recursive {self.output_dir}/{self.target_id}/msas/ {self.output_s3_uri}/jackhmmer && aws s3 cp {self.output_dir}/{self.target_id}/features.pkl {self.output_s3_uri}/jackhmmer"
+        upload_string = f"aws s3 cp --recursive {self.output_dir}/{self.target_id}/msas/ {self.output_s3_uri}/jackhmmer && aws s3 cp {self.output_dir}/{self.target_id}/features.pkl {self.output_s3_uri}/features/features.pkl"
         command_string = (
             download_string + " && " + " ".join(command_list) + " && " + upload_string
         )
