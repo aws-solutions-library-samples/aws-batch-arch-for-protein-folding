@@ -25,6 +25,7 @@ from Bio.PDB.Polypeptide import PPBuilder
 import requests
 import subprocess
 import boto3
+import json
 from datetime import datetime
 
 def download_pdb_file(pdb_code, output_dir, file_format="pdb"):
@@ -156,12 +157,24 @@ def plot_plddt_legend():
     plt.title('Model Confidence', fontsize=20, pad=20)
     return plt
 
+def get_best_alphafold2_model(ranking_debug_file):
+    with open(ranking_debug_file, "r") as f:
+        rankings = json.load(f)
+    return(rankings["order"][0])
 
 def pdb_plot(pdb_path, show_sidechains = True):
     """ Create a plot of PDB structures"""
 
-    pkl_file = list_files_by_extension(extension=".pkl", dir=pdb_path)[0]
-    result = np.load(pkl_file, allow_pickle=True)
+    pkl_files = list_files_by_extension(extension=".pkl", dir=pdb_path)
+    if len(pkl_files) > 1: #AlphaFold
+        best_model = get_best_alphafold2_model(os.path.join(pdb_path, "ranking_debug.json"))
+        result = np.load(os.path.join(pdb_path, f"result_{best_model}.pkl"), allow_pickle=True)
+        best_pdb_file = os.path.abspath(os.path.join(pdb_path, f"relaxed_{best_model}.pdb"))
+
+    else: #OpenFold
+        result = np.load(pkl_files[0], allow_pickle=True)
+        best_pdb_file = list_files_by_extension(extension="_relaxed.pdb", dir=pdb_path)[0]
+
 
     pae_outputs = (
           result['predicted_aligned_error'],
@@ -170,9 +183,9 @@ def pdb_plot(pdb_path, show_sidechains = True):
 
     # Construct multiclass b-factors to indicate confidence bands
     # 0=very low, 1=low, 2=confident, 3=very high    
-    relaxed_pdb = list_files_by_extension(extension="_relaxed.pdb", dir=pdb_path)[0]
+    
 
-    with open(relaxed_pdb) as f:
+    with open(best_pdb_file) as f:
         best_pdb = f.read()
     
     banded_b_factors = []
@@ -181,7 +194,11 @@ def pdb_plot(pdb_path, show_sidechains = True):
             if plddt >= min_val and plddt <= max_val:
                 banded_b_factors.append(idx)
                 break
-    banded_b_factors = np.array(banded_b_factors)[:, None] * result['final_atom_mask']
+    if "final_atom_mask" in result:
+        banded_b_factors = np.array(banded_b_factors)[:, None] * result['final_atom_mask']
+    else:
+        banded_b_factors = np.array(banded_b_factors)[:, None] * result['structure_module']['final_atom_mask']
+
     to_visualize_pdb = utils.overwrite_b_factors(best_pdb, banded_b_factors)
 
 
@@ -283,25 +300,6 @@ def get_batch_logs(logStreamName, boto_session = boto3.session.Session()):
     )
     logs.drop("ingestionTime", axis=1, inplace=True)
     return logs
-
-def get_openfold_timings_for_job_id(job_id, prefix = "", boto_session = boto3.session.Session()):
-
-    batch = boto_session.client("batch")
-    job_description = batch.describe_jobs(jobs=[job_id]).get("jobs", [])[0]
-    log_stream_name = job_description["container"]["logStreamName"]
-    logs = get_batch_logs(log_stream_name, boto_session)
-    results= logs['message'].str.extract('[Inference|Relaxation] time: (.*)').dropna()[0]
-    results.iloc[0]
-    return {prefix+"inference": results.iloc[0], prefix+"relaxation": results.iloc[1]}
-
-def get_openfold_timings_for_job_name(batch_environment, job_name, prefix = "", boto_session = boto3.session.Session()):
-
-    last_job_id = get_last_batch_job_id(batch_environment, job_name, boto_session)
-    if last_job_id == "":
-        return None
-    else:
-        return(get_openfold_timings_for_job_id(last_job_id, prefix, boto_session = boto3.session.Session()))
-
 
 def get_last_batch_job_id(batch_environment, job_name, boto_session = boto3.session.Session()):
     batch = boto_session.client("batch")
