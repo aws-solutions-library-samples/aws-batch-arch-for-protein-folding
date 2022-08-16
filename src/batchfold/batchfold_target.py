@@ -8,20 +8,12 @@ from typing import List, Dict
 from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-from Bio.SeqIO.FastaIO import FastaIterator
-from attrs import define, field
-import boto3
-import re
-import os
-
-from Bio.Seq import Seq
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 from attrs import define, field
 import boto3
 import re
 import os
 from io import  StringIO
+import pathlib
 
 @define
 class BatchFoldTarget:
@@ -31,7 +23,7 @@ class BatchFoldTarget:
     s3_bucket: str = field(kw_only=True, default="")
     s3_base_prefix: str = field(kw_only=True)
     s3_fastas_prefix: str = "fastas"
-    s3_msas_prefix: str = "msas"
+    s3_msas_prefix: str = "msas/jackhmmer"
     s3_predictions_prefix: str = "predictions"
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
     sequences: Dict = field(kw_only=True)
@@ -121,16 +113,14 @@ class BatchFoldTarget:
         """Download fasta files from s3"""
 
         prefix = os.path.join(self.s3_base_prefix, self.s3_fastas_prefix)
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix)
+        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".fasta",".fa"])
 
-    def download_msas(self, local_path: str = ".", type: str = "all") -> str:
+    def download_msas(self, local_path: str = ".") -> str:
         """Download msa files from s3"""
         
-        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix)
-        if type in ["jackhmmer"]:
-            prefix += "/" + type           
+        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix)       
 
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix)
+        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".sto",".a3m",".hhr", ".pkl"])
 
     def download_predictions(self, local_path: str = ".", job: str = "") -> str:
         """Download prediction files from s3"""
@@ -139,7 +129,7 @@ class BatchFoldTarget:
         if job != "":
             prefix = os.path.join(prefix, job)           
 
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix)
+        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".pdb", ".pkl", ".json"])
 
     def download_all(self, local_path: str = ".") -> str:
         """Download all files from s3"""       
@@ -147,7 +137,7 @@ class BatchFoldTarget:
         return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = self.s3_base_prefix)
 
 
-    def _download_dir(self, client = None, bucket = None, local_path=".", prefix=""):
+    def _download_dir(self, client = None, bucket = None, local_path=".", prefix="", extensions=[]):
         """Recursively download files from S3."""
         
         bucket = bucket or self.s3_bucket
@@ -161,14 +151,16 @@ class BatchFoldTarget:
                         client=client, 
                         bucket=bucket, 
                         local_path=local_path, 
-                        prefix=subdir.get("Prefix")
+                        prefix=subdir.get("Prefix"),
+                        extensions=extensions
                         )
             for file in result.get("Contents", []):
-                dest_pathname = os.path.join(local_path, file.get("Key"))
-                if not os.path.exists(os.path.dirname(dest_pathname)):
-                    os.makedirs(os.path.dirname(dest_pathname))
-                client.download_file(bucket, file.get("Key"), dest_pathname)
-                file_count += 1
+                if extensions is [] or pathlib.Path(file.get("Key")).suffix in extensions:
+                    dest_pathname = os.path.join(local_path, file.get("Key"))
+                    if not os.path.exists(os.path.dirname(dest_pathname)):
+                        os.makedirs(os.path.dirname(dest_pathname))
+                    client.download_file(bucket, file.get("Key"), dest_pathname)
+                    file_count += 1
         print(f"{file_count} files downloaded from s3.")
         return os.path.abspath(local_path)
         
@@ -194,8 +186,8 @@ class BatchFoldTarget:
         jobs = []
         for page in page_iterator:
             for key in page["Contents"]:
-                jobs.append(re.search("predictions/(.*)/", key["Key"]).group(1))
-
+                if re.search("predictions/(.*)/", key["Key"]):
+                    jobs.append(re.search("predictions/(.*)/", key["Key"]).group(1))
         jobs = [*set(jobs)]
 
         if job_type != "":
