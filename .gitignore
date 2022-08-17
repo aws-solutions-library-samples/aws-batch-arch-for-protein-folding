@@ -21,4 +21,3 @@ notebooks/data/*
 notebooks/data/
 notebooks/TMscore*
 notebooks/cameo*
-tests/*
