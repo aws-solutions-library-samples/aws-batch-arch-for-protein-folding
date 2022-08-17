@@ -3,8 +3,8 @@ batch-protein-folding.zip
 .mypy_cache/
 **/__pycache__
 .taskcat/
-.venv/
-.vscode/
+.venv/*
+.vscode/*
 infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
 taskcat_outputs/
 random_commands.sh
