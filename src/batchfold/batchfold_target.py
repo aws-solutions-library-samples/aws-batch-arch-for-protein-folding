@@ -23,7 +23,7 @@ class BatchFoldTarget:
     s3_bucket: str = field(kw_only=True, default="")
     s3_base_prefix: str = field(kw_only=True)
     s3_fastas_prefix: str = "fastas"
-    s3_msas_prefix: str = "msas/jackhmmer"
+    s3_msas_prefix: str = "msas"
     s3_predictions_prefix: str = "predictions"
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
     sequences: Dict = field(kw_only=True)
@@ -118,7 +118,7 @@ class BatchFoldTarget:
     def download_msas(self, local_path: str = ".") -> str:
         """Download msa files from s3"""
         
-        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix)       
+        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix, "jackhmmer")       
 
         return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".sto",".a3m",".hhr", ".pkl"])
 

@@ -53,7 +53,7 @@ class OpenFoldJob(BatchFoldJob):
 
         download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri} {self.output_dir}/msas/{self.target_id}/"
+            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer {self.output_dir}/msas/{self.target_id}/"
 
         command_list = [
             f"python3 /opt/openfold/run_pretrained_openfold.py {self.output_dir}/fasta {self.data_dir}/{self.template_mmcif_dir}",
