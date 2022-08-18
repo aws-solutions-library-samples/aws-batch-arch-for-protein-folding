@@ -130,9 +130,7 @@ class OpenFoldJob(BatchFoldJob):
         if self.save_outputs:
             command_list.extend(["--save_outputs"])
 
-        upload_string = (
-            f"aws s3 cp --recursive {self.output_dir}/predictions/ {self.output_s3_uri} && aws s3 cp {self.output_dir}/timings.json {self.output_s3_uri}/timings.json"
-        )
+        upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions/ {self.output_s3_uri} && aws s3 cp {self.output_dir}/timings.json {self.output_s3_uri}/timings.json"
 
         command_string = (
             download_string + " && " + " ".join(command_list) + " && " + upload_string

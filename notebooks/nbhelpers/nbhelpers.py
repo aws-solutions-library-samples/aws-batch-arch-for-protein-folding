@@ -28,28 +28,33 @@ import boto3
 import json
 from datetime import datetime
 
+
 def download_pdb_file(pdb_code, output_dir, file_format="pdb"):
     pdb_code = str.upper(pdb_code)
     pdbl = PDBList()
     os.makedirs(output_dir, exist_ok=True)
-    ent_filename = (pdbl.retrieve_pdb_file(pdb_code=pdb_code, file_format=file_format, pdir=output_dir, overwrite=True))
-    pdb_filename = os.path.join(output_dir, pdb_code+".pdb")
+    ent_filename = pdbl.retrieve_pdb_file(
+        pdb_code=pdb_code, file_format=file_format, pdir=output_dir, overwrite=True
+    )
+    pdb_filename = os.path.join(output_dir, pdb_code + ".pdb")
     os.rename(ent_filename, pdb_filename)
-    return(pdb_filename)
+    return pdb_filename
+
 
 def download_fasta_file(pdb_code, output_dir):
     pdb_code = str.upper(pdb_code)
     os.makedirs(output_dir, exist_ok=True)
     r = requests.get(f"https://www.rcsb.org/fasta/entry/{pdb_code}")
-    fasta_filename = os.path.join(output_dir, pdb_code +".fasta")
-    with open(fasta_filename, 'wb') as f:
+    fasta_filename = os.path.join(output_dir, pdb_code + ".fasta")
+    with open(fasta_filename, "wb") as f:
         f.write(r.content)
-    return(fasta_filename)
+    return fasta_filename
+
 
 def get_pdb_data(pdb_list):
-    
-    pdbl = PDBList() 
-    parser = PDBParser(PERMISSIVE = True, QUIET = True) 
+
+    pdbl = PDBList()
+    parser = PDBParser(PERMISSIVE=True, QUIET=True)
     writer = PDBIO()
     ppb = PPBuilder()
     os.makedirs("data/pdb", exist_ok=True)
@@ -59,8 +64,10 @@ def get_pdb_data(pdb_list):
         structure_id, chain_id = id.split("_")
         print(f"structure ID is {structure_id}")
         print(f"chain ID is {chain_id}")
-        
-        filename = pdbl.retrieve_pdb_file(pdb_code=structure_id, file_format="pdb", pdir="data")
+
+        filename = pdbl.retrieve_pdb_file(
+            pdb_code=structure_id, file_format="pdb", pdir="data"
+        )
         structure = parser.get_structure(structure_id, filename)
         chain = structure[0][chain_id]
         writer.set_structure(chain)
@@ -77,21 +84,26 @@ def get_pdb_data(pdb_list):
         with open(fasta_file, "w") as f_out:
             SeqIO.write(seq_record, f_out, "fasta")
 
+
 def list_files_by_extension(extension="", dir="."):
-    """ List files in dir with a given extension"""
+    """List files in dir with a given extension"""
     absdir = os.path.abspath(dir)
-    return [os.path.join(absdir,f) for f in os.listdir(absdir) if f.endswith(extension)]
+    return [
+        os.path.join(absdir, f) for f in os.listdir(absdir) if f.endswith(extension)
+    ]
+
 
 # Color bands for visualizing plddt
 PLDDT_BANDS = [
-  (0, 50, '#FF7D45'),
-  (50, 70, '#FFDB13'),
-  (70, 90, '#65CBF3'),
-  (90, 100, '#0053D6')
-]    
+    (0, 50, "#FF7D45"),
+    (50, 70, "#FFDB13"),
+    (70, 90, "#65CBF3"),
+    (90, 100, "#0053D6"),
+]
+
 
 def msa_plot(id, sto_path, mgnify_max_hits=501):
-    """ Create a plot of MSA data."""
+    """Create a plot of MSA data."""
     msas = []
     deletion_matrices = []
     full_msa = []
@@ -106,111 +118,126 @@ def msa_plot(id, sto_path, mgnify_max_hits=501):
             unsorted_results.extend(zipped_results)
             db_msas, db_deletion_matrices, _ = zip(*unsorted_results)
             if db_msas:
-                if db_name == 'mgnify':
+                if db_name == "mgnify":
                     db_msas = db_msas[:mgnify_max_hits]
                     db_deletion_matrices = db_deletion_matrices[:mgnify_max_hits]
                 full_msa.extend(db_msas)
                 msas.append(db_msas)
                 deletion_matrices.append(db_deletion_matrices)
                 msa_size = len(set(db_msas))
-                print(f'{msa_size} Sequences Found in {db_name}')
-                
+                print(f"{msa_size} Sequences Found in {db_name}")
+
     deduped_full_msa = list(dict.fromkeys(full_msa))
     total_msa_size = len(deduped_full_msa)
-    print(f'\n{total_msa_size} Sequences Found in Total\n')
+    print(f"\n{total_msa_size} Sequences Found in Total\n")
 
     import numpy as np
-    aa_map = {restype: i for i, restype in enumerate('ABCDEFGHIJKLMNOPQRSTUVWXYZ-')}
+
+    aa_map = {restype: i for i, restype in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ-")}
     msa_arr = np.array([[aa_map[aa] for aa in seq] for seq in deduped_full_msa])
     num_alignments, num_res = msa_arr.shape
 
     fig = plt.figure(figsize=(12, 3))
-    plt.title(f'Per-Residue Count of Non-Gap Amino Acids in the MSA for {id}')
-    plt.plot(np.sum(msa_arr != aa_map['-'], axis=0), color='black')
-    plt.ylabel('Non-Gap Count')
+    plt.title(f"Per-Residue Count of Non-Gap Amino Acids in the MSA for {id}")
+    plt.plot(np.sum(msa_arr != aa_map["-"], axis=0), color="black")
+    plt.ylabel("Non-Gap Count")
     plt.yticks(range(0, num_alignments + 1, max(1, int(num_alignments / 3))))
     # plt.show()
     return plt
+
 
 def plot_plddt_legend():
     """Plots the legend for pLDDT."""
 
     thresh = [
-                'Very low (pLDDT < 50)',
-                'Low (70 > pLDDT > 50)',
-                'Confident (90 > pLDDT > 70)',
-                'Very high (pLDDT > 90)']
+        "Very low (pLDDT < 50)",
+        "Low (70 > pLDDT > 50)",
+        "Confident (90 > pLDDT > 70)",
+        "Very high (pLDDT > 90)",
+    ]
 
     colors = [x[2] for x in PLDDT_BANDS]
 
     plt.figure(figsize=(2, 2))
     for c in colors:
         plt.bar(0, 0, color=c)
-    plt.legend(thresh, frameon=False, loc='center', fontsize=20)
+    plt.legend(thresh, frameon=False, loc="center", fontsize=20)
     plt.xticks([])
     plt.yticks([])
     ax = plt.gca()
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    plt.title('Model Confidence', fontsize=20, pad=20)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    plt.title("Model Confidence", fontsize=20, pad=20)
     return plt
+
 
 def get_best_alphafold2_model(ranking_debug_file):
     with open(ranking_debug_file, "r") as f:
         rankings = json.load(f)
-    return(rankings["order"][0])
+    return rankings["order"][0]
 
-def pdb_plot(pdb_path, show_sidechains = True):
-    """ Create a plot of PDB structures"""
+
+def pdb_plot(pdb_path, show_sidechains=True):
+    """Create a plot of PDB structures"""
 
     pkl_files = list_files_by_extension(extension=".pkl", dir=pdb_path)
-    if len(pkl_files) > 1: #AlphaFold
-        best_model = get_best_alphafold2_model(os.path.join(pdb_path, "ranking_debug.json"))
-        result = np.load(os.path.join(pdb_path, f"result_{best_model}.pkl"), allow_pickle=True)
-        best_pdb_file = os.path.abspath(os.path.join(pdb_path, f"relaxed_{best_model}.pdb"))
+    if len(pkl_files) > 1:  # AlphaFold
+        best_model = get_best_alphafold2_model(
+            os.path.join(pdb_path, "ranking_debug.json")
+        )
+        result = np.load(
+            os.path.join(pdb_path, f"result_{best_model}.pkl"), allow_pickle=True
+        )
+        best_pdb_file = os.path.abspath(
+            os.path.join(pdb_path, f"relaxed_{best_model}.pdb")
+        )
 
-    else: #OpenFold
+    else:  # OpenFold
         result = np.load(pkl_files[0], allow_pickle=True)
-        best_pdb_file = list_files_by_extension(extension="_relaxed.pdb", dir=pdb_path)[0]
-
+        best_pdb_file = list_files_by_extension(extension="_relaxed.pdb", dir=pdb_path)[
+            0
+        ]
 
     pae_outputs = (
-          result['predicted_aligned_error'],
-          result['max_predicted_aligned_error']
-      )
+        result["predicted_aligned_error"],
+        result["max_predicted_aligned_error"],
+    )
 
     # Construct multiclass b-factors to indicate confidence bands
-    # 0=very low, 1=low, 2=confident, 3=very high    
-    
+    # 0=very low, 1=low, 2=confident, 3=very high
 
     with open(best_pdb_file) as f:
         best_pdb = f.read()
-    
+
     banded_b_factors = []
-    for plddt in result['plddt']:
+    for plddt in result["plddt"]:
         for idx, (min_val, max_val, _) in enumerate(PLDDT_BANDS):
             if plddt >= min_val and plddt <= max_val:
                 banded_b_factors.append(idx)
                 break
     if "final_atom_mask" in result:
-        banded_b_factors = np.array(banded_b_factors)[:, None] * result['final_atom_mask']
+        banded_b_factors = (
+            np.array(banded_b_factors)[:, None] * result["final_atom_mask"]
+        )
     else:
-        banded_b_factors = np.array(banded_b_factors)[:, None] * result['structure_module']['final_atom_mask']
+        banded_b_factors = (
+            np.array(banded_b_factors)[:, None]
+            * result["structure_module"]["final_atom_mask"]
+        )
 
     to_visualize_pdb = utils.overwrite_b_factors(best_pdb, banded_b_factors)
-
 
     # Color the structure by per-residue pLDDT
     color_map = {i: bands[2] for i, bands in enumerate(PLDDT_BANDS)}
     view = py3Dmol.view(width=800, height=600)
     view.addModelsAsFrames(to_visualize_pdb)
-    style = {'cartoon': {'colorscheme': {'prop': 'b','map': color_map}}}
+    style = {"cartoon": {"colorscheme": {"prop": "b", "map": color_map}}}
 
     if show_sidechains:
-        style['stick'] = {}
-    view.setStyle({'model': -1}, style)
+        style["stick"] = {}
+    view.setStyle({"model": -1}, style)
     view.zoomTo()
 
     grid = GridspecLayout(1, 2)
@@ -234,31 +261,31 @@ def pdb_plot(pdb_path, show_sidechains = True):
 
     plt.figure(figsize=[8 * num_plots, 6])
     plt.subplot(1, num_plots, 1)
-    plt.plot(result['plddt'])
-    plt.title('Predicted LDDT')
-    plt.xlabel('Residue')
-    plt.ylabel('pLDDT')
+    plt.plot(result["plddt"])
+    plt.title("Predicted LDDT")
+    plt.xlabel("Residue")
+    plt.ylabel("pLDDT")
 
     if num_plots == 2:
         plt.subplot(1, 2, 2)
         pae, max_pae = pae_outputs
-        plt.imshow(pae, vmin=0., vmax=max_pae, cmap='Greens_r')
+        plt.imshow(pae, vmin=0.0, vmax=max_pae, cmap="Greens_r")
         plt.colorbar(fraction=0.046, pad=0.04)
-        plt.title('Predicted Aligned Error')
-        plt.xlabel('Scored residue')
-        plt.ylabel('Aligned residue')
+        plt.title("Predicted Aligned Error")
+        plt.xlabel("Scored residue")
+        plt.ylabel("Aligned residue")
 
     return plt
 
 
 def run_tmscore(pdb1, pdb2):
-    
+
     cmd = [
         "TMscore",
         "-seq",
         pdb1,
         pdb2,
-        ]
+    ]
     output = subprocess.run(
         cmd,
         capture_output=True,
@@ -278,8 +305,7 @@ def run_tmscore(pdb1, pdb2):
     return o
 
 
-
-def get_batch_logs(logStreamName, boto_session = boto3.session.Session()):
+def get_batch_logs(logStreamName, boto_session=boto3.session.Session()):
 
     """
     Retrieve and format logs for batch job.
@@ -301,19 +327,16 @@ def get_batch_logs(logStreamName, boto_session = boto3.session.Session()):
     logs.drop("ingestionTime", axis=1, inplace=True)
     return logs
 
-def get_last_batch_job_id(batch_environment, job_name, boto_session = boto3.session.Session()):
+
+def get_last_batch_job_id(
+    batch_environment, job_name, boto_session=boto3.session.Session()
+):
     batch = boto_session.client("batch")
     jobs = []
     for queue in batch_environment.get_stack_outputs(filter="JobQueue").values():
         hits = batch.list_jobs(
-                jobQueue = queue,
-                filters = [
-                    {
-                        'name': 'JOB_NAME',
-                        'values': [job_name]
-                    }
-                ]
-            ).get("jobSummaryList",[])
+            jobQueue=queue, filters=[{"name": "JOB_NAME", "values": [job_name]}]
+        ).get("jobSummaryList", [])
         jobs.extend(hits) if hits != [] else next
 
     if jobs == []:

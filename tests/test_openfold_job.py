@@ -6,6 +6,7 @@ from batchfold.openfold_job import OpenFoldJob
 import pytest
 import boto3
 from datetime import datetime
+import os
 
 @pytest.fixture()
 def batch_environment():
@@ -14,30 +15,33 @@ def batch_environment():
     return(stack)
 
 def test_openfold_job_init():
+    bucket = os.getenv("TEST_BUCKET")
+
     new_job = OpenFoldJob(
         target_id = "T1084",
-        fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
-        output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
+        fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
+        output_s3_uri = f"s3://{bucket}/T1084/outputs/",
         openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",
     )
 
     assert new_job.job_definition_name == "OpenFoldJobDefinition"
     assert new_job.target_id == "T1084"
-    assert new_job.fasta_s3_uri == "s3://aws-af-testing/T1084/fasta/T1084.fasta"
-    assert new_job.output_s3_uri == "s3://aws-af-testing/T1084/outputs/"
+    assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
+    assert new_job.output_s3_uri == f"s3://{bucket}/T1084/outputs/"
     assert new_job.template_mmcif_dir == "pdb_mmcif/mmcif_files" 
 
 def test_openfold_job_submission(batch_environment):
 
     job_name = "OpenFoldJob" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "G4dnJobQueue"
+    bucket = os.getenv("TEST_BUCKET")
 
     new_job = OpenFoldJob(
         job_name = job_name,
         target_id = "T1084",
-        fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
-        msa_s3_uri="s3://aws-af-testing/T1084/msas/",
-        output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
+        fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
+        msa_s3_uri=f"s3://{bucket}/T1084/msas/",
+        output_s3_uri = f"s3://{bucket}/T1084/outputs/",
         use_precomputed_msas = True,
         config_preset = "finetuning_ptm",
         openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",

@@ -21,7 +21,6 @@ def test_get_stack_outputs(batch_environment):
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
         "G4dnJobQueue",
-        # "G5JobQueue",        
         "GravitonOnDemandJobQueue",
         "GravitonSpotJobQueue",
         "LaunchTemplate",
@@ -41,7 +40,6 @@ def test_get_job_queue_names(batch_environment):
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
         "G4dnJobQueue",
-        # "G5JobQueue",        
         "GravitonOnDemandJobQueue",
         "GravitonSpotJobQueue"
     ]

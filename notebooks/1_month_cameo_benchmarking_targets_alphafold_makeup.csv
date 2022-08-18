@@ -1,5 +1,0 @@
-PDB_ID,CHAIN,SEQ_ID,CAMEO_TARGET_ID,SEQ_URL,PDB_URL,SUBMISSION_DATE,DIFFICULTY,QUATERNARY_STATE,MONOMERIC_MODEL_COUNT,REF_PDB,SEQ_LENGTH,METHOD,RESOLUTION
-7V2S,B,7V2S_B,2022-08-06_00000131_1,https://www.cameo3d.org/modeling/targets/1-month/target/2022-08-06/7V2S_B/fasta/,https://www.cameo3d.org/static/data/modeling/2022.08.06/7V2S_B/target.pdb,8/6/22,1,2,55,7v2s [B],287,X-RAY DIFFRACTION,2.133
-7WUA,A,7WUA_A,2022-08-06_00000168_1,https://www.cameo3d.org/modeling/targets/1-month/target/2022-08-06/7WUA_A/fasta/,https://www.cameo3d.org/static/data/modeling/2022.08.06/7WUA_A/target.pdb,8/6/22,0,0,53,7wua [A],604,X-RAY DIFFRACTION,1.999
-7ESG,A,7ESG_A,2022-07-16_00000008_1,https://www.cameo3d.org/modeling/targets/1-month/target/2022-07-16/7ESG_A/fasta/,https://www.cameo3d.org/static/data/modeling/2022.07.16/7ESG_A/target.pdb,7/16/22,2,0,79,7esg [A],598,X-RAY DIFFRACTION,2.53
-7VKK,A,7VKK_A,2022-07-16_00000181_1,https://www.cameo3d.org/modeling/targets/1-month/target/2022-07-16/7VKK_A/fasta/,https://www.cameo3d.org/static/data/modeling/2022.07.16/7VKK_A/target.pdb,7/16/22,2,0,76,7vkk [A],304,X-RAY DIFFRACTION,3.55

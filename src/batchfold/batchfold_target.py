@@ -12,8 +12,9 @@ from attrs import define, field
 import boto3
 import re
 import os
-from io import  StringIO
+from io import StringIO
 import pathlib
+
 
 @define
 class BatchFoldTarget:
@@ -42,27 +43,27 @@ class BatchFoldTarget:
         return {}
 
     def __attrs_post_init__(self) -> None:
-        """ Check and see if data already exists in S3 for this target and if so, load it"""
+        """Check and see if data already exists in S3 for this target and if so, load it"""
         s3 = self.boto_session.client("s3")
         bucket = self.s3_bucket
-        key = os.path.join(self.s3_base_prefix, self.s3_fastas_prefix, self.target_id+".fasta")
+        key = os.path.join(
+            self.s3_base_prefix, self.s3_fastas_prefix, self.target_id + ".fasta"
+        )
         try:
-            s3.head_object(
-                Bucket=bucket, 
-                Key=key
-                )
+            s3.head_object(Bucket=bucket, Key=key)
         except:
             return None
         else:
-            fasta_str = s3.get_object(Bucket=bucket, Key=key)['Body'].read().decode("utf-8")
+            fasta_str = (
+                s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode("utf-8")
+            )
             with StringIO(fasta_str) as stringio:
-                    seq_records = SeqIO.parse(stringio, "fasta")
-                    for seq_record in seq_records:
-                        self.sequences[seq_record.id] = seq_record
+                seq_records = SeqIO.parse(stringio, "fasta")
+                for seq_record in seq_records:
+                    self.sequences[seq_record.id] = seq_record
             return None
 
-
-    def add_sequence(self, seq: str, seq_id: str = "", description: str = "") -> BatchFoldTarget:
+    def add_sequence(self, seq: str, seq_id: str = "", description: str = "") -> str:
         """Add sequence to target object."""
 
         seq_id = seq_id or self.target_id
@@ -75,71 +76,101 @@ class BatchFoldTarget:
         )
 
         self.sequences[seq_record.id] = seq_record
-        # return self
-        return(self.upload_fasta())
+        return self.upload_fasta()
 
-
-    def add_fasta(self, path: str) -> BatchFoldTarget:
+    def add_fasta(self, path: str) -> str:
         """Add an existing fasta file to the target object."""
         with open(path) as handle:
             for seq_record in SeqIO.parse(handle, "fasta"):
                 self.sequences[seq_record.id] = seq_record
-        
-        return(self.upload_fasta())
 
-    def upload_fasta(self) -> BatchFoldTarget:
+        return self.upload_fasta()
+
+    def upload_fasta(self) -> str:
         """Create and upload a fasta file to s3"""
         file_out = f"{self.target_id}.fasta"
         with open(file_out, "w") as f_out:
             SeqIO.write(list(self.sequences.values()), f_out, "fasta")
-        s3_fasta_key = os.path.join(self.s3_base_prefix, self.s3_fastas_prefix, file_out)
-        self.boto_session.client("s3").upload_file(file_out, self.s3_bucket, s3_fasta_key)
+        s3_fasta_key = os.path.join(
+            self.s3_base_prefix, self.s3_fastas_prefix, file_out
+        )
+        self.boto_session.client("s3").upload_file(
+            file_out, self.s3_bucket, s3_fasta_key
+        )
         os.remove(file_out)
         return os.path.join("s3://", self.s3_bucket, s3_fasta_key)
 
     def get_fasta_s3_uri(self) -> str:
         """Get the s3 uri for the fasta file"""
-        return os.path.join("s3://", self.s3_bucket, self.s3_base_prefix, self.s3_fastas_prefix, self.target_id + ".fasta")
+        return os.path.join(
+            "s3://",
+            self.s3_bucket,
+            self.s3_base_prefix,
+            self.s3_fastas_prefix,
+            self.target_id + ".fasta",
+        )
 
     def get_msas_s3_uri(self) -> str:
         """Get the s3 uri for the msas folder"""
-        return os.path.join("s3://", self.s3_bucket, self.s3_base_prefix, self.s3_msas_prefix)
+        return os.path.join(
+            "s3://", self.s3_bucket, self.s3_base_prefix, self.s3_msas_prefix
+        )
 
     def get_predictions_s3_uri(self) -> str:
         """Get the s3 uri for the predictions folder"""
-        return os.path.join("s3://", self.s3_bucket, self.s3_base_prefix, self.s3_predictions_prefix)
+        return os.path.join(
+            "s3://", self.s3_bucket, self.s3_base_prefix, self.s3_predictions_prefix
+        )
 
     def download_fastas(self, local_path: str = ".") -> str:
         """Download fasta files from s3"""
 
         prefix = os.path.join(self.s3_base_prefix, self.s3_fastas_prefix)
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".fasta",".fa"])
+        return self._download_dir(
+            bucket=self.s3_bucket,
+            local_path=local_path,
+            prefix=prefix,
+            extensions=[".fasta", ".fa"],
+        )
 
     def download_msas(self, local_path: str = ".") -> str:
         """Download msa files from s3"""
-        
-        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix, "jackhmmer")       
 
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".sto",".a3m",".hhr", ".pkl"])
+        prefix = os.path.join(self.s3_base_prefix, self.s3_msas_prefix, "jackhmmer")
+
+        return self._download_dir(
+            bucket=self.s3_bucket,
+            local_path=local_path,
+            prefix=prefix,
+            extensions=[".sto", ".a3m", ".hhr", ".pkl"],
+        )
 
     def download_predictions(self, local_path: str = ".", job: str = "") -> str:
         """Download prediction files from s3"""
-        
+
         prefix = os.path.join(self.s3_base_prefix, self.s3_predictions_prefix)
         if job != "":
-            prefix = os.path.join(prefix, job)           
+            prefix = os.path.join(prefix, job)
 
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = prefix, extensions=[".pdb", ".pkl", ".json"])
+        return self._download_dir(
+            bucket=self.s3_bucket,
+            local_path=local_path,
+            prefix=prefix,
+            extensions=[".pdb", ".pkl", ".json"],
+        )
 
     def download_all(self, local_path: str = ".") -> str:
-        """Download all files from s3"""       
+        """Download all files from s3"""
 
-        return self._download_dir(bucket = self.s3_bucket, local_path = local_path, prefix = self.s3_base_prefix)
+        return self._download_dir(
+            bucket=self.s3_bucket, local_path=local_path, prefix=self.s3_base_prefix
+        )
 
-
-    def _download_dir(self, client = None, bucket = None, local_path=".", prefix="", extensions=[]):
+    def _download_dir(
+        self, client=None, bucket=None, local_path=".", prefix="", extensions=[]
+    ):
         """Recursively download files from S3."""
-        
+
         bucket = bucket or self.s3_bucket
         client = client or self.boto_session.client("s3")
         paginator = client.get_paginator("list_objects_v2")
@@ -148,14 +179,17 @@ class BatchFoldTarget:
             if result.get("CommonPrefixes") is not None:
                 for subdir in result.get("CommonPrefixes"):
                     self._download_dir(
-                        client=client, 
-                        bucket=bucket, 
-                        local_path=local_path, 
+                        client=client,
+                        bucket=bucket,
+                        local_path=local_path,
                         prefix=subdir.get("Prefix"),
-                        extensions=extensions
-                        )
+                        extensions=extensions,
+                    )
             for file in result.get("Contents", []):
-                if extensions is [] or pathlib.Path(file.get("Key")).suffix in extensions:
+                if (
+                    extensions is []
+                    or pathlib.Path(file.get("Key")).suffix in extensions
+                ):
                     dest_pathname = os.path.join(local_path, file.get("Key"))
                     if not os.path.exists(os.path.dirname(dest_pathname)):
                         os.makedirs(os.path.dirname(dest_pathname))
@@ -163,7 +197,7 @@ class BatchFoldTarget:
                     file_count += 1
         print(f"{file_count} files downloaded from s3.")
         return os.path.abspath(local_path)
-        
+
     def validate_sequence(self, sequence: str) -> bool:
         """Validate that the sequences only contains valid amino acid symbols."""
         sequence = sequence.upper().strip()
@@ -173,7 +207,7 @@ class BatchFoldTarget:
             )
         return True
 
-    def list_job_names(self, bucket = None, client = None, job_type=""):
+    def list_job_names(self, bucket=None, client=None, job_type=""):
 
         bucket = bucket or self.s3_bucket
         client = client or self.boto_session.client("s3")
@@ -181,8 +215,8 @@ class BatchFoldTarget:
 
         # Create a PageIterator from the Paginator
         page_iterator = paginator.paginate(
-            Bucket=self.s3_bucket,
-            Prefix=self.target_id+"/predictions")
+            Bucket=self.s3_bucket, Prefix=self.target_id + "/predictions"
+        )
         jobs = []
         for page in page_iterator:
             for key in page["Contents"]:
@@ -196,5 +230,5 @@ class BatchFoldTarget:
         jobs.sort()
         return jobs
 
-    def get_last_job_name(self, bucket = None, client = None, job_type=""):
+    def get_last_job_name(self, bucket=None, client=None, job_type=""):
         return self.list_job_names(bucket, client, job_type)[-1]

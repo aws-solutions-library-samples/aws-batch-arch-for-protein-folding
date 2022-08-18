@@ -172,9 +172,7 @@ def convert_stockholm_to_a3m(
     reached_max_sequences = False
 
     for line in stockholm_format.splitlines():
-        reached_max_sequences = (
-            max_sequences and len(sequences) >= max_sequences
-        )
+        reached_max_sequences = max_sequences and len(sequences) >= max_sequences
         if line.strip() and not line.startswith(("#", "//")):
             # Ignore blank lines, markup and end symbols - remainder are alignment
             # sequence parts.
@@ -211,8 +209,7 @@ def convert_stockholm_to_a3m(
         )
 
     fasta_chunks = (
-        f">{k} {descriptions.get(k, '')}\n{a3m_sequences[k]}"
-        for k in a3m_sequences
+        f">{k} {descriptions.get(k, '')}\n{a3m_sequences[k]}" for k in a3m_sequences
     )
     return "\n".join(fasta_chunks) + "\n"  # Include terminating newline.
 
@@ -329,9 +326,7 @@ def _parse_hhr_hit(detailed_lines: Sequence[str]) -> TemplateHit:
 
                 # Update the hit sequence and indices list.
                 hit_sequence += delta_hit_sequence
-                _update_hhr_residue_indices_list(
-                    delta_hit_sequence, start, indices_hit
-                )
+                _update_hhr_residue_indices_list(delta_hit_sequence, start, indices_hit)
 
     return TemplateHit(
         index=number_of_hit,
@@ -359,9 +354,7 @@ def parse_hhr(hhr_string: str) -> Sequence[TemplateHit]:
     if block_starts:
         block_starts.append(len(lines))  # Add the end of the final block.
         for i in range(len(block_starts) - 1):
-            hits.append(
-                _parse_hhr_hit(lines[block_starts[i] : block_starts[i + 1]])
-            )
+            hits.append(_parse_hhr_hit(lines[block_starts[i] : block_starts[i + 1]]))
     return hits
 
 

@@ -6,6 +6,7 @@ from batchfold.jackhmmer_job import JackhmmerJob
 import pytest
 import boto3
 from datetime import datetime
+import os
 
 @pytest.fixture()
 def batch_environment():
@@ -14,30 +15,33 @@ def batch_environment():
     return(stack)
 
 def test_jackhmmer_job_init():
+    bucket = os.getenv("TEST_BUCKET")
+
     new_job = JackhmmerJob(
         target_id = "T1084",
-        fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
-        output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
+        fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
+        output_s3_uri = f"s3://{bucket}/T1084/outputs/",
         bfd_database_path = "TESTA",
         uniclust30_database_path = "TESTB"
     )
 
     assert new_job.job_definition_name == "MSAJobDefinition"
     assert new_job.target_id == "T1084"
-    assert new_job.fasta_s3_uri == "s3://aws-af-testing/T1084/fasta/T1084.fasta"
-    assert new_job.output_s3_uri == "s3://aws-af-testing/T1084/outputs/"
+    assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
+    assert new_job.output_s3_uri == f"s3://{bucket}/T1084/outputs/"
     assert new_job.bfd_database_path == "TESTA" 
     assert new_job.uniclust30_database_path == "TESTB" 
 
 def test_jackhmmer_job_submission(batch_environment):
     job_name = "JackhmmerJob" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "GravitonSpotJobQueue"
+    bucket = os.getenv("TEST_BUCKET")
 
     new_job = JackhmmerJob(
         job_name = job_name,
         target_id = "T1084",
-        fasta_s3_uri = "s3://aws-af-testing/T1084/fasta/T1084.fasta",
-        output_s3_uri = "s3://aws-af-testing/T1084/outputs/",
+        fasta_s3_uri = "s3://{bucket}/T1084/fasta/T1084.fasta",
+        output_s3_uri = "s3://{bucket}/T1084/outputs/",
         bfd_database_path = "test/tiny.fasta",
         db_preset = "reduced_bfd",
         cpu = 4

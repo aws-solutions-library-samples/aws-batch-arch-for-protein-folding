@@ -8,6 +8,7 @@ from nbhelpers import residue_constants
 from Bio import PDB
 import numpy as np
 
+
 def overwrite_b_factors(pdb_str: str, bfactors: np.ndarray) -> str:
     """Overwrites the B-factors in pdb_str with contents of bfactors array.
 
@@ -58,6 +59,4 @@ def assert_equal_nonterminal_atom_types(
     oxt = residue_constants.atom_order["OXT"]
     no_oxt_mask = np.ones(shape=atom_mask.shape, dtype=np.bool)
     no_oxt_mask[..., oxt] = False
-    np.testing.assert_almost_equal(
-        ref_atom_mask[no_oxt_mask], atom_mask[no_oxt_mask]
-    )
+    np.testing.assert_almost_equal(ref_atom_mask[no_oxt_mask], atom_mask[no_oxt_mask])

@@ -12,7 +12,7 @@ import boto3
 @pytest.fixture
 def fold_target():
     target_id = "Test"
-    bucket = "aws-af-testing"
+    bucket = os.getenv("TEST_BUCKET")
     target = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
     assert target.target_id == target_id
     assert target.s3_bucket == bucket
@@ -29,6 +29,7 @@ def test_validate_sequence(fold_target):
 
 def test_add_sequence(fold_target):
     sequence_id = "T1084"
+    bucket = os.getenv("TEST_BUCKET")
     fold_target.add_sequence(
         seq_id="T1084",
         seq="MAAHKGAEHHHKAAEHHEQAAKHHHAAAEHHEKGEHEQAAHHADTAYAHHKHAEEHAAQAAKHDAEHHAPKPH",
@@ -44,7 +45,7 @@ def test_add_sequence(fold_target):
         fold_target.sequences[sequence_id].description
         == "Meio, Meiothermus silvanus, 73 residues|"
     )
-    assert fold_target.get_fasta_s3_uri() == "s3://aws-af-testing/Test/fastas/Test.fasta"
+    assert fold_target.get_fasta_s3_uri() == f"s3://{bucket}/Test/fastas/Test.fasta"
     fasta_path = fold_target.download_fastas(local_path="tests/data")
     with open(os.path.join(fasta_path, "Test/fastas", "Test.fasta")) as handle:
         for record in SeqIO.parse(handle, "fasta"):
@@ -61,7 +62,7 @@ def test_add_sequence(fold_target):
 
 def test_add_fasta():
     target_id = "TEST"
-    bucket = "aws-af-testing"
+    bucket = os.getenv("TEST_BUCKET")
     mytarget = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
     assert mytarget.target_id == target_id
     assert mytarget.s3_bucket == bucket
@@ -86,7 +87,7 @@ def test_add_fasta():
 @pytest.fixture
 def test_load_existing_s3_data():
     target_id = "7DUV_A"
-    bucket = "aws-af-testing"
+    bucket = os.getenv("TEST_BUCKET")
     mytarget = BatchFoldTarget(target_id=target_id, s3_bucket=bucket)
     assert mytarget.target_id == target_id
     assert mytarget.s3_bucket == bucket

@@ -79,7 +79,7 @@ if __name__ == "__main__":
         for script in all_scripts:
             script_response = submit_download_data_job(
                 batch_substack_name=args.batch_substack_name,
-                job_name=args.job_name + "-" + script.replace(".sh",""),
+                job_name=args.job_name + "-" + script.replace(".sh", ""),
                 script=script,
                 cpu=args.cpu,
                 memory=args.memory,

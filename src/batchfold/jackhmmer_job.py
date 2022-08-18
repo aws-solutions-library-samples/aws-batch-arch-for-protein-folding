@@ -25,12 +25,8 @@ class JackhmmerJob(BatchFoldJob):
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
-    small_bfd_database_path: str = (
-        "small_bfd/bfd-first_non_consensus_sequences.fasta"
-    )
-    uniclust30_database_path: str = (
-        "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
-    )
+    small_bfd_database_path: str = "small_bfd/bfd-first_non_consensus_sequences.fasta"
+    uniclust30_database_path: str = "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
     uniprot_database_path: str = "uniprot/uniprot.fasta"
     pdb_seqres_database_path: str = "pdb_seqres/pdb_seqres.txt"
     db_preset: str = "full_dbs"

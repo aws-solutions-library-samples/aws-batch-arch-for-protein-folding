@@ -6,6 +6,7 @@ from datetime import datetime
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+
 @define
 class BatchFoldJob:
     """Base class to submit protein analysis job to AWS"""
