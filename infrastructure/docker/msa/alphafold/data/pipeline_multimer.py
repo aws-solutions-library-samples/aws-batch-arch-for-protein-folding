@@ -175,7 +175,9 @@ class DataPipeline:
                jackhmmer_binary_path: str,
                uniprot_database_path: str,
                max_uniprot_hits: int = 50000,
-               use_precomputed_msas: bool = False):
+               use_precomputed_msas: bool = False,
+               n_cpu: int = 8):
+
     """Initializes the data pipeline.
 
     Args:
@@ -190,7 +192,8 @@ class DataPipeline:
     self._monomer_data_pipeline = monomer_data_pipeline
     self._uniprot_msa_runner = jackhmmer.Jackhmmer(
         binary_path=jackhmmer_binary_path,
-        database_path=uniprot_database_path)
+        database_path=uniprot_database_path,
+        n_cpu=n_cpu)
     self._max_uniprot_hits = max_uniprot_hits
     self.use_precomputed_msas = use_precomputed_msas
 
