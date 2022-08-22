@@ -777,7 +777,7 @@ Resources:
       - CodePipeline
     Properties:
       Handle: !Ref CodeBuildWaitHandle
-      Timeout: 1800
+      Timeout: 2700
       Count: 4
 
 Outputs:
