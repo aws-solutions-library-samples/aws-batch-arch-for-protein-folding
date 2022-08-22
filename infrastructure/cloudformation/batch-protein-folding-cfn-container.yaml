@@ -336,8 +336,6 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/alphafold2  
-          - Name: SOURCE_URI
-            Value: !Ref AlphaFold2ContainerRegistryURI
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -373,9 +371,7 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfold     
-          - Name: SOURCE_URI
-            Value: !Ref OpenFoldContainerRegistryURI                 
+            Value: infrastructure/docker/openfold                    
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -411,9 +407,7 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/msa
-          - Name: SOURCE_URI
-            Value: !Ref MSAContainerRegistryURI                    
+            Value: infrastructure/docker/msa                 
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -431,6 +425,42 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"          
+
+  CodeBuildProjectDownload:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Build Download Docker container
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: IMAGE_TAG
+            Value: latest
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref MSAContainerRegistry            
+          - Name: ACCOUNT_ID
+            Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/download                 
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        BuildSpec: infrastructure/docker/buildspec.yaml        
+        GitCloneDepth: 1
+        Location: !GetAtt CodeRepository.CloneUrlHttp
+        Type: CODECOMMIT
+      SourceVersion: refs/heads/main
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"               
 
   CodePipelineRole:
     Type: AWS::IAM::Role
@@ -566,7 +596,22 @@ Resources:
               OutputArtifacts:
                 - Name: OpenFoldBuildArtifactMSA
               Region: !Ref "AWS::Region"
-              RunOrder: 2                                  
+              RunOrder: 2      
+            - Name: BuildDownload
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProjectDownload
+              InputArtifacts:
+                - Name: SourceArtifact
+              Namespace: BuildVariablesDownload
+              OutputArtifacts:
+                - Name: OpenFoldBuildArtifactDownload
+              Region: !Ref "AWS::Region"
+              RunOrder: 2                                             
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -750,13 +795,22 @@ Outputs:
     Value:  
       Ref: OpenFoldContainerRegistry         
   MSAContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
+    Description: URI of the MSA container
     Value:
       Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
   MSAContainerRegistryName:
-    Description: Name of the OpenFold MSA container repository
+    Description: Name of the MSA container repository
     Value:
-      Ref: MSAContainerRegistry              
+      Ref: MSAContainerRegistry         
+  DownloadContainerRegistryURI:
+    Description: URI of the download container
+    Value:
+      Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
+  DownloadContainerRegistryName:
+    Description: Name of the download container repository
+    Value:
+      Ref: MSAContainerRegistry          
+
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:
