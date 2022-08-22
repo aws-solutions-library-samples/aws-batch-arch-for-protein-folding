@@ -161,7 +161,6 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
-        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicReadOnly
       Policies:
         - PolicyName: CodeBuildPolicy
           PolicyDocument:
@@ -497,15 +496,16 @@ Resources:
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
                   - !GetAtt CodeBuildProjectMSA.Arn
+                  - !GetAtt CodeBuildProjectDownload.Arn                  
                 Effect: Allow
               - Effect: Allow
                 Action:
                   - ecr:DescribeImages
                 Resource: 
                   - !GetAtt AlphaFold2ContainerRegistry.Arn
-                  - !GetAtt DownloadContainerRegistry.Arn
                   - !GetAtt OpenFoldContainerRegistry.Arn
                   - !GetAtt MSAContainerRegistry.Arn
+                  - !GetAtt DownloadContainerRegistry.Arn                  
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -597,7 +597,7 @@ Resources:
                 - Name: SourceArtifact
               Namespace: BuildVariablesDownload
               OutputArtifacts:
-                - Name: OpenFoldBuildArtifactDownload
+                - Name: BuildArtifactDownload
               Region: !Ref "AWS::Region"
               RunOrder: 2                                             
       Tags:
