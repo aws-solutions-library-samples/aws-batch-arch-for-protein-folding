@@ -768,7 +768,6 @@ Resources:
       ContainerRepo:
         Ref: MSAContainerRegistry              
 
-
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
 
@@ -778,7 +777,7 @@ Resources:
       - CodePipeline
     Properties:
       Handle: !Ref CodeBuildWaitHandle
-      Timeout: 3600
+      Timeout: 1800
       Count: 4
 
 Outputs:
