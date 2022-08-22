@@ -11,4 +11,4 @@ RUN amazon-linux-extras install epel -y \
   && ./aws/install
 VOLUME /fsx
 
-ENTRYPOINT ["usr/bin/bash"]
+ENTRYPOINT ["bash", "-c"]
