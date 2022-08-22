@@ -323,6 +323,8 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/alphafold2  
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -358,7 +360,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfold                    
+            Value: infrastructure/docker/openfold     
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                           
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -394,7 +398,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/msa                 
+            Value: infrastructure/docker/msa        
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                     
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -430,7 +436,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/download                 
+            Value: infrastructure/docker/download        
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                     
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -760,6 +768,18 @@ Resources:
       ContainerRepo:
         Ref: MSAContainerRegistry              
 
+
+  CodeBuildWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+  CodeBuildWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: 
+      - CodePipeline
+    Properties:
+      Handle: !Ref CodeBuildWaitHandle
+      Timeout: 3600
+      Count: 4
 
 Outputs:
   CodeRepositoryURI:
