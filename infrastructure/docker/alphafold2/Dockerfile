@@ -50,7 +50,7 @@ RUN conda update -qy conda \
     cudatoolkit==${CUDA_VERSION} \
     pdbfixer \
     pip \
-    python=3.7
+    python=3.9
 
 RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
 
