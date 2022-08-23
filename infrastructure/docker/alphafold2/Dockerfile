@@ -4,7 +4,7 @@
 
 ARG CUDA=11.1.1
 ARG ALPHAFOLD2_VERSION=v2.2.2
-FROM nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
+FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
 ARG CUDA
