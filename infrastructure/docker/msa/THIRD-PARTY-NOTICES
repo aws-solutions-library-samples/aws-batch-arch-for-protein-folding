@@ -1,14 +1,11 @@
-Once built, the aws-alphafold2 container image includes the following third-party software/licensing:
+Once built, the aws-msa container image includes the following third-party software/licensing:
 
 pip               mit-0 https://github.com/pypa/pip/blob/main/LICENSE.txt
 git               GPL-2 https://git-scm.com/about/free-and-open-source
 apt               GPL-2 https://salsa.debian.org/apt-team/apt/-/blob/main/COPYING
 cmake             BSD-3 https://cmake.org/licensing/
-Miniconda         BSD-3 https://legal.anaconda.com/policies/en/?name=end-user-license-agreements#miniconda
-Nvidia container  BSD-3 https://gitlab.com/nvidia/container-images/cuda/-/blob/master/LICENSE
 awscli            Apache-2.0 https://github.com/aws/aws-cli/blob/develop/LICENSE.txt
 AlphaFold         Apache-2.0 https://github.com/deepmind/alphafold/blob/main/LICENSE
-jax               Apache-2.0 https://github.com/google/jax/blob/main/LICENSE
 
 python            PSF License https://docs.python.org/3/license.html#psf-license
 
@@ -18,6 +15,4 @@ hmmer             GPL-3 https://github.com/EddyRivasLab/hmmer/blob/master/LICENS
 HHsuite           GPL-3 https://github.com/soedinglab/hh-suite/blob/master/LICENSE
 tar               GPL-3 https://www.gnu.org/software/tar/
 
-cudatoolkit       Other https://docs.nvidia.com/cuda/eula/index.html#cuda-toolkit-supplement-license-agreement
-openmm            Other https://github.com/openmm/openmm/blob/master/docs-source/licenses/Licenses.txt
-pdbfixer          Other https://github.com/openmm/pdbfixer/blob/master/LICENSE
+Ubuntu image      Other https://ubuntu.com/legal/intellectual-property-policy

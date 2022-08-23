@@ -1,10 +1,9 @@
-The aws-openfold container image hosted at public.ecr.aws/alphafold-on-aws/aws-alphafold2 includes the following third-party software/licensing:
+Once built, the aws-openfold container image includes the following third-party software/licensing:
 
 pip               mit-0 https://github.com/pypa/pip/blob/main/LICENSE.txt
-DeepSped          mit-0 https://github.com/microsoft/DeepSpeed
+DeepSpeed         mit-0 https://github.com/microsoft/DeepSpeed
 PyYAML            mit-0 https://pypi.org/project/PyYAML/
 tqdm              mit-0 https://pypi.org/project/tqdm/
-
 
 git               GPL-2 https://git-scm.com/about/free-and-open-source
 apt               GPL-2 https://salsa.debian.org/apt-team/apt/-/blob/main/COPYING
