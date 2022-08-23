@@ -66,8 +66,8 @@ RUN pip3 install --upgrade pip \
     -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Apply OpenMM patch.
-WORKDIR /opt/conda/lib/python3.9/site-packages
-RUN patch -p0 < /app/alphafold/docker/openmm.patch
+# WORKDIR /opt/conda/lib/python3.9/site-packages
+# RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
 RUN chmod u+s /sbin/ldconfig.real
