@@ -1,0 +1,10 @@
+Once built, the aws-download container image includes the following third-party software/licensing:
+
+pip               mit-0 https://github.com/pypa/pip/blob/main/LICENSE.txt
+git               GPL-2 https://git-scm.com/about/free-and-open-source
+apt               GPL-2 https://salsa.debian.org/apt-team/apt/-/blob/main/COPYING
+aria2             GPL-2 https://aria2.github.io/
+Amazon Linux 2    GPL-2 https://github.com/amazonlinux/container-images/blob/master/LICENSE
+awscli            Apache-2.0 https://github.com/aws/aws-cli/blob/develop/LICENSE.txt
+tar               GPL-3 https://www.gnu.org/software/tar/
+rsync             GPL-3 https://rsync.samba.org/GPL.html
