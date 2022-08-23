@@ -130,7 +130,7 @@ Resources:
             depends_on=None
           ):
             container_overrides = {
-                "command": [f"./scripts/{script} {download_dir}"],
+                "command": [f"./{script} {download_dir}"],
                 "resourceRequirements": [
                     {"value": str(cpu), "type": "VCPU"},
                     {"value": str(memory * 1000), "type": "MEMORY"},
