@@ -20,5 +20,5 @@ phases:
       - echo Pushing the $IMAGE_REPO_NAME image
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - JSON_DATA=$( jq -n --arg uid "$IMAGE_REPO_NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
-      - curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
+      - curl -v -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
       - echo Build completed on `date`
