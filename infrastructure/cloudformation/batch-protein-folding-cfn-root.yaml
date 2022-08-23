@@ -49,18 +49,6 @@ Parameters:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
     Default: "Y"
-  AlphaFold2ContainerRegistryURI:
-    Description: URI of the AlphaFold2 container
-    Type: String
-    Default: public.ecr.aws/alphafold-on-aws/aws-alphafold2
-  OpenFoldContainerRegistryURI:
-    Description: URI of the OpenFold container
-    Type: String  
-    Default: public.ecr.aws/alphafold-on-aws/aws-openfold
-  MSAContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
-    Type: String  
-    Default: public.ecr.aws/alphafold-on-aws/aws-openfold-msa
   CreateG5ComputeEnvironment:
     Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
     Type: String
@@ -131,13 +119,7 @@ Resources:
         ApplicationName:
           Ref: ApplicationName
         Environment:
-          Ref: Environment
-        AlphaFold2ContainerRegistryURI:
-          Ref: AlphaFold2ContainerRegistryURI
-        OpenFoldContainerRegistryURI:
-          Ref: OpenFoldContainerRegistryURI
-        MSAContainerRegistryURI:
-          Ref: MSAContainerRegistryURI
+          Ref: Environment        
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -174,6 +156,8 @@ Resources:
           "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
         MSAContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.MSAContainerRegistryURI
+        DownloadContainerRegistryURI:
+          "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         S3BucketName:
           "Fn::GetAtt": Container.Outputs.s3Bucket
 
@@ -209,7 +193,7 @@ Resources:
         DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.MSAJobDefinition
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
 
 Outputs:
   ApplicationName:

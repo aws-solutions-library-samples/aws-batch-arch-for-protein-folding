@@ -1,0 +1,34 @@
+The aws-openfold container image hosted at public.ecr.aws/alphafold-on-aws/aws-alphafold2 includes the following third-party software/licensing:
+
+pip               mit-0 https://github.com/pypa/pip/blob/main/LICENSE.txt
+DeepSped          mit-0 https://github.com/microsoft/DeepSpeed
+PyYAML            mit-0 https://pypi.org/project/PyYAML/
+tqdm              mit-0 https://pypi.org/project/tqdm/
+
+
+git               GPL-2 https://git-scm.com/about/free-and-open-source
+apt               GPL-2 https://salsa.debian.org/apt-team/apt/-/blob/main/COPYING
+Miniconda         BSD-3 https://legal.anaconda.com/policies/en/?name=end-user-license-agreements#miniconda
+Nvidia contianer  BSD-3 https://gitlab.com/nvidia/container-images/cuda/-/blob/master/LICENSE
+biopython         BSD-3 https://github.com/biopython/biopython/blob/master/LICENSE.rst
+numpy             BSD-3 https://github.com/numpy/numpy/blob/main/LICENSE.txt
+scipy             BSD-3 https://github.com/scipy/scipy/blob/main/LICENSE.txt
+
+Pytorch           BSD-style https://github.com/pytorch/pytorch/blob/master/LICENSE
+
+awscli            Apache-2.0 https://github.com/aws/aws-cli/blob/develop/LICENSE.txt
+OpenFold          Apache-2.0 https://github.com/aqlaboratory/openfold/blob/main/LICENSE
+dm-tree           Apache-2.0 https://pypi.org/project/dm-tree/
+ml-collections    Apache-2.0 https://pypi.org/project/ml-collections/
+requests          Apache-2.0 https://pypi.org/project/requests/
+
+python            PSF License https://docs.python.org/3/license.html#psf-license
+
+wget              GPL-3 https://www.gnu.org/licenses/gpl-3.0.en.html
+kalign            GPL-3 https://github.com/TimoLassmann/kalign/blob/master/COPYING
+hmmer             GPL-3 https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE
+HHsuite           GPL-3 https://github.com/soedinglab/hh-suite/blob/master/LICENSE
+
+cudatoolkit       https://docs.nvidia.com/cuda/eula/index.html#cuda-toolkit-supplement-license-agreement
+openmm            https://github.com/openmm/openmm/blob/master/docs-source/licenses/Licenses.txt
+pdbfixer          https://github.com/openmm/pdbfixer/blob/master/LICENSE

@@ -15,19 +15,7 @@ Parameters:
     Default: main
     AllowedValues:
       - main
-      - dev
-  AlphaFold2ContainerRegistryURI:
-    Description: URI of the AlphaFold2 container
-    Type: String
-    Default: public.ecr.aws/alphafold-on-aws/aws-alphafold2
-  OpenFoldContainerRegistryURI:
-    Description: URI of the OpenFold container
-    Type: String  
-    Default: public.ecr.aws/alphafold-on-aws/aws-openfold
-  MSAContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
-    Type: String  
-    Default: public.ecr.aws/alphafold-on-aws/aws-jackhmmer-msa      
+      - dev     
 
 Resources:
   ##################################################
@@ -173,7 +161,6 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
-        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicReadOnly
       Policies:
         - PolicyName: CodeBuildPolicy
           PolicyDocument:
@@ -336,8 +323,8 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/alphafold2  
-          - Name: SOURCE_URI
-            Value: !Ref AlphaFold2ContainerRegistryURI
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -374,8 +361,8 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/openfold     
-          - Name: SOURCE_URI
-            Value: !Ref OpenFoldContainerRegistryURI                 
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                           
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -411,9 +398,9 @@ Resources:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/msa
-          - Name: SOURCE_URI
-            Value: !Ref MSAContainerRegistryURI                    
+            Value: infrastructure/docker/msa        
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                     
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -431,6 +418,44 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"          
+
+  CodeBuildProjectDownload:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Build Download Docker container
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: IMAGE_TAG
+            Value: latest
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref DownloadContainerRegistry            
+          - Name: ACCOUNT_ID
+            Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/download        
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                     
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        BuildSpec: infrastructure/docker/buildspec.yaml        
+        GitCloneDepth: 1
+        Location: !GetAtt CodeRepository.CloneUrlHttp
+        Type: CODECOMMIT
+      SourceVersion: refs/heads/main
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"               
 
   CodePipelineRole:
     Type: AWS::IAM::Role
@@ -479,15 +504,16 @@ Resources:
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
                   - !GetAtt CodeBuildProjectMSA.Arn
+                  - !GetAtt CodeBuildProjectDownload.Arn                  
                 Effect: Allow
               - Effect: Allow
                 Action:
                   - ecr:DescribeImages
                 Resource: 
                   - !GetAtt AlphaFold2ContainerRegistry.Arn
-                  - !GetAtt DownloadContainerRegistry.Arn
                   - !GetAtt OpenFoldContainerRegistry.Arn
                   - !GetAtt MSAContainerRegistry.Arn
+                  - !GetAtt DownloadContainerRegistry.Arn                  
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -566,7 +592,22 @@ Resources:
               OutputArtifacts:
                 - Name: OpenFoldBuildArtifactMSA
               Region: !Ref "AWS::Region"
-              RunOrder: 2                                  
+              RunOrder: 2      
+            - Name: BuildDownload
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProjectDownload
+              InputArtifacts:
+                - Name: SourceArtifact
+              Namespace: BuildVariablesDownload
+              OutputArtifacts:
+                - Name: BuildArtifactDownload
+              Region: !Ref "AWS::Region"
+              RunOrder: 2                                             
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -727,6 +768,17 @@ Resources:
       ContainerRepo:
         Ref: MSAContainerRegistry              
 
+  CodeBuildWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+  CodeBuildWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: 
+      - CodePipeline
+    Properties:
+      Handle: !Ref CodeBuildWaitHandle
+      Timeout: 2700
+      Count: 4
 
 Outputs:
   CodeRepositoryURI:
@@ -750,13 +802,21 @@ Outputs:
     Value:  
       Ref: OpenFoldContainerRegistry         
   MSAContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
+    Description: URI of the MSA container
     Value:
       Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
   MSAContainerRegistryName:
-    Description: Name of the OpenFold MSA container repository
+    Description: Name of the MSA container repository
     Value:
-      Ref: MSAContainerRegistry              
+      Ref: MSAContainerRegistry         
+  DownloadContainerRegistryURI:
+    Description: URI of the download container
+    Value:
+      Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
+  DownloadContainerRegistryName:
+    Description: Name of the download container repository
+    Value:
+      Ref: MSAContainerRegistry        
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:
