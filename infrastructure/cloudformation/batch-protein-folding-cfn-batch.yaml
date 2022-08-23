@@ -32,7 +32,7 @@ Parameters:
     Description: URI of the OpenFold MSA container
     Type: String  
   DownloadContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
+    Description: URI of the download container
     Type: String  
   S3BucketName:
     Description: Optional S3 Bucket Name
