@@ -10,6 +10,5 @@ RUN amazon-linux-extras install epel -y \
   && unzip awscliv2.zip \
   && ./aws/install \
   && chmod -R 755 /scripts
-VOLUME /fsx
 
 ENTRYPOINT ["bash", "-c"]
