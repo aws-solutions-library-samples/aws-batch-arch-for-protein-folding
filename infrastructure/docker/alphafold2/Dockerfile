@@ -46,12 +46,11 @@ RUN wget -q -P /tmp \
 ENV PATH="/opt/conda/bin:$PATH"
 RUN conda update -qy conda \
   && conda install -y -c conda-forge \
-    # openmm=7.5.1 \
     openmm \
     cudatoolkit==${CUDA_VERSION} \
     pdbfixer \
     pip \
-    python=3.7
+    python=3.9
 
 RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
 
@@ -67,7 +66,7 @@ RUN pip3 install --upgrade pip \
     -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # OpenMM Backward Compatible
-WORKDIR /opt/conda/lib/python3.7/site-packages/simtk
+WORKDIR /opt/conda/lib/python3.9/site-packages/simtk
 RUN rm -rf openmm && ln -s ../openmm
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
