@@ -812,11 +812,11 @@ Outputs:
   DownloadContainerRegistryURI:
     Description: URI of the download container
     Value:
-      Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
+      Fn::GetAtt: DownloadContainerRegistry.RepositoryUri   
   DownloadContainerRegistryName:
     Description: Name of the download container repository
     Value:
-      Ref: MSAContainerRegistry        
+      Ref: DownloadContainerRegistry        
   s3Bucket:
     Description: S3 bucket for CodePipeline
     Value:
