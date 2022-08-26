@@ -3,10 +3,8 @@
 .venv/
 .vscode/
 build/
-
 *.DS_Store*
 **/__pycache__
-
 infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
 random_commands.sh
 .github/
@@ -15,3 +13,4 @@ src/batchfold.egg-info/
 notebooks/data/
 notebooks/TMscore*
 .mypy.ini
+notebooks/*cameo*
