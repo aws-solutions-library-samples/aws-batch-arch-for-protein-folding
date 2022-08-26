@@ -33,7 +33,7 @@ class AlphaFold2Job(BatchFoldJob):
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
     db_preset: str = "full_dbs"
-    model_preset: str = "monomer"
+    model_preset: str = "monomer_ptm"
     benchmark: bool = False
     run_relax: bool = True
     use_gpu_relax: bool = True
