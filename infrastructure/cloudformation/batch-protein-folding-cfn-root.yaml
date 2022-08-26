@@ -11,7 +11,7 @@ Parameters:
     Default: BatchProteinFolding
   LaunchSageMakerNotebook:
     Type: String
-    Default: Y
+    Default: N
     Description: Create a SageMaker Notebook Instance.
     AllowedValues: [Y, N]       
   StackAvailabilityZone:
@@ -49,10 +49,12 @@ Parameters:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
     Default: "Y"
+    AllowedValues: [Y, N]
   CreateG5ComputeEnvironment:
     Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
     Type: String
     Default: "N"
+    AllowedValues: [Y, N]    
 
 
 Conditions:

@@ -4,7 +4,7 @@
 
 ARG CUDA=11.1.1
 ARG ALPHAFOLD2_VERSION=v2.2.2
-FROM nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
+FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
 ARG CUDA
@@ -46,11 +46,11 @@ RUN wget -q -P /tmp \
 ENV PATH="/opt/conda/bin:$PATH"
 RUN conda update -qy conda \
   && conda install -y -c conda-forge \
-    openmm=7.5.1 \
+    openmm=7.5.1 \    
     cudatoolkit==${CUDA_VERSION} \
     pdbfixer \
     pip \
-    python=3.7
+    python=3.9
 
 RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
 
@@ -66,7 +66,7 @@ RUN pip3 install --upgrade pip \
     -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Apply OpenMM patch.
-WORKDIR /opt/conda/lib/python3.7/site-packages
+WORKDIR /opt/conda/lib/python3.9/site-packages
 RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.

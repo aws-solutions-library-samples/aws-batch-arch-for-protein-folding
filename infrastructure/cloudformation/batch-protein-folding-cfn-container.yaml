@@ -455,7 +455,7 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"                    
+          Value: !Ref "AWS::StackId"               
 
   CodePipelineRole:
     Type: AWS::IAM::Role
@@ -505,7 +505,6 @@ Resources:
                   - !GetAtt CodeBuildProjectOpenFold.Arn
                   - !GetAtt CodeBuildProjectMSA.Arn
                   - !GetAtt CodeBuildProjectDownload.Arn                  
-                  - !GetAtt CodeBuildProjectDownload.Arn                  
                 Effect: Allow
               - Effect: Allow
                 Action:
@@ -514,7 +513,6 @@ Resources:
                   - !GetAtt AlphaFold2ContainerRegistry.Arn
                   - !GetAtt OpenFoldContainerRegistry.Arn
                   - !GetAtt MSAContainerRegistry.Arn
-                  - !GetAtt DownloadContainerRegistry.Arn                  
                   - !GetAtt DownloadContainerRegistry.Arn                  
       Tags:
         - Key: Application
@@ -770,17 +768,6 @@ Resources:
       ContainerRepo:
         Ref: MSAContainerRegistry              
 
-  CodeBuildWaitHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-
-  CodeBuildWaitCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    DependsOn: 
-      - CodePipeline
-    Properties:
-      Handle: !Ref CodeBuildWaitHandle
-      Timeout: 2700
-      Count: 4
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
 

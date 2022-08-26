@@ -4,7 +4,7 @@
 """
 Helper functions for the AWS-Alphafold notebook.
 """
-from Bio import SeqIO
+from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import os
@@ -101,49 +101,68 @@ PLDDT_BANDS = [
     (90, 100, "#0053D6"),
 ]
 
+def reduce_stockholm_file(sto_file):
+    """Read in a .sto file and parse format it into a numpy array of the
+    same length as the first (target) sequence
+    """
+    msa = AlignIO.read(sto_file, "stockholm")
+    msa_arr = np.array([list(rec) for rec in msa])
+    return msa_arr[:, msa_arr[0, :] != "-"]
 
-def msa_plot(id, sto_path, mgnify_max_hits=501):
-    """Create a plot of MSA data."""
-    msas = []
-    deletion_matrices = []
-    full_msa = []
-    for sto_file in list_files_by_extension(".sto", dir=sto_path):
-        db_name = os.path.basename(sto_file).split("_")[0]
-        unsorted_results = []
-        with open(sto_file, "r") as f:
-            result = f.read()
-            msa, deletion_matrix, target_names = parsers.parse_stockholm(result)
-            zipped_results = zip(msa, deletion_matrix, target_names)
-            zipped_results = [x for x in zipped_results if x[2] != id]
-            unsorted_results.extend(zipped_results)
-            db_msas, db_deletion_matrices, _ = zip(*unsorted_results)
-            if db_msas:
-                if db_name == "mgnify":
-                    db_msas = db_msas[:mgnify_max_hits]
-                    db_deletion_matrices = db_deletion_matrices[:mgnify_max_hits]
-                full_msa.extend(db_msas)
-                msas.append(db_msas)
-                deletion_matrices.append(db_deletion_matrices)
-                msa_size = len(set(db_msas))
-                print(f"{msa_size} Sequences Found in {db_name}")
 
-    deduped_full_msa = list(dict.fromkeys(full_msa))
-    total_msa_size = len(deduped_full_msa)
-    print(f"\n{total_msa_size} Sequences Found in Total\n")
+def plot_msa_array(msa_arr, id=None):
 
-    import numpy as np
+    total_msa_size = len(msa_arr)
 
-    aa_map = {restype: i for i, restype in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ-")}
-    msa_arr = np.array([[aa_map[aa] for aa in seq] for seq in deduped_full_msa])
-    num_alignments, num_res = msa_arr.shape
+    if total_msa_size > 1:
+        aa_map = {res: i for i, res in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ-")}
+        msa_arr = np.array([[aa_map[aa] for aa in seq] for seq in msa_arr])
+        plt.figure(figsize=(12, 3))
+        plt.title(
+            f"Per-Residue Count of Non-Gap Amino Acids in the MSA for Sequence {id}"
+        )
+        plt.plot(np.sum(msa_arr != aa_map["-"], axis=0), color="black")
+        plt.ylabel("Non-Gap Count")
+        plt.yticks(range(0, total_msa_size + 1, max(1, int(total_msa_size / 3))))
 
-    fig = plt.figure(figsize=(12, 3))
-    plt.title(f"Per-Residue Count of Non-Gap Amino Acids in the MSA for {id}")
-    plt.plot(np.sum(msa_arr != aa_map["-"], axis=0), color="black")
-    plt.ylabel("Non-Gap Count")
-    plt.yticks(range(0, num_alignments + 1, max(1, int(num_alignments / 3))))
-    # plt.show()
-    return plt
+        return plt
+
+    else:
+        print("Unable to display MSA of length 1")
+        return None
+
+
+def plot_msa_folder(msa_folder, id=None):
+    combined_msa = None
+    with os.scandir(msa_folder) as it:
+        for obj in it:
+            obj_path = os.path.splitext(obj.path)
+            if "pdb_hits" not in obj_path[0] and obj_path[1] == ".sto":
+                msa_arr = reduce_stockholm_file(obj.path)
+                if combined_msa is None:
+                    combined_msa = msa_arr
+                else:
+                    combined_msa = np.concatenate((combined_msa, msa_arr), axis=0)
+    if combined_msa is not None:
+        print(f"Total number of aligned sequences is {len(combined_msa)}")
+        plot_msa_array(combined_msa, id).show()
+        return None
+    else:
+        return None
+
+
+def plot_msa_output_folder(path, id=None):
+    """Plot MSAs in a folder that may have multiple chain folders"""
+    plots = []
+    monomer = True
+    with os.scandir(path) as it:
+        for obj in it:
+            if obj.is_dir():
+                monomer = False
+                plot_msa_folder(obj.path, id + " " + obj.name)
+        if monomer:
+            plot_msa_folder(path, id)
+    return None
 
 
 def plot_plddt_legend():

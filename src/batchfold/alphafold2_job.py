@@ -33,7 +33,7 @@ class AlphaFold2Job(BatchFoldJob):
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
     db_preset: str = "full_dbs"
-    model_preset: str = "monomer"
+    model_preset: str = "monomer_ptm"
     benchmark: bool = False
     run_relax: bool = True
     use_gpu_relax: bool = True
@@ -44,8 +44,7 @@ class AlphaFold2Job(BatchFoldJob):
 
         download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer {self.output_dir}/{self.target_id}/msas/"
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/features {self.output_dir}/{self.target_id}/"
+            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer/ {self.output_dir}/{self.target_id}/msas/"
 
         command_list = [
             "/app/run_alphafold.sh",

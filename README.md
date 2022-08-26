@@ -10,7 +10,7 @@ Running both the MSA and structure prediction steps in the same computing enviro
 This repository includes the CloudFormation template, Jupyter Notebook, and supporting code to run protein folding algorithms on AWS Batch. This includes:
 
 - Jackhmmer for MSA generation
-- AlphaFold2, AlphaFold-Multimer, OpenFold for protein structure prediction
+- AlphaFold2, AlphaFold-Multimer, and OpenFold for protein structure prediction
 
 -----
 ## Architecture Diagram
@@ -39,8 +39,6 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 2. Select **Notebook** > **Notebook instances**.
 3. Select the **Batch-Protein-Folding-Notebook** instance and then **Actions** > **Open Jupyter** or **Open JupyterLab**.
 
-![Sagemaker Notebook Instances](imgs/notebook-nav.png)
-
 ### Clone Notebook Repository
 (If **LaunchSageMakerNotebook** set to N)
 1. Navigate to [CodeCommit](https://console.aws.amazon.com/codesuite/codecommit).
@@ -55,7 +53,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 > python prep_databases.py
 ```
 
-2. It will take 8 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
+2. It will take up to 8 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
 
 ### Cleaning Up
 1. To delete all provisioned resources from from your account, navigate to [Cloud Formation](https://console.aws.amazon.com/cloudformation), select your stack, and then **Delete**. 
