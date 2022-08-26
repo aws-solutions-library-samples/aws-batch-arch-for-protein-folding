@@ -14,7 +14,8 @@ class OpenFoldJob(BatchFoldJob):
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
-    config_preset: str = "finetuning_ptm"
+    config_preset="model_1_ptm",
+    openfold_checkpoint_path="openfold_params/finetuning_ptm_2.pt",
     data_dir: str = "/database"
     data_random_seed: str = ""
     fasta_s3_uri: str = ""
@@ -30,14 +31,13 @@ class OpenFoldJob(BatchFoldJob):
     msa_s3_uri: str = ""
     multimer_ri_gap: int = 200
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
-    openfold_checkpoint_path: str = ""
     output_dir: str = "/tmp/openfold"
     output_postfix: str = ""
     output_s3_uri: str = ""
     pdb70_database_path: str = "pdb70/pdb70"
     preset: str = "full_dbs"
     release_dates_path: str = ""
-    save_outputs: bool = False
+    save_outputs: bool = True
     skip_relaxation: bool = False
     small_bfd_database_path: str = "small_bfd/bfd-first_non_consensus_sequences.fasta"
     subtract_plddt: bool = False
