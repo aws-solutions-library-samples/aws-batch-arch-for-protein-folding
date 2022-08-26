@@ -580,38 +580,6 @@ Resources:
         StackId: !Ref "AWS::StackId"
       Type: container            
 
-  DownloadJobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "echo hello"
-        Image: !Join [":", [!Ref DownloadContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /database
-            ReadOnly: False
-            SourceVolume: database
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 8
-          - Type: MEMORY
-            Value: 16000
-        Volumes:
-          - Name: database
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container            
-
 Outputs:
   LaunchTemplate:
     Description: Launch template for EC2 instances.
@@ -661,11 +629,7 @@ Outputs:
   DownloadJobDefinition:
     Description: Job definition for downloading reference data.
     Value:
-      Ref: DownloadJobDefinition         
-  DownloadJobDefinition:
-    Description: Job definition for downloading reference data.
-    Value:
-      Ref: DownloadJobDefinition         
+      Ref: DownloadJobDefinition                
   S3BucketName:
     Description: Optional S3 Bucket name.
     Value:
