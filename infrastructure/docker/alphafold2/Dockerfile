@@ -46,7 +46,7 @@ RUN wget -q -P /tmp \
 ENV PATH="/opt/conda/bin:$PATH"
 RUN conda update -qy conda \
   && conda install -y -c conda-forge \
-    openmm \
+    openmm=7.5.1 \    
     cudatoolkit==${CUDA_VERSION} \
     pdbfixer \
     pip \
@@ -65,9 +65,9 @@ RUN pip3 install --upgrade pip \
     jaxlib==0.1.69+cuda$(cut -f1,2 -d. <<< ${CUDA} | sed 's/\.//g') \
     -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
-# OpenMM Backward Compatible
-WORKDIR /opt/conda/lib/python3.9/site-packages/simtk
-RUN rm -rf openmm && ln -s ../openmm
+# Apply OpenMM patch.
+WORKDIR /opt/conda/lib/python3.9/site-packages
+RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
 RUN chmod u+s /sbin/ldconfig.real
