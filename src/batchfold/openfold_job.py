@@ -14,8 +14,8 @@ class OpenFoldJob(BatchFoldJob):
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
-    config_preset="model_1_ptm",
-    openfold_checkpoint_path="openfold_params/finetuning_ptm_2.pt",
+    config_preset: str = "model_1_ptm",
+    openfold_checkpoint_path: str = "openfold_params/finetuning_ptm_2.pt",
     data_dir: str = "/database"
     data_random_seed: str = ""
     fasta_s3_uri: str = ""
