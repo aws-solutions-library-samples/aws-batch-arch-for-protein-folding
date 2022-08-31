@@ -90,8 +90,8 @@ Resources:
             Ebs:
               DeleteOnTermination: true
               Encrypted: true
-              VolumeSize: 50
-              VolumeType: "gp2"
+              VolumeSize: 100
+              VolumeType: "gp3"
         IamInstanceProfile:
           Name: !Ref InstanceProfile
         TagSpecifications:
