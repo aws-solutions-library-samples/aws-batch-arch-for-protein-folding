@@ -449,11 +449,11 @@ Resources:
       ContainerProperties:
         Command:
           - "nvidia-smi"
-        Environment:
-          - Name: TF_FORCE_UNIFIED_MEMORY
-            Value: 1
-          - Name: XLA_PYTHON_CLIENT_MEM_FRACTION
-            Value: 4.0
+        # Environment:
+        #   - Name: TF_FORCE_UNIFIED_MEMORY
+        #     Value: 1
+        #   - Name: XLA_PYTHON_CLIENT_MEM_FRACTION
+        #     Value: 4.0
         Image: !Join [":", [!Ref AlphaFold2ContainerRegistryURI, "latest"]]
         LogConfiguration:
           LogDriver: awslogs
