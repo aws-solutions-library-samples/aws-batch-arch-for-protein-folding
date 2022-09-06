@@ -6,7 +6,6 @@ from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
 
-
 @define
 class OpenFoldJob(BatchFoldJob):
     """Define OpenFold Job"""
@@ -14,8 +13,8 @@ class OpenFoldJob(BatchFoldJob):
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
-    config_preset="model_1_ptm",
-    openfold_checkpoint_path="openfold_params/finetuning_ptm_2.pt",
+    config_preset: str = "model_1_ptm"
+    openfold_checkpoint_path: str = "openfold_params/finetuning_ptm_2.pt"
     data_dir: str = "/database"
     data_random_seed: str = ""
     fasta_s3_uri: str = ""
@@ -47,6 +46,7 @@ class OpenFoldJob(BatchFoldJob):
     uniclust30_database_path: str = "uniclust30/uniclust30_2018_08/uniclust30_2018_08"
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     use_precomputed_msas: bool = True
+    long_sequence_inference: bool = False
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -129,6 +129,8 @@ class OpenFoldJob(BatchFoldJob):
             command_list.extend(["--subtract_plddt"])
         if self.save_outputs:
             command_list.extend(["--save_outputs"])
+        if self.long_sequence_inference:
+            command_list.extend(["--long_sequence_inference"])            
 
         upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions/ {self.output_s3_uri} && aws s3 cp {self.output_dir}/timings.json {self.output_s3_uri}/timings.json"
 
