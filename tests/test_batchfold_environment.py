@@ -20,6 +20,7 @@ def test_get_stack_outputs(batch_environment):
         "CPUFoldingJobDefinition",
         "CPUOnDemandJobQueue",
         "CPUSpotJobQueue",
+        "DownloadJobDefinition",
         "G4dnJobQueue",
         "GravitonOnDemandJobQueue",
         "GravitonSpotJobQueue",
@@ -49,6 +50,7 @@ def test_get_job_definition_names(batch_environment):
     assert job_def_names == [
         "AlphaFold2JobDefinition",
         "CPUFoldingJobDefinition",
+        "DownloadJobDefinition",
         "MSAJobDefinition",
         "OpenFoldJobDefinition",
     ]
