@@ -13,4 +13,4 @@ src/batchfold.egg-info/
 notebooks/data/
 notebooks/TMscore*
 .mypy.ini
-notebooks/*cameo*
+notebooks/analysis
