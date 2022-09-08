@@ -36,6 +36,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AWSBatchFullAccess"
         - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
   DownloadFsxDataLambda:
     Type: AWS::Lambda::Function
