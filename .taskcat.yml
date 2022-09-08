@@ -10,7 +10,9 @@ project:
     - us-east-2
     - us-west-2
   parameters:
-    Environment: dev
+    Environment: 'dev'
+    DownloadFsxData: 'N'
+    LaunchSageMakerNotebook: 'N'
 tests:
   default:
     template: infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
