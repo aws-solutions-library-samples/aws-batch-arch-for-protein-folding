@@ -5,6 +5,7 @@ from attrs import define
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
+import uuid
 
 @define
 class OpenFoldJob(BatchFoldJob):
@@ -30,7 +31,7 @@ class OpenFoldJob(BatchFoldJob):
     msa_s3_uri: str = ""
     multimer_ri_gap: int = 200
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
-    output_dir: str = "/tmp/openfold"
+    output_dir: str = uuid.uuid4().hex
     output_postfix: str = ""
     output_s3_uri: str = ""
     pdb70_database_path: str = "pdb70/pdb70"

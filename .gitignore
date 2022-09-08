@@ -14,3 +14,4 @@ notebooks/data/
 notebooks/TMscore*
 .mypy.ini
 notebooks/analysis
+.security_scans/
