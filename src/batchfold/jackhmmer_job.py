@@ -5,6 +5,7 @@ from attrs import define
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
+import uuid
 
 
 @define
@@ -13,7 +14,7 @@ class JackhmmerJob(BatchFoldJob):
 
     fasta_s3_uri: str = ""
     output_s3_uri: str = ""
-    output_dir: str = "/tmp/msa"
+    output_dir: str = uuid.uuid4().hex
     data_dir: str = "/database"
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     mgnify_database_path: str = "mgnify/mgy_clusters_2018_12.fa"

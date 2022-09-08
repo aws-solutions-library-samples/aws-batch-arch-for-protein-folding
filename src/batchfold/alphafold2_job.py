@@ -5,6 +5,7 @@ from attrs import define
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
+import uuid
 
 
 @define
@@ -17,7 +18,7 @@ class AlphaFold2Job(BatchFoldJob):
     msa_s3_uri: str = ""
     output_s3_uri: str = ""
     use_precomputed_msas: bool = True
-    output_dir: str = "/tmp/alphafold2"
+    output_dir: str = uuid.uuid4().hex
     data_dir: str = "/database"
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files"
     bfd_database_path: str = (

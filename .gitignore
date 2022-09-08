@@ -13,4 +13,5 @@ src/batchfold.egg-info/
 notebooks/data/
 notebooks/TMscore*
 .mypy.ini
-notebooks/analysis
+.analysis/
+.security_scans/
