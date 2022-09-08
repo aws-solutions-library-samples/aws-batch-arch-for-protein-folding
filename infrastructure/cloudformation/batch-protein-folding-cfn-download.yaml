@@ -12,6 +12,12 @@ Parameters:
   JobDefinition:
     Description: Batch job definition for running download job.
     Type: String
+  LambdaSubnet:
+    Description: Subnet ID for Lambda function deployment
+    Type: AWS::EC2::Subnet::Id
+  LambdaSecurityGroupId:
+    Description: Security group for Lambda function deployment
+    Type: AWS::EC2::SecurityGroup::Id    
 
 Resources:
   LambdaExecutionRole:
@@ -34,6 +40,12 @@ Resources:
   DownloadFsxDataLambda:
     Type: AWS::Lambda::Function
     Properties:
+      ReservedConcurrentExecutions: 25
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref LambdaSecurityGroupId
+        SubnetIds: 
+          - !Ref LambdaSubnet      
       Code: 
         ZipFile: |
           import boto3

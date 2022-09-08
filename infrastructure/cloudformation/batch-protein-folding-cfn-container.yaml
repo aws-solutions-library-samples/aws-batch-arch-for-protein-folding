@@ -16,6 +16,12 @@ Parameters:
     AllowedValues:
       - main
       - dev     
+  LambdaSubnet:
+    Description: Subnet ID for Lambda function deployment
+    Type: AWS::EC2::Subnet::Id
+  LambdaSecurityGroupId:
+    Description: Security group for Lambda function deployment
+    Type: AWS::EC2::SecurityGroup::Id
 
 Resources:
   ##################################################
@@ -475,27 +481,28 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Action:
+              - Effect: Allow
+                Action:
                   - codecommit:CancelUploadArchive
                   - codecommit:GetBranch
                   - codecommit:GetCommit
                   - codecommit:GetRepository
                   - codecommit:GetUploadArchiveStatus
                   - codecommit:UploadArchive
-                Resource: !GetAtt CodeRepository.Arn
-                Effect: Allow
-              - Action:
+                Resource: !GetAtt CodeRepository.Arn                
+              - Effect: Allow
+                Action:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:GetObjectVersion
-                Resource: !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*
-                Effect: Allow
-              - Action:
+                Resource: !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*                
+              - Effect: Allow
+                Action:
                   - s3:GetBucketAcl
                   - s3:GetBucketLocation
-                Resource: !GetAtt BatchFoldS3Bucket.Arn
-                Effect: Allow
-              - Action:
+                Resource: !GetAtt BatchFoldS3Bucket.Arn                
+              - Effect: Allow
+                Action:
                   - codebuild:BatchGetBuilds
                   - codebuild:StartBuild
                   - codebuild:BatchGetBuildBatches
@@ -504,8 +511,7 @@ Resources:
                   - !GetAtt CodeBuildProjectAlphaFold2.Arn
                   - !GetAtt CodeBuildProjectOpenFold.Arn
                   - !GetAtt CodeBuildProjectMSA.Arn
-                  - !GetAtt CodeBuildProjectDownload.Arn                  
-                Effect: Allow
+                  - !GetAtt CodeBuildProjectDownload.Arn                                  
               - Effect: Allow
                 Action:
                   - ecr:DescribeImages
@@ -637,6 +643,12 @@ Resources:
   DeleteBucketLambda:
     Type: AWS::Lambda::Function
     Properties:
+      ReservedConcurrentExecutions: 5
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref LambdaSecurityGroupId
+        SubnetIds: 
+          - !Ref LambdaSubnet
       Code:
         ZipFile: |
           import logging          
@@ -692,6 +704,12 @@ Resources:
   DeleteContainerRepoLambda:
     Type: AWS::Lambda::Function
     Properties:
+      ReservedConcurrentExecutions: 25
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref LambdaSecurityGroupId
+        SubnetIds: 
+          - !Ref LambdaSubnet
       Code:
         ZipFile: |
           import logging          

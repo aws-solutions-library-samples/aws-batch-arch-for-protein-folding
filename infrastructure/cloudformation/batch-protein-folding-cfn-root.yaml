@@ -121,7 +121,18 @@ Resources:
         ApplicationName:
           Ref: ApplicationName
         Environment:
-          Ref: Environment        
+          Ref: Environment     
+        LambdaSubnet:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - Ref: Subnet
+        LambdaSecurityGroupId:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
+            - Ref: DefaultSecurityGroup        
+
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -196,6 +207,16 @@ Resources:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
         JobDefinition:
           "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
+        LambdaSubnet:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - Ref: Subnet
+        LambdaSecurityGroupId:
+          "Fn::If":
+            - CreateNetwork
+            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
+            - Ref: DefaultSecurityGroup             
 
 Outputs:
   ApplicationName:
