@@ -51,7 +51,7 @@ class AlphaFold2Job(BatchFoldJob):
             "/app/run_alphafold.sh",
             f"--data_dir={self.data_dir}",
             f"--output_dir={self.output_dir}",
-            f"--fasta_paths=/tmp/alphafold2/fasta/{self.target_id}.fasta",
+            f"--fasta_paths={self.output_dir}/fasta/{self.target_id}.fasta",
             f"--template_mmcif_dir={self.data_dir}/{self.template_mmcif_dir}",
             f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
             f"--uniref90_database_path={self.data_dir}/{self.uniref90_database_path}",
