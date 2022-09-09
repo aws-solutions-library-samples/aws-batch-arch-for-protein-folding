@@ -16,11 +16,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       hmmer \
       tar \
       awscli \
-      python3.7 \
+      python3.8 \
       python3-pip \
     && apt-get clean \
     && rm /usr/bin/python3 \
-    && ln -s /usr/bin/python3.7 /usr/bin/python3 \
+    && ln -s /usr/bin/python3.8 /usr/bin/python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.
@@ -47,7 +47,7 @@ RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
 COPY . /opt/msa
 WORKDIR /opt/msa
 
-RUN pip3 install --upgrade pip \
-    && python3 -m pip install -r /opt/msa/requirements.txt 
+RUN pip3 install --upgrade pip
+RUN python3 -m pip install -r /opt/msa/requirements.txt 
 
 ENTRYPOINT ["bash", "-c"]
