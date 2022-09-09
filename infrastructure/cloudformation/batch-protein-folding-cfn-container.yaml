@@ -22,6 +22,15 @@ Parameters:
   LambdaSecurityGroupId:
     Description: Security group for Lambda function deployment
     Type: AWS::EC2::SecurityGroup::Id
+  DownloadFsxData:
+    Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+
+Conditions:
+  DownloadFsxDataCondition:
+    "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
 
 Resources:
   ##################################################
@@ -789,9 +798,12 @@ Resources:
 
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: DownloadFsxDataCondition
+
 
   CodeBuildWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
+    Condition: DownloadFsxDataCondition
     DependsOn: 
       - CodePipeline
     Properties:

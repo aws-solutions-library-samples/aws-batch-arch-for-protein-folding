@@ -132,6 +132,8 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup        
+        DownloadFsxData:
+          Ref: DownloadFsxData
 
 
   BatchEnvironment:
