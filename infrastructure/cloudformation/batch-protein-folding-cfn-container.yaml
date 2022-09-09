@@ -798,8 +798,6 @@ Resources:
 
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: DownloadFsxDataCondition
-
 
   CodeBuildWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
