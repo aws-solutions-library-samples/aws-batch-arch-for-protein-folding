@@ -157,13 +157,13 @@ Resources:
     Type: AWS::IAM::ServiceLinkedRole
     Properties:
       AWSServiceName: spot.amazonaws.com
-      Description: Default EC2 Spot Service Linked Role
+      Description: Default EC2 Spot Service Linked Role for protein folding
 
   AWSServiceRoleForEC2SpotFleetServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
     Properties:
       AWSServiceName: spotfleet.amazonaws.com
-      Description: Default EC2 Spot Fleet Service Linked Role
+      Description: Default EC2 Spot Fleet Service Linked Role for protein folding
 
   ####################################################################################################
   # Batch Compute Environments
