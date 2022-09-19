@@ -21,16 +21,6 @@ Parameters:
   Subnet:
     Description: Subnet ID for the file system.
     Type: String
-  AlphaFold2ContainerRegistryURI:
-    Description: URI of the AlphaFold2 container
-    Type: String
-    Default: ""
-  OpenFoldContainerRegistryURI:
-    Description: URI of the OpenFold container
-    Type: String  
-  MSAContainerRegistryURI:
-    Description: URI of the OpenFold MSA container
-    Type: String  
   DownloadContainerRegistryURI:
     Description: URI of the download container
     Type: String  
@@ -65,6 +55,25 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - "sts:AssumeRole"
+      Policies:
+        - PolicyName: S3RWPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::${S3BucketName}/*
+              - Action:
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                  - s3:PutBucketPolicy
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::${S3BucketName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
         - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
@@ -132,7 +141,7 @@ Resources:
                 ],
               ]
 
-  SpotFleetRole:
+  AmazonEC2SpotFleetTaggingRole:
     Type: AWS::IAM::Role
     Properties:
       Description: "Required service policies to support tagging spot fleet instances on AWS Batch"
@@ -157,13 +166,13 @@ Resources:
     Type: AWS::IAM::ServiceLinkedRole
     Properties:
       AWSServiceName: spot.amazonaws.com
-      Description: Default EC2 Spot Service Linked Role for protein folding
+      Description: Default EC2 Spot Service Linked Role
 
   AWSServiceRoleForEC2SpotFleetServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
     Properties:
       AWSServiceName: spotfleet.amazonaws.com
-      Description: Default EC2 Spot Fleet Service Linked Role for protein folding
+      Description: Default EC2 Spot Service Linked Role
 
   ####################################################################################################
   # Batch Compute Environments
@@ -218,7 +227,7 @@ Resources:
         SecurityGroupIds:
           - Ref: DefaultSecurityGroupID
         SpotIamFleetRole:
-          "Fn::GetAtt": SpotFleetRole.Arn
+          "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
         Subnets:
           - Ref: Subnet
         Type: SPOT
@@ -251,7 +260,7 @@ Resources:
         SecurityGroupIds:
           - Ref: DefaultSecurityGroupID
         SpotIamFleetRole:
-          "Fn::GetAtt": SpotFleetRole.Arn
+          "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
         Subnets:
           - Ref: Subnet
         Type: SPOT
@@ -425,147 +434,6 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"        
 
-  ####################################################################################################
-  # Batch Job Definitions
-  ####################################################################################################
-
-  CPUFoldingJobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "echo hello"
-        Image: !Join [":", [!Ref OpenFoldContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /database
-            ReadOnly: True
-            SourceVolume: database
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 8
-          - Type: MEMORY
-            Value: 16000
-        Volumes:
-          - Name: database
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container
-
-  AlphaFold2JobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "nvidia-smi"
-        # Environment:
-        #   - Name: TF_FORCE_UNIFIED_MEMORY
-        #     Value: 1
-        #   - Name: XLA_PYTHON_CLIENT_MEM_FRACTION
-        #     Value: 4.0
-        Image: !Join [":", [!Ref AlphaFold2ContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /database
-            ReadOnly: True
-            SourceVolume: database
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 8
-          - Type: MEMORY
-            Value: 16000
-          - Type: GPU
-            Value: 1
-        Volumes:
-          - Name: database
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container
-
-  OpenFoldJobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "nvidia-smi"
-        Image: !Join [":", [!Ref OpenFoldContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /database
-            ReadOnly: True
-            SourceVolume: database
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 8
-          - Type: MEMORY
-            Value: 16000
-          - Type: GPU
-            Value: 1
-        Volumes:
-          - Name: database
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container
-
-  MSAJobDefinition:
-    Type: AWS::Batch::JobDefinition
-    Properties:
-      ContainerProperties:
-        Command:
-          - "echo hello"
-        Image: !Join [":", [!Ref MSAContainerRegistryURI, "latest"]]
-        LogConfiguration:
-          LogDriver: awslogs
-        MountPoints:
-          - ContainerPath: /database
-            ReadOnly: False
-            SourceVolume: database
-        ResourceRequirements:
-          - Type: VCPU
-            Value: 8
-          - Type: MEMORY
-            Value: 16000
-        Volumes:
-          - Name: database
-            Host:
-              SourcePath: /fsx
-      PlatformCapabilities:
-        - EC2
-      PropagateTags: true
-      RetryStrategy:
-        Attempts: 3
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-      Type: container      
-
   DownloadJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
@@ -628,22 +496,6 @@ Outputs:
     Description: Job queue for On-Demand Graviton instances.
     Value: 
       Ref: GravitonOnDemandJobQueue         
-  CPUFoldingJobDefinition:
-    Description: Job definition for running folding jobs on CPU instances.
-    Value:
-      Ref: CPUFoldingJobDefinition
-  AlphaFold2JobDefinition:
-    Description: Job definition for running AlphaFold2 jobs on GPU instances.
-    Value:
-      Ref: AlphaFold2JobDefinition
-  OpenFoldJobDefinition:
-    Description: Job definition for running OpenFold jobs on GPU instances.
-    Value:
-      Ref: OpenFoldJobDefinition    
-  MSAJobDefinition:
-    Description: Job definition for running OpenFold MSA jobs on CPU instances.
-    Value:
-      Ref: MSAJobDefinition    
   DownloadJobDefinition:
     Description: Job definition for downloading reference data.
     Value:

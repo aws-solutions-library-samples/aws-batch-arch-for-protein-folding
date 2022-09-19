@@ -37,8 +37,9 @@ RUN wget -q -P /opt/openfold/openfold/resources \
 RUN patch -p0 -d /opt/conda/lib/python3.7/site-packages/ < /opt/openfold/lib/openmm.patch
 
 WORKDIR /opt/openfold
-COPY setup.py /opt/openfold/setup.py
-COPY run_pretrained_openfold.py /opt/openfold/run_pretrained_openfold.py
-RUN python3 setup.py install
+COPY . /opt/openfold/
 
-ENTRYPOINT ["bash", "-c"]
+RUN python3 setup.py install \
+  && chmod 755 /opt/openfold/run.sh
+
+ENTRYPOINT ["bash", "/opt/openfold/run.sh"]

@@ -30,14 +30,15 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 3. Provide a name for your stack, leave the other parameters as their default, and select **Next**.
 4. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.
 5. Choose **Create stack**.
-6. Wait 15 minutes for AWS CloudFormation to create the infrastructure stack and AWS CodeBuild to build and publish the AWS-AlphaFold container to Amazon Elastic Container Registry (Amazon ECR).
-7. Once the stack is active, AWS Batch will begin downloading the necessary reference data to the Amazon FSx for Lustre file system. This process will take about 8 hours to finish. 
+6. Wait 20 minutes for AWS CloudFormation to create the infrastructure stack and AWS CodeBuild to build and publish the AWS-AlphaFold container to Amazon Elastic Container Registry (Amazon ECR).
+7. Once the stack is active, AWS Batch will begin downloading the necessary reference data to the Amazon FSx for Lustre file system. This process will take about 5 hours to finish, depending on your location. 
 
 ### Launch SageMaker Notebook
 (If **LaunchSageMakerNotebook** set to Y)
 1. Navigate to [SageMaker](https://console.aws.amazon.com/sagemaker)
 2. Select **Notebook** > **Notebook instances**.
 3. Select the **Batch-Protein-Folding-Notebook** instance and then **Actions** > **Open Jupyter** or **Open JupyterLab**.
+4. Select the **conda_python_3** kernel.
 
 ### Clone Notebook Repository
 (If **LaunchSageMakerNotebook** set to N)
@@ -53,7 +54,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 > python prep_databases.py
 ```
 
-2. It will take up to 8 hours to populate the file system, depending on your region. You can track its progress by navigating to the file system in the FSx for Lustre console.
+It will take around 5 hours to populate the file system, depending on your location. You can track its progress by navigating to the file system in the FSx for Lustre console.
 
 ### Cleaning Up
 1. To delete all provisioned resources from from your account, navigate to [Cloud Formation](https://console.aws.amazon.com/cloudformation), select your stack, and then **Delete**. 
@@ -64,10 +65,11 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
   - Provide values for the **VPC**, **Subnet**, and **DefaultSecurityGroup** parameters to use existing network resources. If one or more of those parameters are left empty, CloudFormation will create a new VPC and FSx for Lustre instance for the stack.
   - Provide values for the **FileSystemId** and **FileSystemMountName** parameters to use an existing FSx for Lustre file system. If one or more of these parameters are left empty, CloudFormation will create a new file system for the stack.
   - Select "Y" for **DownloadFsxData** to automatically populate the FSx for Lustre file system with common sequence databases.
+  - Select "Y" for **CreateG5ComputeEnvironment** to create an additional job queue with support for G5 family instances. Note that G5 instances are currently not available in all AWS regions.
 
 -----
 ## Usage
-Use the provided `quick-start-openfold.ipynb` notebook to submit sequences for analysis and download the results.
+Use the provided `quick-start-protein-folding.ipynb` notebook to submit sequences for analysis and download the results.
 
 -----
 ## Infrastructure Details
@@ -111,22 +113,11 @@ This project is licensed under the Apache-2.0 License.
 -----
 ## Additional Information
 
-### OpenFold Repository
-Please visit https://github.com/aqlaboratory/openfold for more information about the OpenFold algorithm.
+### JackHMMER
+Please visit https://github.com/EddyRivasLab/hmmer for more information about the JackHMMER algorithm.
 
-### Citations
-
-The OpenFold citation is
-```
-@software{Ahdritz_OpenFold_2021,
-  author = {Ahdritz, Gustaf and Bouatta, Nazim and Kadyan, Sachin and Xia, Qinghui and Gerecke, William and AlQuraishi, Mohammed},
-  doi = {10.5281/zenodo.5709539},
-  month = {11},
-  title = {{OpenFold}},
-  url = {https://github.com/aqlaboratory/openfold},
-  year = {2021}
-}
-```
+### AlphaFold
+Please visit https://github.com/deepmind/alphafold for more information about the AlphaFold2 algorithm.
 
 The original AlphaFold 2 paper is
 ```
@@ -154,7 +145,11 @@ The AlphaFold-Multimer paper is
   eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
 }
 ```
-OpenFold may be cited as 
+
+### OpenFold
+Please visit https://github.com/aqlaboratory/openfold for more information about the OpenFold algorithm.
+
+The OpenFold citation is
 ```
 @software{Ahdritz_OpenFold_2021,
   author = {Ahdritz, Gustaf and Bouatta, Nazim and Kadyan, Sachin and Xia, Qinghui and Gerecke, William and AlQuraishi, Mohammed},

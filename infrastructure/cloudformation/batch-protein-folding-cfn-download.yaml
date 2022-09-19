@@ -32,9 +32,16 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
+      Policies:
+        - PolicyName: SubmitJob
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: batch:SubmitJob
+                Resource: "*"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AWSBatchFullAccess"
-        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
@@ -68,17 +75,17 @@ Resources:
                       LOGGER.info("CREATE!")
 
                       download_scripts = [
-                          "download_alphafold_params.sh",
-                          "download_bfd.sh",
-                          "download_mgnify.sh",
-                          "download_openfold_params.sh",
-                          "download_pdb_mmcif.sh",
-                          "download_pdb_seqres.sh",
-                          "download_pdb70.sh",
-                          "download_small_bfd.sh",
-                          "download_uniclust30.sh",
-                          "download_uniprot.sh",                          
-                          "download_uniref90.sh"
+                          "/scripts/download_alphafold_params.sh",
+                          "/scripts/download_bfd.sh",
+                          "/scripts/download_mgnify.sh",
+                          "/scripts/download_openfold_params.sh",
+                          "/scripts/download_pdb_mmcif.sh",
+                          "/scripts/download_pdb_seqres.sh",
+                          "/scripts/download_pdb70.sh",
+                          "/scripts/download_small_bfd.sh",
+                          "/scripts/download_uniclust30.sh",
+                          "/scripts/download_uniprot.sh",                          
+                          "/scripts/download_uniref90.sh"
                       ]
                       
                       responses = []
@@ -143,7 +150,7 @@ Resources:
             depends_on=None
           ):
             container_overrides = {
-                "command": [f"./{script} {download_dir}"],
+                "command": [f"bash {script} {download_dir}"],
                 "resourceRequirements": [
                     {"value": str(cpu), "type": "VCPU"},
                     {"value": str(memory * 1000), "type": "MEMORY"},

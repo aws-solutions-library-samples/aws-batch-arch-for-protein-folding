@@ -220,8 +220,8 @@ class BatchFoldTarget:
         jobs = []
         for page in page_iterator:
             for key in page["Contents"]:
-                if re.search("predictions/(.*)/", key["Key"]):
-                    jobs.append(re.search("predictions/(.*)/", key["Key"]).group(1))
+                if re.search("predictions/(.*?)/", key["Key"]):
+                    jobs.append(re.search("predictions/(.*?)/", key["Key"]).group(1))
         jobs = [*set(jobs)]
 
         if job_type != "":

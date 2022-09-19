@@ -19,7 +19,7 @@ class BatchFoldJob:
     job_name: str = field(
         kw_only=True, default=datetime.now().strftime("%Y%m%dT%H%M%S")
     )
-    job_definition_name: str = field(kw_only=True, default="CPUFoldingJobDefinition")
+    job_definition_name: str = field(kw_only=True, default="JackhmmerJobDefinition")
     gpu: int = field(kw_only=True, default=0)
     id: str = field(init=False)
     memory: int = field(kw_only=True, default=16)

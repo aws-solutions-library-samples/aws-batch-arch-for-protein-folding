@@ -21,7 +21,7 @@ class JackhmmerJob(BatchFoldJob):
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
-    job_definition_name: str = "MSAJobDefinition"
+    job_definition_name: str = "JackhmmerJobDefinition"
     pdb70_database_path: str = "pdb70/pdb70"
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
@@ -36,11 +36,12 @@ class JackhmmerJob(BatchFoldJob):
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
-
-        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/{self.target_id}.fasta"
-
-        command_list = [
-            f"python3 /opt/msa/create_alignments.py",
+        command_list = [f"-i {self.fasta_s3_uri}:{self.output_dir}/fasta/{self.target_id}.fasta"]
+        command_list.extend([f"-o {self.output_dir}/{self.target_id}/msas/:{self.output_s3_uri}/jackhmmer/"])
+        command_list.extend([f"-o {self.output_dir}/{self.target_id}/features.pkl:{self.output_s3_uri}/features/features.pkl"])
+        command_list.extend([
+            "python3",
+            "/opt/msa/create_alignments.py",
             f"--fasta_paths {self.output_dir}/fasta/{self.target_id}.fasta",
             f"--output_dir {self.output_dir}",
             f"--uniref90_database_path {self.data_dir}/{self.uniref90_database_path}",
@@ -51,7 +52,7 @@ class JackhmmerJob(BatchFoldJob):
             f"--db_preset {self.db_preset}",
             f"--model_preset {self.model_preset}",
             f"--n_cpu {self.cpu}",
-        ]
+        ])
 
         if self.db_preset == "reduced_dbs":
             command_list.extend(
@@ -79,11 +80,7 @@ class JackhmmerJob(BatchFoldJob):
                 [f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"]
             )
 
-        upload_string = f"aws s3 cp --recursive {self.output_dir}/{self.target_id}/msas/ {self.output_s3_uri}/jackhmmer && aws s3 cp {self.output_dir}/{self.target_id}/features.pkl {self.output_s3_uri}/features/features.pkl"
-        command_string = (
-            download_string + " && " + " ".join(command_list) + " && " + upload_string
-        )
-        logging.info(f"Command is \n{command_string}")
-        self.container_overrides["command"] = [command_string]
+        logging.info(f"Command is \n{command_list}")
+        self.container_overrides["command"] = command_list
 
         return None

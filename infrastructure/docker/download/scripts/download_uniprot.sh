@@ -45,8 +45,8 @@ mkdir --parents "${ROOT_DIR}"
 aria2c "${TREMBL_SOURCE_URL}" --dir="${ROOT_DIR}"
 aria2c "${SPROT_SOURCE_URL}" --dir="${ROOT_DIR}"
 pushd "${ROOT_DIR}"
-gunzip "${ROOT_DIR}/${TREMBL_BASENAME}"
-gunzip "${ROOT_DIR}/${SPROT_BASENAME}"
+gunzip -f "${ROOT_DIR}/${TREMBL_BASENAME}"
+gunzip -f "${ROOT_DIR}/${SPROT_BASENAME}"
 
 # Concatenate TrEMBL and SwissProt, rename to uniprot and clean up.
 cat "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}" >> "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}"

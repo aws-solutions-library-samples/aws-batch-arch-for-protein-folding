@@ -90,7 +90,7 @@ Resources:
         ApplicationName:
           Ref: ApplicationName
         StackAvailabilityZone:
-          "Fn::Join": ["", [Ref: "AWS::Region", Ref: StackAvailabilityZone]]
+          "Fn::Sub": ${AWS::Region}${StackAvailabilityZone}
 
   FileSystem:
     Type: "AWS::CloudFormation::Stack"
@@ -135,7 +135,6 @@ Resources:
         DownloadFsxData:
           Ref: DownloadFsxData
 
-
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
     Properties:
@@ -165,12 +164,6 @@ Resources:
             - CreateFileSystem
             - "Fn::GetAtt": FileSystem.Outputs.FileSystemMountName
             - Ref: FileSystemMountName
-        AlphaFold2ContainerRegistryURI:
-          "Fn::GetAtt": Container.Outputs.AlphaFold2ContainerRegistryURI
-        OpenFoldContainerRegistryURI:
-          "Fn::GetAtt": Container.Outputs.OpenFoldContainerRegistryURI
-        MSAContainerRegistryURI:
-          "Fn::GetAtt": Container.Outputs.MSAContainerRegistryURI
         DownloadContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         S3BucketName:
@@ -206,7 +199,7 @@ Resources:
       TemplateURL: batch-protein-folding-cfn-download.yaml
       Parameters:
         DownloadJobQueue:
-          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonSpotJobQueue
+          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonOnDemandJobQueue
         JobDefinition:
           "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
         LambdaSubnet:
@@ -219,6 +212,64 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup             
+
+#################################################################################
+# Modules
+#################################################################################
+
+  ModuleAlphaFold2:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-alphafold2.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+
+  ModuleOpenFold:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-openfold.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn          
+
+  ModuleJackhmmer:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-jackhmmer.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
 
 Outputs:
   ApplicationName:

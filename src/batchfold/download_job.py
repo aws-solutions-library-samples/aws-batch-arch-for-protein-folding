@@ -10,7 +10,7 @@ import logging
 class DownloadJob(BatchFoldJob):
     """Define Jackhmmer MSA Creation Job"""
 
-    job_definition_name: str = "MSAJobDefinition"
+    job_definition_name: str = "JackhmmerJobDefinition"
     script: str = "./scripts/download_test.sh"
     data_dir: str = "/database"
 

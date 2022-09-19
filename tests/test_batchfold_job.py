@@ -11,7 +11,6 @@ from datetime import datetime
 @pytest.fixture()
 def batch_environment():
     stack = BatchFoldEnvironment(boto_session=boto3.Session())
-    assert "BatchEnvironment" in stack.stack_name
     return stack
 
 

@@ -78,9 +78,10 @@ RUN chmod u+s /sbin/ldconfig.real
 # ENTRYPOINT does not support easily running multiple commands, so instead we
 # write a shell script to wrap them up.
 WORKDIR /app/alphafold
+COPY run.sh /app/alphafold/run.sh
 RUN echo $'#!/bin/bash\n\
 ldconfig\n\
 python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
-  && chmod +x /app/run_alphafold.sh
+  && chmod +x /app/run_alphafold.sh /app/alphafold/run.sh
 
-ENTRYPOINT ["bash", "-c"]
+ENTRYPOINT ["bash", "/app/alphafold/run.sh"]

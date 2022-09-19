@@ -10,7 +10,6 @@ from datetime import datetime
 @pytest.fixture()
 def batch_environment():
     stack = BatchFoldEnvironment(boto_session = boto3.Session())
-    assert "BatchEnvironment" in stack.stack_name
     return(stack)
 
 def test_download_job_init():
@@ -45,5 +44,5 @@ def test_download_job_submission(batch_environment):
     assert len(job_list) > 0
 
     job_info = [job for job in job_list if job.get("jobName", []) == job_name]
-    assert job_info[0].get("jobDefinition") == batch_environment.job_definitions["MSAJobDefinition"]
+    assert job_info[0].get("jobDefinition") == batch_environment.job_definitions["JackhmmerJobDefinition"]
     assert job_info[0].get("jobName") == job_name

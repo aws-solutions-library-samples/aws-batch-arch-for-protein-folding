@@ -47,7 +47,8 @@ RUN wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
 COPY . /opt/msa
 WORKDIR /opt/msa
 
-RUN pip3 install --upgrade pip
-RUN python3 -m pip install -r /opt/msa/requirements.txt 
+RUN pip3 install --upgrade pip \
+  && python3 -m pip install -r /opt/msa/requirements.txt \
+  && chmod 755 /opt/msa/run.sh
 
-ENTRYPOINT ["bash", "-c"]
+ENTRYPOINT ["bash", "/opt/msa/run.sh"]

@@ -52,12 +52,17 @@ class OpenFoldJob(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
-        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"
+        command_list = [f"-i {self.fasta_s3_uri}:{self.output_dir}/fasta/"]
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer {self.output_dir}/msas/{self.target_id}/"
+            command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/msas/{self.target_id}/"])
+        command_list.extend([f"-o {self.output_dir}/predictions/:{self.output_s3_uri}/"])
+        command_list.extend([f"-o {self.output_dir}/timings.json:{self.output_s3_uri}/timings.json"])
 
-        command_list = [
-            f"python3 /opt/openfold/run_pretrained_openfold.py {self.output_dir}/fasta {self.data_dir}/{self.template_mmcif_dir}",
+        command_list.extend([
+            "python3",
+            "/opt/openfold/run_pretrained_openfold.py",
+            f"{self.output_dir}/fasta",
+            f"{self.data_dir}/{self.template_mmcif_dir}",
             f"--model_device={self.model_device}",
             f"--config_preset={self.config_preset}",
             f"--multimer_ri_gap={self.multimer_ri_gap}",
@@ -68,7 +73,7 @@ class OpenFoldJob(BatchFoldJob):
             f"--hhsearch_binary_path={self.hhsearch_binary_path}",
             f"--kalign_binary_path={self.kalign_binary_path}",
             f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
-        ]
+        ])
 
         if self.use_precomputed_msas is False:
             command_list.extend(
@@ -133,12 +138,7 @@ class OpenFoldJob(BatchFoldJob):
         if self.long_sequence_inference:
             command_list.extend(["--long_sequence_inference"])            
 
-        upload_string = f"aws s3 cp --recursive {self.output_dir}/predictions/ {self.output_s3_uri} && aws s3 cp {self.output_dir}/timings.json {self.output_s3_uri}/timings.json"
-
-        command_string = (
-            download_string + " && " + " ".join(command_list) + " && " + upload_string
-        )
-        logging.info(f"Command is \n{command_string}")
-        self.container_overrides["command"] = [command_string]
+        logging.info(f"Command is \n{command_list}")
+        self.container_overrides["command"] = command_list
 
         return None

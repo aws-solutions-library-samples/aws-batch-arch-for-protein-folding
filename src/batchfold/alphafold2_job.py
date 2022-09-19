@@ -43,11 +43,12 @@ class AlphaFold2Job(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
-        download_string = f"aws s3 cp {self.fasta_s3_uri} {self.output_dir}/fasta/"
+        command_list = [f"-i {self.fasta_s3_uri}:{self.output_dir}/fasta/"]
         if self.use_precomputed_msas:
-            download_string += f" && aws s3 cp --recursive {self.msa_s3_uri}/jackhmmer/ {self.output_dir}/{self.target_id}/msas/"
+            command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/{self.target_id}/msas/"])
+        command_list.extend([f"-o {self.output_dir}/{self.target_id}/:{self.output_s3_uri}"])
 
-        command_list = [
+        command_list.extend([
             "/app/run_alphafold.sh",
             f"--data_dir={self.data_dir}",
             f"--output_dir={self.output_dir}",
@@ -63,7 +64,7 @@ class AlphaFold2Job(BatchFoldJob):
             f"--benchmark={self.benchmark}",
             f"--run_relax={self.run_relax}",
             f"--use_gpu_relax={self.use_gpu_relax}",
-        ]
+        ])
 
         if self.db_preset == "full_dbs":
             command_list.extend(
@@ -86,22 +87,17 @@ class AlphaFold2Job(BatchFoldJob):
         if self.model_preset == "multimer":
             command_list.extend(
                 [
-                    f"--pdb_seqres_database_path {self.data_dir}/{self.pdb_seqres_database_path}",
-                    f"--uniprot_database_path {self.data_dir}/{self.uniprot_database_path}",
+                    f"--pdb_seqres_database_path={self.data_dir}/{self.pdb_seqres_database_path}",
+                    f"--uniprot_database_path={self.data_dir}/{self.uniprot_database_path}",
                     f"--num_multimer_predictions_per_model={self.num_multimer_predictions_per_model}",
                 ]
             )
         else:
             command_list.extend(
-                [f"--pdb70_database_path {self.data_dir}/{self.pdb70_database_path}"]
+                [f"--pdb70_database_path={self.data_dir}/{self.pdb70_database_path}"]
             )
 
-        upload_string = f'aws s3 cp {self.output_dir}/{self.target_id}/ {self.output_s3_uri} --recursive --exclude "*.a3m" --exclude "*.sto" --exclude "*.hhr" '
-
-        command_string = (
-            download_string + " && " + " ".join(command_list) + " && " + upload_string
-        )
-        logging.info(f"Command is \n{command_string}")
-        self.container_overrides["command"] = [command_string]
+        logging.info(f"Command is \n{command_list}")
+        self.container_overrides["command"] = command_list
 
         return None

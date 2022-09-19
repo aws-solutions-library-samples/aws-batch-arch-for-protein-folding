@@ -20,7 +20,7 @@ class BatchFoldEnvironment:
         boto_session (boto3.session.Session): The underlying Boto3 session which AWS service
             calls are delegated to (default: None). If not provided, one is created with
             default AWS configuration chain.
-        stack_name (str): Name of the CloudFormation stack to use. If not provided, the
+        stack_id (str): ID of the CloudFormation stack to use. If not provided, the
             most recent stack will be used.
         queues (dict): Dictionary of JobQueue objects used to submit and track analysis jobs.
         job_definitions (list): List of valid job definitions for the environment.
@@ -28,13 +28,15 @@ class BatchFoldEnvironment:
     """
 
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
-    stack_name: str = field(kw_only=True)
+    stack_id: str = field(kw_only=True)
+    nested_stacks: List = field(kw_only=True)
+    stack_outputs: List = field(kw_only=True)
     queues: dict = field(kw_only=True)
     job_definitions: dict = field(kw_only=True)
     default_bucket: str = field(kw_only=True)
 
-    @stack_name.default
-    def get_latest_stack(self) -> str:
+    @stack_id.default
+    def load_latest_root_stack(self) -> str:
         """Get the latest batchfold cloudformation stack."""
 
         cfn = self.boto_session.client("cloudformation")
@@ -44,14 +46,33 @@ class BatchFoldEnvironment:
             "ROLLBACK_COMPLETE",
             "UPDATE_COMPLETE",
         ]
-        for stack in cfn.list_stacks(StackStatusFilter=stack_status_filter)[
-            "StackSummaries"
-        ]:
-            if "batch-protein-folding-cfn-batch.yaml" in stack.get(
-                "TemplateDescription", []
-            ):
-                batchfold_stacks.append(stack)
-        return batchfold_stacks[0].get("StackName", [])
+        for stack in cfn.list_stacks(StackStatusFilter=stack_status_filter)["StackSummaries"]:
+            if "batch-protein-folding-cfn-root.yaml" in stack.get("TemplateDescription", []):
+                batchfold_stacks.append((stack["CreationTime"], stack["StackId"]))
+        return sorted(batchfold_stacks, key = lambda x: x[0], reverse=True)[0][1]
+
+    @nested_stacks.default
+    def load_nested_stacks(self) -> List:
+        cfn = self.boto_session.client("cloudformation")
+        resources = cfn.list_stack_resources(StackName=self.stack_id).get("StackResourceSummaries", [])
+        return [ x.get("PhysicalResourceId", []) for x in resources if x.get("ResourceType", []) ==  "AWS::CloudFormation::Stack" ]
+
+    @stack_outputs.default
+    def load_stack_outputs(self) -> List:
+        cfn = self.boto_session.client("cloudformation")
+        stack_outputs = []
+        for nested_stack in self.nested_stacks:
+            stack_outputs.extend(cfn.describe_stacks(StackName=nested_stack).get("Stacks")[0].get("Outputs", []))
+        return(stack_outputs)
+
+    def get_stack_outputs(self, filter: str = "") -> Dict:
+        """Get a dict of the cloudformation stack outputs, optionally with key filtered by a string"""
+        output_dict = {
+            output["OutputKey"]: output["OutputValue"]
+            for output in self.stack_outputs
+            if filter in output["OutputKey"]
+        }
+        return output_dict
 
     @queues.default
     def load_queues(self) -> Dict:
@@ -87,22 +108,6 @@ class BatchFoldEnvironment:
     def load_default_bucket(self):
         return self.get_stack_outputs().get("S3BucketName", [])
 
-    def get_stack_outputs(self, filter: str = "") -> Dict:
-        """Get a dict of the cloudformation stack outputs, optionally with key filtered by a string"""
-
-        cfn = self.boto_session.client("cloudformation")
-        output_list = (
-            cfn.describe_stacks(StackName=self.stack_name)
-            .get("Stacks")[0]
-            .get("Outputs")
-        )
-        output_dict = {
-            output["OutputKey"]: output["OutputValue"]
-            for output in output_list
-            if filter in output["OutputKey"]
-        }
-        return output_dict
-
     def submit_job(
         self,
         job: BatchFoldJob,
@@ -136,3 +141,4 @@ class BatchFoldEnvironment:
             all_jobs[queue.name] = jobs
 
         return all_jobs
+

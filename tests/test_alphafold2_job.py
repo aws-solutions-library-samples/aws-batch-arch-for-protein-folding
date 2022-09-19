@@ -11,7 +11,6 @@ import os
 @pytest.fixture()
 def batch_environment():
     stack = BatchFoldEnvironment(boto_session = boto3.Session())
-    assert "BatchEnvironment" in stack.stack_name
     return(stack)
 
 def test_alphafold_2_job_init():

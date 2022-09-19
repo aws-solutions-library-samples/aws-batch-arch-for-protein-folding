@@ -78,15 +78,27 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSageMakerFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCodeCommitReadOnly"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSBatchFullAccess"
+      Policies:
+        - PolicyName: SubmitJob
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - batch:SubmitJob
+                  - batch:DescribeJobs
+                  - batch:ListJobs
+                  - batch:TerminateJobs
+                Resource: "*"
 
   AlphafoldNotebookInstance:
     Type: "AWS::SageMaker::NotebookInstance"
     Properties:
       DirectInternetAccess: Enabled
-      InstanceType: ml.c4.2xlarge
+      InstanceType: ml.t3.medium
       DefaultCodeRepository: !Ref CodeRepositoryURI
       KmsKeyId: !GetAtt EncryptionKey.Arn
+      PlatformIdentifier: "notebook-al2-v2"
       RoleArn: !GetAtt SageMakerNotebookExecutionRole.Arn
       SubnetId: !Ref Subnet
       SecurityGroupIds:

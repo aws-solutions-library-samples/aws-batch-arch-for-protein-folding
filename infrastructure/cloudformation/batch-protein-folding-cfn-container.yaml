@@ -109,19 +109,6 @@ Resources:
         - Key: StackId
           Value: !Ref AWS::StackId
 
-  AlphaFold2ContainerRegistry:
-    Type: AWS::ECR::Repository
-    Properties:
-      EncryptionConfiguration:
-        EncryptionType: AES256
-      ImageScanningConfiguration:
-        ScanOnPush: true
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
   DownloadContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
@@ -133,33 +120,7 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  OpenFoldContainerRegistry:
-    Type: AWS::ECR::Repository
-    Properties:
-      EncryptionConfiguration:
-        EncryptionType: AES256
-      ImageScanningConfiguration:
-        ScanOnPush: true
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  MSAContainerRegistry:
-    Type: AWS::ECR::Repository
-    Properties:
-      EncryptionConfiguration:
-        EncryptionType: AES256
-      ImageScanningConfiguration:
-        ScanOnPush: true
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"          
+          Value: !Ref "AWS::StackId"     
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -175,7 +136,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
       Policies:
         - PolicyName: CodeBuildPolicy
           PolicyDocument:
@@ -187,16 +148,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - Fn::Join:
-                      [
-                        ":",
-                        [
-                          "arn:aws:logs",
-                          !Ref "AWS::Region",
-                          !Ref "AWS::AccountId",
-                          "log-group:/aws/codebuild/CodeBuildProject*",
-                        ],
-                      ]
+                  - Fn::Sub: "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/CodeBuildProject*"
               - Effect: Allow
                 Action:
                   - s3:PutObject
@@ -241,16 +193,7 @@ Resources:
                   - codebuild:BatchPutTestCases
                   - codebuild:BatchPutCodeCoverages
                 Resource:
-                  - Fn::Join:
-                      [
-                        ":",
-                        [
-                          "arn:aws:s3:::codebuild",
-                          !Ref "AWS::Region",
-                          !Ref "AWS::AccountId",
-                          "report-group/batch-protein-folding*",
-                        ],
-                      ]
+                  - Fn::Sub: "arn:aws:s3:::codebuild:${AWS::Region}:${AWS::AccountId}:report-group/batch-protein-folding*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -320,319 +263,7 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  CodeBuildProjectAlphaFold2:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Build Docker container for AlphaFold 2 algorithm on AWS Batch
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
-        EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
-          - Name: IMAGE_REPO_NAME
-            Value: !Ref AlphaFold2ContainerRegistry
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/alphafold2  
-          - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildWaitHandle
-        Image: aws/codebuild/standard:4.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"       
-
-  CodeBuildProjectOpenFold:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Build Docker container for OpenFold algorithm folding on AWS Batch
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
-        EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
-          - Name: IMAGE_REPO_NAME
-            Value: !Ref OpenFoldContainerRegistry            
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfold     
-          - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildWaitHandle                           
-        Image: aws/codebuild/standard:4.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  CodeBuildProjectMSA:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Build Docker container for OpenFold MSA algorithm on AWS Batch
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
-          - Name: IMAGE_REPO_NAME
-            Value: !Ref MSAContainerRegistry            
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/msa        
-          - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildWaitHandle                     
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: ARM_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml        
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"          
-
-  CodeBuildProjectDownload:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Build Download Docker container
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
-          - Name: IMAGE_REPO_NAME
-            Value: !Ref DownloadContainerRegistry            
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/download        
-          - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildWaitHandle                     
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: ARM_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml        
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"               
-
-  CodePipelineRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Description: "Required service policies to support running batch protein folding build pipeline"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - codepipeline.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: codePipelinePolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - codecommit:CancelUploadArchive
-                  - codecommit:GetBranch
-                  - codecommit:GetCommit
-                  - codecommit:GetRepository
-                  - codecommit:GetUploadArchiveStatus
-                  - codecommit:UploadArchive
-                Resource: !GetAtt CodeRepository.Arn                
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                Resource: !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*                
-              - Effect: Allow
-                Action:
-                  - s3:GetBucketAcl
-                  - s3:GetBucketLocation
-                Resource: !GetAtt BatchFoldS3Bucket.Arn                
-              - Effect: Allow
-                Action:
-                  - codebuild:BatchGetBuilds
-                  - codebuild:StartBuild
-                  - codebuild:BatchGetBuildBatches
-                  - codebuild:StartBuildBatch
-                Resource: 
-                  - !GetAtt CodeBuildProjectAlphaFold2.Arn
-                  - !GetAtt CodeBuildProjectOpenFold.Arn
-                  - !GetAtt CodeBuildProjectMSA.Arn
-                  - !GetAtt CodeBuildProjectDownload.Arn                                  
-              - Effect: Allow
-                Action:
-                  - ecr:DescribeImages
-                Resource: 
-                  - !GetAtt AlphaFold2ContainerRegistry.Arn
-                  - !GetAtt OpenFoldContainerRegistry.Arn
-                  - !GetAtt MSAContainerRegistry.Arn
-                  - !GetAtt DownloadContainerRegistry.Arn                  
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  CodePipeline:
-    Type: AWS::CodePipeline::Pipeline
-    Properties:
-      ArtifactStore:
-        Location: !Ref BatchFoldS3Bucket
-        Type: S3
-      RestartExecutionOnUpdate: true
-      RoleArn: !GetAtt CodePipelineRole.Arn
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: Source
-              ActionTypeId:
-                Category: Source
-                Owner: AWS
-                Provider: CodeCommit
-                Version: 1
-              Configuration:
-                RepositoryName: !GetAtt CodeRepository.Name
-                BranchName: main
-                PollForSourceChanges: "false"
-              Namespace: SourceVariables
-              OutputArtifacts:
-                - Name: SourceArtifact
-              Region: !Ref "AWS::Region"
-              RunOrder: 1
-        - Name: Build
-          Actions:           
-            - Name: BuildAlphaFold2
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectAlphaFold2
-              InputArtifacts:
-                - Name: SourceArtifact
-              Namespace: BuildVariablesAlphaFold2
-              OutputArtifacts:
-                - Name: AlphaFold2BuildArtifact
-              Region: !Ref "AWS::Region"
-              RunOrder: 2
-            - Name: BuildOpenFold
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectOpenFold
-              InputArtifacts:
-                - Name: SourceArtifact
-              Namespace: BuildVariablesOpenFold
-              OutputArtifacts:
-                - Name: OpenFoldBuildArtifact
-              Region: !Ref "AWS::Region"
-              RunOrder: 2     
-            - Name: BuildMSA
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectMSA
-              InputArtifacts:
-                - Name: SourceArtifact
-              Namespace: BuildVariablesMSA
-              OutputArtifacts:
-                - Name: OpenFoldBuildArtifactMSA
-              Region: !Ref "AWS::Region"
-              RunOrder: 2      
-            - Name: BuildDownload
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: 1
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectDownload
-              InputArtifacts:
-                - Name: SourceArtifact
-              Namespace: BuildVariablesDownload
-              OutputArtifacts:
-                - Name: BuildArtifactDownload
-              Region: !Ref "AWS::Region"
-              RunOrder: 2                                             
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  ##################################################
-  # Delete container repos on stack deletion
-  ##################################################  
-  LambdaExecutionRole:
+  CodeBuildLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -644,9 +275,92 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
+      Policies:
+        - PolicyName: StartCodeBuildLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource: "*"          
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+
+  StartCodeBuildLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      ReservedConcurrentExecutions: 25
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref LambdaSecurityGroupId
+        SubnetIds: 
+          - !Ref LambdaSubnet
+      Code:
+        ZipFile: |
+          import logging          
+          import cfnresponse
+          import boto3
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+          def lambda_handler(event, context):
+              try:
+                  LOGGER.info('REQUEST RECEIVED:\n %s', event)
+                  LOGGER.info('REQUEST RECEIVED:\n %s', context)
+                  if event['RequestType'] == 'Create':
+                      LOGGER.info('CREATE!')
+                      client = boto3.client('codebuild')
+                      project_name = event['ResourceProperties']['ProjectName']
+                      response = client.start_build(projectName=project_name)
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource creation successful!"})
+                  elif event['RequestType'] == 'Update':
+                      LOGGER.info('UPDATE!')
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
+                  elif event['RequestType'] == 'Delete':
+                      LOGGER.info('DELETE!')
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource deletion successful!"})
+                  else:
+                      LOGGER.info('FAILED!')
+                      cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Unexpected event received from CloudFormation"})
+              except: 
+                  LOGGER.info('FAILED!')
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Exception during processing"})
+      Description: Start CodeBuildProject
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: CodeBuildLambdaExecutionRole.Arn
+      Runtime: python3.8
+      Timeout: 10
+
+  ##################################################
+  # Delete S3 bucket on stack deletion
+  ##################################################  
+  DeleteBucketLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: DeleteContainerRepoLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:     
+                  - !GetAtt BatchFoldS3Bucket.Arn
+                  - !Sub "${BatchFoldS3Bucket.Arn}/*"
+      ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
@@ -699,7 +413,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: LambdaExecutionRole.Arn
+        Fn::GetAtt: DeleteBucketLambdaExecutionRole.Arn
       Runtime: python3.8
       Timeout: 10
 
@@ -710,6 +424,34 @@ Resources:
         Fn::GetAtt: DeleteBucketLambda.Arn
       S3Bucket:
         Ref: BatchFoldS3Bucket
+
+  ##################################################
+  # Delete container repo on stack deletion
+  ##################################################  
+  DeleteContainerRepoLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: DeleteContainerRepoLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+            - Effect: Allow
+              Action:
+                - ecr:DeleteRepository
+              Resource: "*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
   DeleteContainerRepoLambda:
     Type: AWS::Lambda::Function
@@ -760,41 +502,60 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: LambdaExecutionRole.Arn
+        Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
       Runtime: python3.8
-      Timeout: 10
+      Timeout: 10     
 
-  DeleteAlphaFold2ContainerRepo:
-    Type: Custom::ResourceForDeletingECR
+
+##################################################
+# Create Download Container
+##################################################  
+
+  CodeBuildProjectDownload:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Build Download Docker container
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: IMAGE_TAG
+            Value: latest
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref DownloadContainerRegistry            
+          - Name: ACCOUNT_ID
+            Value: !Ref "AWS::AccountId"
+          - Name: BUILD_CONTEXT
+            Value: infrastructure/docker/download        
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle                     
+        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        BuildSpec: infrastructure/docker/download/buildspec_with_wait.yaml        
+        GitCloneDepth: 1
+        Location: !GetAtt CodeRepository.CloneUrlHttp
+        Type: CODECOMMIT
+      SourceVersion: refs/heads/main
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"                
+
+  StartDownloadContainerBuild:
+    Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
-        Fn::GetAtt: DeleteContainerRepoLambda.Arn
-      ContainerRepo:
-        Ref: AlphaFold2ContainerRegistry
-
-  DeleteDownloadContainerRepo:
-    Type: Custom::ResourceForDeletingECR
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: DeleteContainerRepoLambda.Arn
-      ContainerRepo:
-        Ref: DownloadContainerRegistry      
-
-  DeleteOpenFoldContainerRepo:
-    Type: Custom::ResourceForDeletingECR
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: DeleteContainerRepoLambda.Arn
-      ContainerRepo:
-        Ref: OpenFoldContainerRegistry         
-
-  DeleteMSAContainerRepo:
-    Type: Custom::ResourceForDeletingECR
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: DeleteContainerRepoLambda.Arn
-      ContainerRepo:
-        Ref: MSAContainerRegistry              
+        Fn::GetAtt: StartCodeBuildLambda.Arn
+      ProjectName:
+        Ref: CodeBuildProjectDownload
 
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -803,41 +564,41 @@ Resources:
     Type: AWS::CloudFormation::WaitCondition
     Condition: DownloadFsxDataCondition
     DependsOn: 
-      - CodePipeline
+      - CodeBuildProjectDownload
     Properties:
       Handle: !Ref CodeBuildWaitHandle
-      Timeout: 2700
-      Count: 4
+      Timeout: 600
+      Count: 1
+
+  DeleteDownloadContainerRepo:
+    Type: Custom::ResourceForDeletingECR
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: DeleteContainerRepoLambda.Arn
+      ContainerRepo:
+        Ref: DownloadContainerRegistry           
 
 Outputs:
   CodeRepositoryURI:
     Description: Code repository URI
     Value:
       Fn::GetAtt: CodeRepository.CloneUrlHttp
-  AlphaFold2ContainerRegistryURI:
-    Description: URI of the AlphaFold2 container
+  CodeBuildEncryptionKey:
+    Description: Encryption key for CodeBuild jobs
     Value:
-      Fn::GetAtt: AlphaFold2ContainerRegistry.RepositoryUri
-  AlphaFold2ContainerRegistryName:
-    Description: Name of the AlphaFold2 container repository
+      Ref: EncryptionKey
+  CodeBuildRoleArn:
+    Description: IAM role for CodeBuild jobs
     Value:
-      Ref: AlphaFold2ContainerRegistry
-  OpenFoldContainerRegistryURI:
-    Description: URI of the OpenFold container
+      Fn::GetAtt: CodeBuildRole.Arn
+  StartCodeBuildLambdaArn:
+    Description: Lambda function for building container repos
     Value:
-      Fn::GetAtt: OpenFoldContainerRegistry.RepositoryUri
-  OpenFoldContainerRegistryName:
-    Description: Name of the OpenFold container repository
-    Value:  
-      Ref: OpenFoldContainerRegistry         
-  MSAContainerRegistryURI:
-    Description: URI of the MSA container
+      Fn::GetAtt: StartCodeBuildLambda.Arn      
+  DeleteContainerRepoLambdaArn:
+    Description: Lambda function for deleting container repos
     Value:
-      Fn::GetAtt: MSAContainerRegistry.RepositoryUri   
-  MSAContainerRegistryName:
-    Description: Name of the MSA container repository
-    Value:
-      Ref: MSAContainerRegistry         
+      Fn::GetAtt: DeleteContainerRepoLambda.Arn      
   DownloadContainerRegistryURI:
     Description: URI of the download container
     Value:

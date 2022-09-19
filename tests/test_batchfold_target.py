@@ -94,12 +94,14 @@ def test_load_existing_s3_data():
     assert mytarget.sequences[target_id].id == target_id
     return(mytarget)
 
+@pytest.mark.skip(reason="Low bandwidth")
 def test_download_msas(test_load_existing_s3_data):
     mytarget = test_load_existing_s3_data
     msa_path = mytarget.download_msas(local_path="tests/data")
     assert os.path.exists(os.path.join(msa_path, mytarget.target_id, "msas/jackhmmer/mgnify_hits.sto"))
     shutil.rmtree(os.path.join(msa_path, mytarget.target_id))
 
+@pytest.mark.skip(reason="Low bandwidth")
 def test_download_predictions(test_load_existing_s3_data):
     mytarget = test_load_existing_s3_data
     prediction_path = mytarget.download_predictions(local_path="tests/data")

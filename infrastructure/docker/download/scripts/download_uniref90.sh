@@ -37,5 +37,5 @@ BASENAME=$(basename "${SOURCE_URL}")
 mkdir --parents "${ROOT_DIR}"
 aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
 pushd "${ROOT_DIR}"
-gunzip "${ROOT_DIR}/${BASENAME}"
+gunzip -f "${ROOT_DIR}/${BASENAME}"
 popd

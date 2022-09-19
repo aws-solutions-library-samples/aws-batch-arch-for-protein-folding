@@ -11,7 +11,6 @@ import os
 @pytest.fixture()
 def batch_environment():
     stack = BatchFoldEnvironment(boto_session = boto3.Session())
-    assert "BatchEnvironment" in stack.stack_name
     return(stack)
 
 def test_jackhmmer_job_init():
@@ -25,7 +24,7 @@ def test_jackhmmer_job_init():
         uniclust30_database_path = "TESTB"
     )
 
-    assert new_job.job_definition_name == "MSAJobDefinition"
+    assert new_job.job_definition_name == "JackhmmerJobDefinition"
     assert new_job.target_id == "T1084"
     assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
     assert new_job.output_s3_uri == f"s3://{bucket}/T1084/outputs/"
@@ -58,5 +57,5 @@ def test_jackhmmer_job_submission(batch_environment):
     assert len(job_list) > 0
 
     job_info = [job for job in job_list if job.get("jobName", []) == job_name]
-    assert job_info[0].get("jobDefinition") == batch_environment.job_definitions["MSAJobDefinition"]
+    assert job_info[0].get("jobDefinition") == batch_environment.job_definitions["JackhmmerJobDefinition"]
     assert job_info[0].get("jobName") == job_name
