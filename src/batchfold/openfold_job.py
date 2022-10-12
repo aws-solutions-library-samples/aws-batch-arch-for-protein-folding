@@ -55,7 +55,7 @@ class OpenFoldJob(BatchFoldJob):
         command_list = [f"-i {self.fasta_s3_uri}:{self.output_dir}/fasta/"]
         if self.use_precomputed_msas:
             command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/msas/{self.target_id}/"])
-        command_list.extend([f"-o {self.output_dir}/predictions/:{self.output_s3_uri}/"])
+        command_list.extend([f"-o {self.output_dir}/predictions/:{self.output_s3_uri}"])
         command_list.extend([f"-o {self.output_dir}/timings.json:{self.output_s3_uri}/timings.json"])
 
         command_list.extend([

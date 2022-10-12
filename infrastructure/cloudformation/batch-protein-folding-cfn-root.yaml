@@ -11,20 +11,13 @@ Parameters:
     Default: BatchProteinFolding
   LaunchSageMakerNotebook:
     Type: String
-    Default: N
+    Default: Y
     Description: Create a SageMaker Notebook Instance.
     AllowedValues: [Y, N]       
   StackAvailabilityZone:
     Type: String
     AllowedValues: [a, b, c]
     Default: a     
-  Environment:
-    Description: Leave this as "main" unless you are testing a pre-release version of this architecture.
-    Type: String
-    Default: main
-    AllowedValues:
-      - main
-      - dev
   VPC:
     Description: (Optional) ID of VPC to use. If left empty, a new VPC will be created.
     Type: String
@@ -120,8 +113,6 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        Environment:
-          Ref: Environment     
         LambdaSubnet:
           "Fn::If":
             - CreateNetwork
@@ -188,7 +179,9 @@ Resources:
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup
         CodeRepositoryURI:
-          "Fn::GetAtt": Container.Outputs.CodeRepositoryURI         
+          "Fn::GetAtt": Container.Outputs.CodeRepositoryURI    
+        S3BucketName:
+          "Fn::GetAtt": Container.Outputs.s3Bucket     
 
   DownloadData:
     Type: "AWS::CloudFormation::Stack"
@@ -270,6 +263,24 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
+
+  ModuleOmegaFold:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-omegafold.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
 
 Outputs:
   ApplicationName:

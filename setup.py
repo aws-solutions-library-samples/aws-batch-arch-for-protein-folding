@@ -17,7 +17,8 @@ setup(
     install_requires=[
         'biopython',
         'boto3',
-        'datetime'
+        'datetime',
+        'requests'
     ],
     tests_require=[
         'pytest',

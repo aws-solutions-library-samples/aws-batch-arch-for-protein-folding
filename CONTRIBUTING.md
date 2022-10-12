@@ -7,6 +7,23 @@ Please read through this document before submitting any issues or pull requests 
 information to effectively respond to your bug report or contribution.
 
 
+## Adding additional modules
+
+Follow these steps to add additional modules
+
+1. Create a new folder under `infrastructure/docker` with your Dockerfile and any supporting files. Look at the `run.sh` helper script included with other modules for and example of how to pass data back and forth with Amazon S3.
+2. Copy one of the `batch-protein-folding-cdn-module-*.yaml` files in `/infrastructure/cloudformation` and name it after your new module. Update the resource names, CodeBuild details, and Job Definition as needed.
+3. If your modeul needs data on the FSx for Lustre file system (e.g. model weights or reference data), create a new download script in `/infrastructure/docker/download/script`. You'll also need to add the name of the script to the download function defined in `prep_databases.py` and `infrastructure/cloudformation/batch-protein-folding-cfn-download.yaml`.
+4. Create a new module for submitting your job in `src/batchfold` and tests in `tests`.
+5. Build and deploy your stack using the following AWS CLI commands:
+```
+aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --region <YOUR REGION> --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --s3-bucket <YOUR S3 BUCKET NAME>
+
+aws cloudformation deploy --template-file infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --region <YOUR REGION> --capabilities CAPABILITY_IAM --stack-name <YOUR STACK NAME>
+```
+6. Find the URL for your Code Commit repository, add it as a remote to your local git repository, and push your local changes. This will overwrite the "public" code with your updates.
+7. Start the CodeBuild project associated to your new module to create the container.
+
 ## Reporting Bugs/Feature Requests
 
 We welcome you to use the GitHub issue tracker to report bugs or suggest features.

@@ -85,7 +85,8 @@ Resources:
                           "/scripts/download_small_bfd.sh",
                           "/scripts/download_uniclust30.sh",
                           "/scripts/download_uniprot.sh",                          
-                          "/scripts/download_uniref90.sh"
+                          "/scripts/download_uniref90.sh",
+                          "/scripts/download_omegafold_params.sh"
                       ]
                       
                       responses = []

@@ -7,7 +7,7 @@ variables:
   MAIN_BUCKET_PREFIX: main
 
 default:
-  image: public.ecr.aws/amazonlinux/amazonlinux:latest
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/amazonlinux:latest
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
@@ -36,7 +36,9 @@ cfn-lint:
     - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002 # Ignore warning about cfn package req
 
 cfn-nag:
-  image: stelligent/cfn_nag
+  image:
+    name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/stelligent/cfn_nag
+    entrypoint: ['']
   stage: lint
   script:
     - cfn_nag_scan --input-path infrastructure/cloudformation/*.yaml

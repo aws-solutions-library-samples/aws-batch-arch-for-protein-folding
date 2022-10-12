@@ -18,6 +18,11 @@ Parameters:
   CodeRepositoryURI:
     Description: Code repository URI
     Type: String
+  S3BucketName:
+    Description: Optional S3 Bucket Name
+    Type: String
+    Default: ""
+          
 
 Resources:
   ##################################################
@@ -90,8 +95,26 @@ Resources:
                   - batch:ListJobs
                   - batch:TerminateJobs
                 Resource: "*"
+        - PolicyName: S3RWPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::${S3BucketName}/*
+              - Action:
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                  - s3:PutBucketPolicy
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::${S3BucketName}
 
-  AlphafoldNotebookInstance:
+  BatchFoldNotebookInstance:
     Type: "AWS::SageMaker::NotebookInstance"
     Properties:
       DirectInternetAccess: Enabled

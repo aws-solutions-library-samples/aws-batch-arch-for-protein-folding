@@ -84,6 +84,11 @@ def main():
         job_queue_name=job_queue_name,
     )
 
+    download_omegafold_submission = batch_environment.submit_job(
+        DownloadJob(job_name="download_omegafold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_omegafold_params.sh", job_definition_name="DownloadJobDefinition"),
+        job_queue_name=job_queue_name,
+    )
+
     response = [
         download_test_submission,
         download_alphafold_params_submission,
@@ -98,6 +103,7 @@ def main():
         download_uniclust30_submission,
         download_uniprot_submission,
         download_uniref90_submission,
+        download_omegafold_submission
     ]
 
     return(response)

@@ -4,6 +4,7 @@ The Batch ProteinFolding architecture includes the following third-party softwar
 
 ** AlphaFold Code https://github.com/deepmind/alphafold
 ** OpenFold Code https://github.com/aqlaboratory/openfold
+** OmegaFold Code https://github.com/HeliXonProtein/OmegaFold
 
                                 Apache License
                            Version 2.0, January 2004

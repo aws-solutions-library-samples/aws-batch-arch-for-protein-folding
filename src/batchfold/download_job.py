@@ -8,9 +8,9 @@ import logging
 
 @define
 class DownloadJob(BatchFoldJob):
-    """Define Jackhmmer MSA Creation Job"""
+    """Define Download MSA Creation Job"""
 
-    job_definition_name: str = "JackhmmerJobDefinition"
+    job_definition_name: str = "DownloadJobDefinition"
     script: str = "./scripts/download_test.sh"
     data_dir: str = "/database"
 
