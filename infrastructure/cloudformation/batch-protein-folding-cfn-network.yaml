@@ -189,8 +189,8 @@ Resources:
       RouteTableIds:
         - !Ref PublicRouteTable
         - !Ref PrivateRouteTable0
-        - !If [MultiAZCondition, !Ref PrivateRouteTable1, !Ref AWS::NoValue]
-        - !If [MultiAZCondition, !Ref PrivateRouteTable2, !Ref AWS::NoValue]
+        - !If [MultiAZCondition, !Ref PrivateRouteTable1, !Ref "AWS::NoValue"]
+        - !If [MultiAZCondition, !Ref PrivateRouteTable2, !Ref "AWS::NoValue"]
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
       VpcId: !Ref VPC           
 
