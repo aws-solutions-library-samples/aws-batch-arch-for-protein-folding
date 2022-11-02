@@ -43,8 +43,8 @@ Resources:
   ##################################################
   FSX:
     Type: AWS::FSx::FileSystem
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       FileSystemType: "LUSTRE"
       FileSystemTypeVersion: "2.12"
