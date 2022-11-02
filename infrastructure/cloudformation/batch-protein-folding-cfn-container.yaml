@@ -12,7 +12,7 @@ Parameters:
   Environment:
     Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
     Type: String
-    Default: main
+    Default: dev
     AllowedValues:
       - main
       - dev     
@@ -27,57 +27,18 @@ Parameters:
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
+  S3BucketName:
+    Description: S3 Bucket Name
+    Type: String
+  S3BucketARN:
+    Description: S3 Bucket ARN
+    Type: String
 
 Conditions:
   DownloadFsxDataCondition:
     "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
 
 Resources:
-  ##################################################
-  # S3
-  ##################################################
-
-  BatchFoldS3Bucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      AccessControl: Private
-      LoggingConfiguration:
-        LogFilePrefix: code-pipeline-logs
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  S3BucketPolicy:
-    Type: "AWS::S3::BucketPolicy"
-    Properties:
-      Bucket: !Ref BatchFoldS3Bucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Action:
-              - s3:GetObject
-              - s3:PutObject
-              - s3:GetObjectVersion
-            Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${BatchFoldS3Bucket}/*
-            Principal:
-              AWS: !Ref AWS::AccountId
-          - Action:
-              - s3:GetBucketAcl
-              - s3:GetBucketLocation
-              - s3:PutBucketPolicy
-            Effect: Allow
-            Resource:
-              - !GetAtt BatchFoldS3Bucket.Arn
-            Principal:
-              AWS: !Ref AWS::AccountId
 
   ##################################################
   # Container Services
@@ -161,7 +122,7 @@ Resources:
                       "-",
                       ["arn:aws:s3:::codepipeline", !Ref "AWS::Region", "*"],
                     ]
-                  - !Join ["", [!GetAtt BatchFoldS3Bucket.Arn, "*"]]
+                  - !Sub "${S3BucketARN}*"
                   - "arn:aws:s3:::aws-batch-architecture-for-alphafold-public-artifacts/*"
               - Effect: Allow
                 Action:
@@ -333,97 +294,6 @@ Resources:
         Fn::GetAtt: CodeBuildLambdaExecutionRole.Arn
       Runtime: python3.8
       Timeout: 10
-
-  ##################################################
-  # Delete S3 bucket on stack deletion
-  ##################################################  
-  DeleteBucketLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: DeleteContainerRepoLambdaPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                Resource:     
-                  - !GetAtt BatchFoldS3Bucket.Arn
-                  - !Sub "${BatchFoldS3Bucket.Arn}/*"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-
-  DeleteBucketLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      ReservedConcurrentExecutions: 5
-      VpcConfig:
-        SecurityGroupIds: 
-          - !Ref LambdaSecurityGroupId
-        SubnetIds: 
-          - !Ref LambdaSubnet
-      Code:
-        ZipFile: |
-          import logging          
-          import cfnresponse
-          import boto3
-
-          LOGGER = logging.getLogger()
-          LOGGER.setLevel(logging.INFO)
-
-          def lambda_handler(event, context):
-              try:
-                  LOGGER.info('REQUEST RECEIVED:\n %s', event)
-                  LOGGER.info('REQUEST RECEIVED:\n %s', context)
-                  if event['RequestType'] == 'Create':
-                      LOGGER.info('CREATE!')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource creation successful!"})
-                  elif event['RequestType'] == 'Update':
-                      LOGGER.info('UPDATE!')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
-                  elif event['RequestType'] == 'Delete':
-                      LOGGER.info('DELETE!')
-                      s3 = boto3.resource('s3')
-                      bucket_name = event['ResourceProperties']['S3Bucket']
-                      bucket = s3.Bucket(bucket_name)
-                      object_deletion_response = bucket.object_versions.all().delete()
-                      LOGGER.info(f"Object deletion response:\n{object_deletion_response}")
-                      bucket_deletion_response = bucket.delete()
-                      LOGGER.info(f"Bucket deletion response:\n{bucket_deletion_response}")
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource deletion successful!"})
-                  else:
-                      LOGGER.info('FAILED!')
-                      cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Unexpected event received from CloudFormation"})
-              except: 
-                  LOGGER.info('FAILED!')
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Exception during processing"})
-
-      Description: Delete S3 bucket
-      Handler: index.lambda_handler
-      MemorySize: 512
-      Role:
-        Fn::GetAtt: DeleteBucketLambdaExecutionRole.Arn
-      Runtime: python3.8
-      Timeout: 10
-
-  DeleteBucket:
-    Type: Custom::ResourceForDeletingBuckets
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: DeleteBucketLambda.Arn
-      S3Bucket:
-        Ref: BatchFoldS3Bucket
 
   ##################################################
   # Delete container repo on stack deletion
@@ -607,7 +477,7 @@ Outputs:
     Description: Name of the download container repository
     Value:
       Ref: DownloadContainerRegistry        
-  s3Bucket:
-    Description: S3 bucket for CodePipeline
-    Value:
-      Ref: BatchFoldS3Bucket
+  # s3Bucket:
+  #   Description: S3 bucket for CodePipeline
+  #   Value:
+  #     Ref: BatchFoldS3Bucket

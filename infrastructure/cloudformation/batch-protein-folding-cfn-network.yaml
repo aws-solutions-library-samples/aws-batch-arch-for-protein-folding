@@ -3,15 +3,21 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-network.yaml: Creates a VPC with 1 private and 1 public subnet
+  batch-protein-folding-cfn-network.yaml: Creates a VPC with one or more private and public subnets
 Parameters:
-  StackAvailabilityZone:
-    Description: Availability zone to deploy stack resources
-    Type: "AWS::EC2::AvailabilityZone::Name"
   ApplicationName:
     Description: Name of the application, if applicable
     Type: String
     Default: "Unknown"
+  MultiAZ:
+    Description: Use multiple availability zones?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]    
+
+Conditions:
+  MultiAZCondition:
+    "Fn::Equals": [Ref: "MultiAZ", "Y"]
 ##################################################
 # Network Configuration
 ##################################################
@@ -61,162 +67,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-
-  VPCFlowLogsGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      KmsKeyId: !GetAtt EncryptionKey.Arn
-      RetentionInDays: 120
-      Tags:
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  VPCFlowLog:
-    Type: "AWS::EC2::FlowLog"
-    Properties:
-      DeliverLogsPermissionArn: !GetAtt VPCFlowLogRole.Arn
-      LogGroupName: !Ref VPCFlowLogsGroup
-      ResourceId: !Ref VPC
-      ResourceType: VPC
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-      TrafficType: ALL
-
-  PublicSubnet0:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Ref StackAvailabilityZone
-      CidrBlock: "10.0.255.224/28"
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: Network
-          Value: Public
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  PrivateSubnet0:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone: !Ref StackAvailabilityZone
-      MapPublicIpOnLaunch: false
-      CidrBlock: "10.0.224.0/20"
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: Network
-          Value: Private
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  InternetGateway:
-    Type: "AWS::EC2::InternetGateway"
-    Properties:
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: Network
-          Value: Public
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  GatewayToInternet:
-    Type: "AWS::EC2::VPCGatewayAttachment"
-    Properties:
-      VpcId:
-        Ref: VPC
-      InternetGatewayId:
-        Ref: InternetGateway
-
-  PublicRouteTable:
-    Type: "AWS::EC2::RouteTable"
-    Properties:
-      VpcId:
-        Ref: VPC
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: Network
-          Value: Public
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  PublicRoute:
-    Type: "AWS::EC2::Route"
-    DependsOn: GatewayToInternet
-    Properties:
-      RouteTableId:
-        Ref: PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: InternetGateway
-
-  PublicSubnetRouteTableAssociation0:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      SubnetId:
-        Ref: PublicSubnet0
-      RouteTableId:
-        Ref: PublicRouteTable
-
-  ElasticIP0:
-    Type: "AWS::EC2::EIP"
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  NATGateway0:
-    Type: "AWS::EC2::NatGateway"
-    Properties:
-      AllocationId:
-        "Fn::GetAtt":
-          - ElasticIP0
-          - AllocationId
-      SubnetId:
-        Ref: PublicSubnet0
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  PrivateRouteTable0:
-    Type: "AWS::EC2::RouteTable"
-    Properties:
-      VpcId:
-        Ref: VPC
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-
-  PrivateRouteToInternet0:
-    Type: "AWS::EC2::Route"
-    Properties:
-      RouteTableId:
-        Ref: PrivateRouteTable0
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGateway0
-
-  PrivateSubnetRouteTableAssociation0:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      SubnetId:
-        Ref: PrivateSubnet0
-      RouteTableId:
-        Ref: PrivateRouteTable0
 
   EncryptionKey:
     Type: "AWS::KMS::Key"
@@ -268,23 +118,400 @@ Resources:
         - Key: StackId
           Value: !Ref AWS::StackId
 
+  VPCFlowLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      KmsKeyId: !GetAtt EncryptionKey.Arn
+      RetentionInDays: 120
+      Tags:
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  VPCFlowLog:
+    Type: "AWS::EC2::FlowLog"
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt VPCFlowLogRole.Arn
+      LogGroupName: !Ref VPCFlowLogsGroup
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+      TrafficType: ALL
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Public
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  GatewayToInternet:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId:
+        Ref: VPC
+      InternetGatewayId:
+        Ref: InternetGateway
+
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Public
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PublicRoute:
+    Type: "AWS::EC2::Route"
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway 
+
   S3Endpoint:
     Type: "AWS::EC2::VPCEndpoint"
     Properties:
       RouteTableIds:
         - !Ref PublicRouteTable
         - !Ref PrivateRouteTable0
+        - !If [MultiAZCondition, !Ref PrivateRouteTable1, !Ref AWS::NoValue]
+        - !If [MultiAZCondition, !Ref PrivateRouteTable2, !Ref AWS::NoValue]
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      VpcId: !Ref VPC           
+
+##################################################
+# Subnet 0
+##################################################
+  PublicSubnet0:
+    Type: "AWS::EC2::Subnet"
+    Properties:
       VpcId: !Ref VPC
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: "10.0.0.0/20"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Public
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateSubnet0:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId:
+        Ref: VPC
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: false
+      CidrBlock: "10.0.64.0/18"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Private
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PublicSubnetRouteTableAssociation0:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet0
+      RouteTableId:
+        Ref: PublicRouteTable
+
+  ElasticIP0:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  NATGateway0:
+    Type: "AWS::EC2::NatGateway"
+    Properties:
+      AllocationId:
+        "Fn::GetAtt":
+          - ElasticIP0
+          - AllocationId
+      SubnetId:
+        Ref: PublicSubnet0
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateRouteTable0:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId    
+
+  PrivateRouteToInternet0:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable0
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway0
+
+  PrivateSubnetRouteTableAssociation0:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet0
+      RouteTableId:
+        Ref: PrivateRouteTable0
+
+##################################################
+# Subnet 1
+##################################################
+  PublicSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Condition: MultiAZCondition
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select 
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: "10.0.16.0/20"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Public
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Condition: MultiAZCondition
+    Properties:
+      VpcId:
+        Ref: VPC
+      AvailabilityZone: !Select 
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: false
+      CidrBlock: "10.0.128.0/18"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Private
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PublicSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Condition: MultiAZCondition
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+
+  ElasticIP1:
+    Type: "AWS::EC2::EIP"
+    Condition: MultiAZCondition
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  NATGateway1:
+    Type: "AWS::EC2::NatGateway"
+    Condition: MultiAZCondition
+    Properties:
+      AllocationId:
+        "Fn::GetAtt":
+          - ElasticIP1
+          - AllocationId
+      SubnetId:
+        Ref: PublicSubnet1
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId    
+
+  PrivateRouteToInternet1:
+    Type: "AWS::EC2::Route"
+    Condition: MultiAZCondition
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway1
+
+  PrivateSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Condition: MultiAZCondition
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet1
+      RouteTableId:
+        Ref: PrivateRouteTable1
+
+##################################################
+# Subnet 2
+##################################################
+  PublicSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Condition: MultiAZCondition
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select 
+        - 2
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: "10.0.32.0/20"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Public
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Condition: MultiAZCondition
+    Properties:
+      VpcId:
+        Ref: VPC
+      AvailabilityZone: !Select 
+        - 2
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: false
+      CidrBlock: "10.0.192.0/18"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Network
+          Value: Private
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PublicSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Condition: MultiAZCondition
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: PublicRouteTable
+
+  ElasticIP2:
+    Type: "AWS::EC2::EIP"
+    Condition: MultiAZCondition
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  NATGateway2:
+    Type: "AWS::EC2::NatGateway"
+    Condition: MultiAZCondition
+    Properties:
+      AllocationId:
+        "Fn::GetAtt":
+          - ElasticIP2
+          - AllocationId
+      SubnetId:
+        Ref: PublicSubnet2
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  PrivateRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId    
+
+  PrivateRouteToInternet2:
+    Type: "AWS::EC2::Route"
+    Condition: MultiAZCondition
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway2
+
+  PrivateSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Condition: MultiAZCondition
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet2
+      RouteTableId:
+        Ref: PrivateRouteTable2
 
 Outputs:
   VPC:
     Description: A reference to the created VPC
     Value: !Ref VPC
-  PrivateSubnet:
-    Description: The private subnet
-    Value:
-      Ref: PrivateSubnet0
   DefaultSecurityGroup:
     Description: ID of the default security group
     Value: !GetAtt VPC.DefaultSecurityGroup
+  PublicSubnets:
+    Description: Comma-delimited string of public subnets
+    Value: !If [MultiAZCondition, !Join [ ",", [!Ref PublicSubnet0, !Ref PublicSubnet1, !Ref PublicSubnet2]], !Ref PublicSubnet0]
+  PrivateSubnets:
+    Description: Comma-delimited string of private subnets
+    Value: !If [MultiAZCondition, !Join [ ",", [!Ref PrivateSubnet0, !Ref PrivateSubnet1, !Ref PrivateSubnet2]], !Ref PrivateSubnet0]

@@ -18,9 +18,9 @@ Parameters:
   FileSystemMountName:
     Description: Mount name for the Lustre file system
     Type: String
-  Subnet:
-    Description: Subnet ID for the file system.
-    Type: String
+  Subnets:
+    Description: List of private subnets
+    Type: CommaDelimitedList
   DownloadContainerRegistryURI:
     Description: URI of the download container
     Type: String  
@@ -178,67 +178,65 @@ Resources:
   # Batch Compute Environments
   ####################################################################################################
 
-  CPUComputeEnvironmentOnDemand:
-    Type: AWS::Batch::ComputeEnvironment
-    Properties:
-      ComputeResources:
-        AllocationStrategy: BEST_FIT_PROGRESSIVE
-        InstanceRole: !Ref InstanceProfile
-        InstanceTypes:
-          - m5
-          - r5
-          - c5
-        LaunchTemplate:
-          LaunchTemplateId: !Ref InstanceLaunchTemplate
-          Version: $Latest
-        MaxvCpus: 256
-        MinvCpus: 0
-        SecurityGroupIds:
-          - !Ref DefaultSecurityGroupID
-        Subnets:
-          - !Ref Subnet
-        Type: EC2
-        Tags:
-          Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"        
-      State: ENABLED
-      Type: MANAGED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
+  # CPUComputeEnvironmentOnDemand:
+  #   Type: AWS::Batch::ComputeEnvironment
+  #   Properties:
+  #     ComputeResources:
+  #       AllocationStrategy: BEST_FIT_PROGRESSIVE
+  #       InstanceRole: !Ref InstanceProfile
+  #       InstanceTypes:
+  #         - m5
+  #         - r5
+  #         - c5
+  #       LaunchTemplate:
+  #         LaunchTemplateId: !Ref InstanceLaunchTemplate
+  #         Version: $Latest
+  #       MaxvCpus: 256
+  #       MinvCpus: 0
+  #       SecurityGroupIds:
+  #         - !Ref DefaultSecurityGroupID
+  #       Subnets: !Ref Subnets
+  #       Type: EC2
+  #       Tags:
+  #         Application: !Ref ApplicationName
+  #         StackId: !Ref "AWS::StackId"        
+  #     State: ENABLED
+  #     Type: MANAGED
+  #     Tags:
+  #       Application: !Ref ApplicationName
+  #       StackId: !Ref "AWS::StackId"
 
-  CPUComputeEnvironmentSpot:
-    Type: AWS::Batch::ComputeEnvironment
-    Properties:
-      ComputeResources:
-        AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
-        BidPercentage: 100
-        InstanceRole: !Ref InstanceProfile
-        InstanceTypes:
-          - m5
-          - r5
-          - c5
-        LaunchTemplate:
-          LaunchTemplateId: 
-            Ref: InstanceLaunchTemplate
-          Version: $Latest
-        MaxvCpus: 256
-        MinvCpus: 0
-        SecurityGroupIds:
-          - Ref: DefaultSecurityGroupID
-        SpotIamFleetRole:
-          "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
-        Subnets:
-          - Ref: Subnet
-        Type: SPOT
-        Tags:
-          Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"               
-      State: ENABLED
-      Type: MANAGED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"        
+  # CPUComputeEnvironmentSpot:
+  #   Type: AWS::Batch::ComputeEnvironment
+  #   Properties:
+  #     ComputeResources:
+  #       AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
+  #       BidPercentage: 100
+  #       InstanceRole: !Ref InstanceProfile
+  #       InstanceTypes:
+  #         - m5
+  #         - r5
+  #         - c5
+  #       LaunchTemplate:
+  #         LaunchTemplateId: 
+  #           Ref: InstanceLaunchTemplate
+  #         Version: $Latest
+  #       MaxvCpus: 256
+  #       MinvCpus: 0
+  #       SecurityGroupIds:
+  #         - Ref: DefaultSecurityGroupID
+  #       SpotIamFleetRole:
+  #         "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
+  #       Subnets: !Ref Subnets
+  #       Type: SPOT
+  #       Tags:
+  #         Application: !Ref ApplicationName
+  #         StackId: !Ref "AWS::StackId"               
+  #     State: ENABLED
+  #     Type: MANAGED
+  #     Tags:
+  #       Application: !Ref ApplicationName
+  #       StackId: !Ref "AWS::StackId"        
 
   GravitonComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
@@ -261,8 +259,7 @@ Resources:
           - Ref: DefaultSecurityGroupID
         SpotIamFleetRole:
           "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
-        Subnets:
-          - Ref: Subnet
+        Subnets: !Ref Subnets
         Type: SPOT
         Tags:
           Application: !Ref ApplicationName
@@ -290,8 +287,7 @@ Resources:
         MinvCpus: 0
         SecurityGroupIds:
           - !Ref DefaultSecurityGroupID
-        Subnets:
-          - !Ref Subnet
+        Subnets: !Ref Subnets
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
@@ -317,8 +313,7 @@ Resources:
         MinvCpus: 0
         SecurityGroupIds:
           - Ref: DefaultSecurityGroupID
-        Subnets:
-          - Ref: Subnet
+        Subnets: !Ref Subnets
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
@@ -345,8 +340,7 @@ Resources:
         MinvCpus: 0
         SecurityGroupIds:
           - Ref: DefaultSecurityGroupID
-        Subnets:
-          - Ref: Subnet
+        Subnets: !Ref Subnets
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
@@ -361,29 +355,29 @@ Resources:
   # Batch Job Queues
   ####################################################################################################
 
-  CPUOnDemandJobQueue:
-    Type: AWS::Batch::JobQueue
-    Properties:
-      ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref CPUComputeEnvironmentOnDemand
-          Order: 1
-      Priority: 10
-      State: ENABLED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
+  # CPUOnDemandJobQueue:
+  #   Type: AWS::Batch::JobQueue
+  #   Properties:
+  #     ComputeEnvironmentOrder:
+  #       - ComputeEnvironment: !Ref CPUComputeEnvironmentOnDemand
+  #         Order: 1
+  #     Priority: 10
+  #     State: ENABLED
+  #     Tags:
+  #       Application: !Ref ApplicationName
+  #       StackId: !Ref "AWS::StackId"
 
-  CPUSpotJobQueue:
-    Type: AWS::Batch::JobQueue
-    Properties:
-      ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref CPUComputeEnvironmentSpot
-          Order: 1
-      Priority: 10
-      State: ENABLED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"      
+  # CPUSpotJobQueue:
+  #   Type: AWS::Batch::JobQueue
+  #   Properties:
+  #     ComputeEnvironmentOrder:
+  #       - ComputeEnvironment: !Ref CPUComputeEnvironmentSpot
+  #         Order: 1
+  #     Priority: 10
+  #     State: ENABLED
+  #     Tags:
+  #       Application: !Ref ApplicationName
+  #       StackId: !Ref "AWS::StackId"      
 
   GravitonOnDemandJobQueue:
     Type: AWS::Batch::JobQueue
@@ -471,14 +465,14 @@ Outputs:
     Description: Launch template for EC2 instances.
     Value:
       Ref: InstanceLaunchTemplate
-  CPUOnDemandJobQueue:
-    Description: Job queue for on-demand CPU instances.
-    Value:
-      Ref: CPUOnDemandJobQueue
-  CPUSpotJobQueue:
-    Description: Job queue for spot CPU instances.
-    Value:
-      Ref: CPUSpotJobQueue
+  # CPUOnDemandJobQueue:
+  #   Description: Job queue for on-demand CPU instances.
+  #   Value:
+  #     Ref: CPUOnDemandJobQueue
+  # CPUSpotJobQueue:
+  #   Description: Job queue for spot CPU instances.
+  #   Value:
+  #     Ref: CPUSpotJobQueue
   G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
     Value: 

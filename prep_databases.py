@@ -9,9 +9,7 @@ from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.download_job import DownloadJob
 import logging
 from datetime import datetime
-
 import urllib3
-import json
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -22,172 +20,33 @@ def main():
 
     boto_session = boto3.session.Session()
     batch_environment = BatchFoldEnvironment(boto_session = boto_session)
-    
     job_queue_name="GravitonSpotJobQueue"
-    download_test_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_test" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_test.sh"),
-        job_queue_name=job_queue_name,
-    )
+    response = []
 
-    download_alphafold_params_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_alphafold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_alphafold_params.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_bfd_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_bfd" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_bfd.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_mgnify_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_mgnify" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_mgnify.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_openfold_params_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_openfold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_openfold_params.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_pdb70_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_pdb70" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb70.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_pdb_mmcif_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_pdb_mmcif" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb_mmcif.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_pdb_seqres_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_pdb_seqres" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_pdb_seqres.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_small_bfd_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_small_bfd" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_small_bfd.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_uniclust30_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_uniclust30" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniclust30.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_uniprot_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_uniprot" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniprot.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_uniref90_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_uniref90" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_uniref90.sh"),
-        job_queue_name=job_queue_name,
-    )
-
-    download_omegafold_submission = batch_environment.submit_job(
-        DownloadJob(job_name="download_omegafold_params" + datetime.now().strftime("%Y%m%dT%H%M%S"), script="./scripts/download_omegafold_params.sh", job_definition_name="DownloadJobDefinition"),
-        job_queue_name=job_queue_name,
-    )
-
-    response = [
-        download_test_submission,
-        download_alphafold_params_submission,
-        download_bfd_submission,
-        download_mgnify_submission,
-        download_mgnify_submission,
-        download_openfold_params_submission,
-        download_pdb70_submission,
-        download_pdb_mmcif_submission,
-        download_pdb_seqres_submission,
-        download_small_bfd_submission,
-        download_uniclust30_submission,
-        download_uniprot_submission,
-        download_uniref90_submission,
-        download_omegafold_submission
+    download_scripts = [
+        "download_alphafold_params",
+        "download_bfd",
+        "download_mgnify",
+        "download_openfold_params",
+        "download_pdb_mmcif",
+        "download_pdb_seqres",
+        "download_pdb70",
+        "download_small_bfd",
+        "download_uniclust30",
+        "download_uniprot",                          
+        "download_uniref90",
+        "download_omegafold_params"
     ]
 
-    return(response)
-
-def lambda_handler(event, context):
-    try:
-        LOGGER.info("REQUEST RECEIVED:\n %s", event)
-        LOGGER.info("REQUEST RECEIVED:\n %s", context)
-        if event["RequestType"] == "Create":
-            LOGGER.info("CREATE!")
-            
-            main()
-            
-            send(
-                event, context, "SUCCESS", {"response": "Resource creation successful!"}
+    for script in download_scripts:
+        response.append(
+            batch_environment.submit_job(
+                DownloadJob(job_name=script + datetime.now().strftime("%Y%m%dT%H%M%S"), script=f"./scripts/{script}.sh"),
+                job_queue_name=job_queue_name,
             )
-        elif event["RequestType"] == "Update":
-            LOGGER.info("UPDATE!")
-            send(
-                event,
-                context,
-                "SUCCESS",
-                {"response": "Resource update successful!"},
-            )
-        elif event["RequestType"] == "Delete":
-            LOGGER.info("DELETE!")
-            send(
-                event,
-                context,
-                "SUCCESS",
-                {"response": "Resource deletion successful!"},
-            )
-        else:
-            LOGGER.info("FAILED!")
-            send(
-                event,
-                context,
-                "FAILED",
-                {"response": "Unexpected event received from CloudFormation"},
-            )
-    except:
-        LOGGER.info("FAILED!")
-        send(
-            event,
-            context,
-            "FAILED",
-            {"response": "Exception during processing"},
         )
 
-def send(event, context, responseStatus, responseData, physicalResourceId=None, noEcho=False, reason=None):
-    responseUrl = event['ResponseURL']
-
-    print(responseUrl)
-
-    responseBody = {
-        'Status' : responseStatus,
-        'Reason' : reason or "See the details in CloudWatch Log Stream: {}".format(context.log_stream_name),
-        'PhysicalResourceId' : physicalResourceId or context.log_stream_name,
-        'StackId' : event['StackId'],
-        'RequestId' : event['RequestId'],
-        'LogicalResourceId' : event['LogicalResourceId'],
-        'NoEcho' : noEcho,
-        'Data' : responseData
-    }
-
-    json_responseBody = json.dumps(responseBody)
-
-    print("Response body:")
-    print(json_responseBody)
-
-    headers = {
-        'content-type' : '',
-        'content-length' : str(len(json_responseBody))
-    }
-
-    try:
-        response = http.request('PUT', responseUrl, headers=headers, body=json_responseBody)
-        print("Status code:", response.status)
-
-
-    except Exception as e:
-
-        print("send(..) failed executing http.request(..):", e)
-
+    return(response)
 
 if __name__ == "__main__":
     main()
