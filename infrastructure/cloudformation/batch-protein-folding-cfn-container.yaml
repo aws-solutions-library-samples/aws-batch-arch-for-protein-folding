@@ -27,9 +27,6 @@ Parameters:
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
-  S3BucketName:
-    Description: S3 Bucket Name
-    Type: String
   S3BucketARN:
     Description: S3 Bucket ARN
     Type: String

@@ -155,16 +155,6 @@ Resources:
             - Ref: Subnet
         S3BucketName:
           Ref: BatchFoldS3Bucket
-        LambdaSubnet:
-          "Fn::If":
-            - CreateNetwork
-            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
-            - Ref: Subnet
-        LambdaSecurityGroupId:
-          "Fn::If":
-            - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
-            - Ref: DefaultSecurityGroup   
 
   Container:
     Type: "AWS::CloudFormation::Stack"
@@ -185,8 +175,6 @@ Resources:
             - Ref: DefaultSecurityGroup        
         DownloadFsxData:
           Ref: DownloadFsxData
-        S3BucketName:
-          Ref: BatchFoldS3Bucket
         S3BucketARN:
           "Fn::GetAtt": BatchFoldS3Bucket.Arn
 

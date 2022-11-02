@@ -36,12 +36,6 @@ Parameters:
   S3BucketName:
     Description: S3 Bucket name for data repository association.
     Type: String
-  LambdaSubnet:
-    Description: Subnet ID for Lambda function deployment
-    Type: AWS::EC2::Subnet::Id
-  LambdaSecurityGroupId:
-    Description: Security group for Lambda function deployment
-    Type: AWS::EC2::SecurityGroup::Id
 
 Resources:
   ##################################################
