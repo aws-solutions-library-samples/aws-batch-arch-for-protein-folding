@@ -33,6 +33,9 @@ Parameters:
   Subnet:
     Description: Subnet ID for the file system.
     Type: String
+  S3BucketName:
+    Description: S3 Bucket name for data repository association.
+    Type: String
 
 Resources:
   ##################################################
@@ -40,6 +43,8 @@ Resources:
   ##################################################
   FSX:
     Type: AWS::FSx::FileSystem
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       FileSystemType: "LUSTRE"
       FileSystemTypeVersion: "2.12"
@@ -61,6 +66,20 @@ Resources:
         - Key: StackId
           Value:
             Ref: AWS::StackId
+
+  DataRepoAssociation:
+    Type: AWS::FSx::DataRepositoryAssociation
+    Properties:
+      BatchImportMetaDataOnCreate: True
+      DataRepositoryPath: !Sub s3://${S3BucketName}/fsx/
+      FileSystemId: !Ref FSX
+      FileSystemPath: /fsx
+      S3: 
+        AutoExportPolicy: 
+          Events:
+            - NEW
+            - CHANGED
+            - DELETED
 
 Outputs:
   FileSystemId:

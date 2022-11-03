@@ -13,11 +13,7 @@ Parameters:
     Type: String
     Default: Y
     Description: Create a SageMaker Notebook Instance.
-    AllowedValues: [Y, N]       
-  StackAvailabilityZone:
-    Type: String
-    AllowedValues: [a, b, c]
-    Default: a     
+    AllowedValues: [Y, N]          
   VPC:
     Description: (Optional) ID of VPC to use. If left empty, a new VPC will be created.
     Type: String
@@ -48,7 +44,11 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]    
-
+  MultiAZ:
+    Description: Use multiple availability zones?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
 
 Conditions:
   CreateFileSystem:
@@ -71,9 +71,57 @@ Conditions:
     "Fn::Equals": [Ref: "LaunchSageMakerNotebook", "Y"]
   DownloadFsxDataCondition:
     "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
-   
 
 Resources:
+
+  ##################################################
+  # S3
+  ##################################################
+
+  BatchFoldS3Bucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      AccessControl: Private
+      LoggingConfiguration:
+        LogFilePrefix: code-pipeline-logs
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+
+  S3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref BatchFoldS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:GetObjectVersion
+            Effect: Allow
+            Resource:
+              - !Sub ${BatchFoldS3Bucket.Arn}/*
+            Principal:
+              AWS: !Ref AWS::AccountId
+          - Action:
+              - s3:GetBucketAcl
+              - s3:GetBucketLocation
+              - s3:PutBucketPolicy
+            Effect: Allow
+            Resource:
+              - !GetAtt BatchFoldS3Bucket.Arn
+            Principal:
+              AWS: !Ref AWS::AccountId
+
   Network:
     Type: "AWS::CloudFormation::Stack"
     Condition: CreateNetwork
@@ -82,8 +130,8 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        StackAvailabilityZone:
-          "Fn::Sub": ${AWS::Region}${StackAvailabilityZone}
+        MultiAZ:
+          Ref: MultiAZ
 
   FileSystem:
     Type: "AWS::CloudFormation::Stack"
@@ -103,8 +151,10 @@ Resources:
         Subnet:
           "Fn::If":
             - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
             - Ref: Subnet
+        S3BucketName:
+          Ref: BatchFoldS3Bucket
 
   Container:
     Type: "AWS::CloudFormation::Stack"
@@ -116,7 +166,7 @@ Resources:
         LambdaSubnet:
           "Fn::If":
             - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
             - Ref: Subnet
         LambdaSecurityGroupId:
           "Fn::If":
@@ -125,6 +175,8 @@ Resources:
             - Ref: DefaultSecurityGroup        
         DownloadFsxData:
           Ref: DownloadFsxData
+        S3BucketARN:
+          "Fn::GetAtt": BatchFoldS3Bucket.Arn
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -135,10 +187,10 @@ Resources:
           Ref: CreateG5ComputeEnvironment
         ApplicationName:
           Ref: ApplicationName
-        Subnet:
+        Subnets:
           "Fn::If":
             - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - !GetAtt Network.Outputs.PrivateSubnets
             - Ref: Subnet
         DefaultSecurityGroupID:
           "Fn::If":
@@ -158,7 +210,7 @@ Resources:
         DownloadContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         S3BucketName:
-          "Fn::GetAtt": Container.Outputs.s3Bucket
+          Ref: BatchFoldS3Bucket
 
   Notebook:
     Type: "AWS::CloudFormation::Stack"
@@ -171,7 +223,7 @@ Resources:
         Subnet:
           "Fn::If":
             - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
             - Ref: Subnet
         DefaultSecurityGroupID:
           "Fn::If":
@@ -181,7 +233,7 @@ Resources:
         CodeRepositoryURI:
           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI    
         S3BucketName:
-          "Fn::GetAtt": Container.Outputs.s3Bucket     
+          Ref: BatchFoldS3Bucket
 
   DownloadData:
     Type: "AWS::CloudFormation::Stack"
@@ -198,7 +250,7 @@ Resources:
         LambdaSubnet:
           "Fn::If":
             - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.PrivateSubnet
+            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
             - Ref: Subnet
         LambdaSecurityGroupId:
           "Fn::If":

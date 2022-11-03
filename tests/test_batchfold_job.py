@@ -6,7 +6,7 @@ import boto3
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
-
+from time import sleep
 
 @pytest.fixture()
 def batch_environment():
@@ -38,7 +38,7 @@ def test_job_init():
 
 def test_submit_batchfold_jobs(batch_environment):
     job_name = "BatchFoldTestJobNoOverrides" + datetime.now().strftime("%Y%m%d%s")
-    job_queue_name = "CPUOnDemandJobQueue"
+    job_queue_name = "GravitonOnDemandJobQueue"
 
     new_job = BatchFoldJob(job_name=job_name)
     submission = batch_environment.submit_job(job=new_job, job_queue_name=job_queue_name)
@@ -47,17 +47,17 @@ def test_submit_batchfold_jobs(batch_environment):
     job_description = new_job.describe_job()
     assert job_name == job_description[0].get("jobName", [])
 
-    job_dict = batch_environment.list_jobs()
-    job_list = job_dict[job_queue_name]
-    assert len(job_list) > 0
-
-    job_info = [job for job in job_list if job.get("jobName", []) == job_name]
+    job_info = []
+    while job_info == []:
+        sleep(5)
+        job_dict = batch_environment.list_jobs()
+        job_list = job_dict[job_queue_name]  
+        job_info = [job for job in job_list if job.get("jobName", []) == job_name]
     assert job_info[0].get("jobName") == job_name
-
 
 def test_submit_dependent_jobs(batch_environment):
 
-    job_queue_name = "CPUOnDemandJobQueue"
+    job_queue_name = "GravitonOnDemandJobQueue"
 
     job_1 = BatchFoldJob(job_name="ChainedJob1")
     job_2 = BatchFoldJob(job_name="ChainedJob2")

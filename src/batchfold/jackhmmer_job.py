@@ -60,13 +60,15 @@ class JackhmmerJob(BatchFoldJob):
                     f"--small_bfd_database_path {self.data_dir}/{self.small_bfd_database_path}"
                 ]
             )
-        else:
+        elif self.db_preset == "full_dbs":
             command_list.extend(
                 [
                     f"--bfd_database_path {self.data_dir}/{self.bfd_database_path}",
                     f"--uniclust30_database_path {self.data_dir}/{self.uniclust30_database_path}",
                 ]
             )
+        else:
+            raise AttributeError('db_preset must be either "reduced_dbs" "full_dbs"')
 
         if self.model_preset == "multimer":
             command_list.extend(
