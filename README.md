@@ -2,15 +2,18 @@
 
 ## Contents
 
-1. [Overview](#1.-Overview)  
-2. [Quick Start](#2.-Quick-Start)  
-3. [Advanced Configuration](#3.-Advanced-Configuration)  
-    3.1. [Optional CloudFormation Parameters](#3.1.-Optional-Cloudformation-Parameters)  
-    3.2. [Manual Data Download](#3.2.-Manual-Data-Download)  
-4. [Module Information](#4.-Module-Information) 
-5. [Architecture Details](#5.-Architecture-Details)  
-6. [Security](#6.-Security)  
-7. [License](#7.-License)  
+1. [Overview](#1-overview)  
+2. [Quick Start](#2-quick-start)  
+3. [Advanced Configuration](#3-advanced-configuration)  
+    3.1. [Optional CloudFormation Parameters](#31-optional-cloudformation-parameters)  
+    3.2. [Manual Data Download](#32-manual-data-download)  
+    3.3. [Clean Up](#33-clean-up)  
+4. [Module Information](#4-module-information)  
+5. [Architecture Details](#5-architecture-details)  
+    5.1. [Stack Creation Details](51-stack-creation-details)  
+    5.2. [Cost](52-cost)  
+6. [Security](#6-security)  
+7. [License](#7-license)  
 
 -----
 
@@ -56,7 +59,8 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ### 3.1. Optional CloudFormation Parameters
 
-- Select "Y" for **LaunchSageMakerNotebook** if you want to launch a managed sagemaker notebook instance to quickly run the provided Jupyter notebook.
+- Select "N" for **LaunchSageMakerNotebook** if you do not want to launch a managed sagemaker notebook instance to quickly run the provided Jupyter notebook. This option will avoid the [charges associated with running that notebook instance](https://aws.amazon.com/sagemaker/pricing/).
+- Select "N" for **MultiAZ** if you want to limit your Batch jobs to a single availability zone and avoid cross-AZ data transfer charges. Note that this may impact the availability of certain accelerated or other high-demand instance types.
 - Provide values for the **VPC**, **Subnet**, and **DefaultSecurityGroup** parameters to use existing network resources. If one or more of those parameters are left empty, CloudFormation will create a new VPC and FSx for Lustre instance for the stack.
 - Provide values for the **FileSystemId** and **FileSystemMountName** parameters to use an existing FSx for Lustre file system. If one or more of these parameters are left empty, CloudFormation will create a new file system for the stack.
 - Select "Y" for **DownloadFsxData** to automatically populate the FSx for Lustre file system with common sequence databases.
@@ -66,12 +70,18 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 If you set the **DownloadFsxData** parameter to **Y**, CloudFormation will automatically start a series of Batch jobs to populate the FSx for Lustre instance with a number of common sequence databases. If you set this parameter to **N** you will instead need to manually populate the file system. Once the CloudFormation stack is in a CREATE_COMPLETE status, you can begin populating the FSx for Lustre file system with the necessary sequence databases. To do this automatically, open a terminal in your notebooks environment and run the following commands from the **batch-protein-folding** directory:
 
-```
+```python
 pip install .
 python prep_databases.py
 ```
 
 It will take around 5 hours to populate the file system, depending on your location. You can track its progress by navigating to the file system in the FSx for Lustre console.
+
+### 3.3. Clean Up
+
+To remove the stack and stop further charges, first slect the root stack from the CloudFormation console and then the **Delete** button. This will remove all resources EXCEPT for the S3 bucket containing job data and the FSx for Lustre backup. You can associate this bucket as a data repository for a future FSx for Lustre file system to quickly repopulate the reference data.
+
+To remove all remaining data, browse to the S3 console and delete the S3 bucket associated with the stack.
 
 -----
 
@@ -87,7 +97,7 @@ Please visit [https://github.com/deepmind/alphafold] for more information about 
 
 The original AlphaFold 2 citation is
 
-```
+```text
 @Article{AlphaFold2021,
   author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and Green, Tim and Figurnov, Michael and Ronneberger, Olaf and Tunyasuvunakool, Kathryn and Bates, Russ and {\v{Z}}{\'\i}dek, Augustin and Potapenko, Anna and Bridgland, Alex and Meyer, Clemens and Kohl, Simon A A and Ballard, Andrew J and Cowie, Andrew and Romera-Paredes, Bernardino and Nikolov, Stanislav and Jain, Rishub and Adler, Jonas and Back, Trevor and Petersen, Stig and Reiman, David and Clancy, Ellen and Zielinski, Michal and Steinegger, Martin and Pacholska, Michalina and Berghammer, Tamas and Bodenstein, Sebastian and Silver, David and Vinyals, Oriol and Senior, Andrew W and Kavukcuoglu, Koray and Kohli, Pushmeet and Hassabis, Demis},
   journal = {Nature},
@@ -102,7 +112,7 @@ The original AlphaFold 2 citation is
 
 The AlphaFold-Multimer citation is
 
-```
+```text
 @article {AlphaFold-Multimer2021,
   author       = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v{Z}}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
   journal      = {bioRxiv}
@@ -121,7 +131,7 @@ Please visit [https://github.com/aqlaboratory/openfold] for more information abo
 
 The OpenFold citation is
 
-```
+```text
 @software{Ahdritz_OpenFold_2021,
   author = {Ahdritz, Gustaf and Bouatta, Nazim and Kadyan, Sachin and Xia, Qinghui and Gerecke, William and AlQuraishi, Mohammed},
   doi = {10.5281/zenodo.5709539},
@@ -138,7 +148,7 @@ Please visit [https://github.com/HeliXonProtein/OmegaFold] for more information 
 
 The OmegaFold citation is
 
-```
+```text
 @article{OmegaFold,
   author = {Wu, Ruidong and Ding, Fan and Wang, Rui and Shen, Rui and Zhang, Xiwen and Luo, Shitong and Su, Chenpeng and Wu, Zuofan and Xie, Qi and Berger, Bonnie and Ma, Jianzhu and Peng, Jian},
   title = {High-resolution de novo structure prediction from primary sequence},
@@ -158,6 +168,8 @@ The OmegaFold citation is
 
 ![AWS Batch Architecture for Protein Folding](imgs/batch-protein-folding-arch.png)
 
+### 5.1. Stack Creation Details
+
 This architecture uses a nested CloudFormation template to create various resources in a particular sequence:
 
 1. (Optional) If existing resources are not provided as template parameters, create a VPC, subnets, NAT gateway, elastic IP, routes, and S3 endpoint.
@@ -165,6 +177,17 @@ This architecture uses a nested CloudFormation template to create various resour
 1. Download several container images from a public ECR repository and push them to a new, private repository in your account. Also download a .zip file with the example notebooks and other code into a CodeCommit repository.
 1. Create the launch template, compute environments, job queues, and job definitions needed to submit jobs to AWS Batch.
 1. (Optional) If requested via a template parameter, create and run a Amazon Lambda-backed custom resource to download several open source proteomic data sets to the FSx Lustre instance.
+
+### 5.2. Cost
+
+There are two types of cost associated with this stack:
+
+- Ongoing charges for data storage, networking, and (optional) SageMaker Notebook Instance usage.
+- Per-job charges for EC2 usage and data transfer.
+
+Here are the estimated costs for using the default stack to run [100](https://calculator.aws/#/estimate?id=b1f0310e7266ad45644d3aefaa16f00e11ac1af6) and [5,000](https://calculator.aws/#/estimate?id=8237529417cf8fb38468e6aa8fcf1e6ba9bca527) jobs per month.
+
+To minimize costs, set the `MultiAZ` and `LaunchSageMakerNotebook` options to **N** when creating the stack. This will eliminate the intra-region data transfer costs between FSx for Lustre and EC2 as well as the SageMaker Notebook hosting costs.
 
 -----
 
