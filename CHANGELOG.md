@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved clarity of `prep_databases.py` script.
 - Removed Batch compute environments for amd instance types.
 - Moved S3 resource to root CloudFormation stack and updated retention policy
+- Updated cost estimates.
 
 ---
 
