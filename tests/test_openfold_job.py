@@ -9,21 +9,22 @@ from datetime import datetime
 import os
 from time import sleep
 
+boto_session = boto3.Session(region_name=os.getenv("AWS_REGION"))
+
 @pytest.fixture()
 def batch_environment():
-    stack = BatchFoldEnvironment(boto_session = boto3.Session())
+    stack = BatchFoldEnvironment(boto_session = boto_session)
     return(stack)
 
 def test_openfold_job_init():
     bucket = os.getenv("TEST_BUCKET")
-
     new_job = OpenFoldJob(
+        boto_session = boto_session,
         target_id = "T1084",
         fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
         output_s3_uri = f"s3://{bucket}/T1084/outputs/",
         openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",
     )
-
     assert new_job.job_definition_name == "OpenFoldJobDefinition"
     assert new_job.target_id == "T1084"
     assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
@@ -35,8 +36,8 @@ def test_openfold_job_submission(batch_environment):
     job_name = "OpenFoldJob" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "G4dnJobQueue"
     bucket = os.getenv("TEST_BUCKET")
-
     new_job = OpenFoldJob(
+        boto_session = boto_session,
         job_name = job_name,
         target_id = "T1084",
         fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
@@ -47,13 +48,10 @@ def test_openfold_job_submission(batch_environment):
         openfold_checkpoint_path = "openfold_params/finetuning_ptm_1.pt",
         save_outputs = True        
     )
-
     submission = batch_environment.submit_job(new_job, job_queue_name)
-    assert job_name == submission.job_name
-    
+    assert job_name == submission.job_name    
     job_description = new_job.describe_job()        
     assert job_name == job_description[0].get("jobName", [])
-
     job_info = []
     while job_info == []:
         sleep(5)

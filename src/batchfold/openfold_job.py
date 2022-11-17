@@ -1,7 +1,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from attrs import define
+from attrs import define, field
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
@@ -48,6 +48,11 @@ class OpenFoldJob(BatchFoldJob):
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     use_precomputed_msas: bool = True
     long_sequence_inference: bool = False
+    job_name: str = field(default="OpenFoldJob" + datetime.now().strftime("%Y%m%d%s"))
+    job_definition_name: str = field(default="OpenFoldJobDefinition")
+    cpu: int = field(default=4)
+    memory: int = field(default=15)
+    gpu: int = field(default=1)
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -57,7 +62,6 @@ class OpenFoldJob(BatchFoldJob):
             command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/msas/{self.target_id}/"])
         command_list.extend([f"-o {self.output_dir}/predictions/:{self.output_s3_uri}"])
         command_list.extend([f"-o {self.output_dir}/timings.json:{self.output_s3_uri}/timings.json"])
-
         command_list.extend([
             "python3",
             "/opt/openfold/run_pretrained_openfold.py",
@@ -74,7 +78,6 @@ class OpenFoldJob(BatchFoldJob):
             f"--kalign_binary_path={self.kalign_binary_path}",
             f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
         ])
-
         if self.use_precomputed_msas is False:
             command_list.extend(
                 [
@@ -105,7 +108,6 @@ class OpenFoldJob(BatchFoldJob):
             command_list.extend(
                 [f"--use_precomputed_alignments {self.output_dir}/msas/"]
             )
-
         if self.release_dates_path != "":
             command_list.extend([f"--release_dates_path={self.release_dates_path}"])
         if self.output_postfix != "":
@@ -126,7 +128,6 @@ class OpenFoldJob(BatchFoldJob):
             raise ValueError(
                 "Please provide a value for either openfold_checkpoint_path or jax_param_path"
             )
-
         if self.skip_relaxation:
             command_list.extend(["--skip_relaxation"])
         if self.trace_model:
@@ -137,8 +138,6 @@ class OpenFoldJob(BatchFoldJob):
             command_list.extend(["--save_outputs"])
         if self.long_sequence_inference:
             command_list.extend(["--long_sequence_inference"])            
-
         logging.info(f"Command is \n{command_list}")
-        self.container_overrides["command"] = command_list
-
+        self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)
         return None
