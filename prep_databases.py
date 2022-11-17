@@ -35,7 +35,8 @@ def main():
         "download_uniclust30",
         "download_uniprot",                          
         "download_uniref90",
-        "download_omegafold_params"
+        "download_omegafold_params",
+        "download_rfdesign_params"
     ]
 
     for script in download_scripts:
