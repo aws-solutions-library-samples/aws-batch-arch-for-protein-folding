@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2022-11-18
+
+### 1.4.0 Added
+
+- Added default support for RFDesign hallucination and inpainting jobs.
+
+---
+
 ## [1.3.0] - 2022-10-12
 
 ### 1.3.0 Added

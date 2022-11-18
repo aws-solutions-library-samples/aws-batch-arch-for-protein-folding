@@ -162,6 +162,26 @@ The OmegaFold citation is
 }
 ```
 
+### 4.5. RFDesign
+
+Please visit [https://github.com/RosettaCommons/RFDesign] for more information about the RFDesign hallucinate and inpainting algorithms.
+
+The RFDesign citation is
+
+```text
+@article{RFDesign,
+  author = {Jue Wang, Sidney Lisanza, David Juergens, Doug Tischer, Ivan Anishchenko, Minkyung Baek, Joseph L. Watson, Jung Ho Chun, Lukas F. Milles, Justas Dauparas, Marc Expòsit, Wei Yang, Amijai Saragovi, Sergey Ovchinnikov, and David Baker},
+  title = {Deep learning methods for designing proteins scaffolding functional sites},
+  elocation-id = {2021.11.10.468128},
+  year = {2022},
+  doi = {10.1101/2021.11.10.468128},
+  publisher = {bioRxiv},
+  URL = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999},
+  eprint = {https://www.biorxiv.org/content/10.1101/2021.11.10.468128v2.full.pdf},
+  journal = {bioRxiv}
+}
+```
+
 -----
 
 ## 5. Architecture Details
