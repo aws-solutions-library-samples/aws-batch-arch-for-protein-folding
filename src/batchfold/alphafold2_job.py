@@ -1,7 +1,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from attrs import define
+from attrs import define, field
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
@@ -39,6 +39,11 @@ class AlphaFold2Job(BatchFoldJob):
     run_relax: bool = True
     use_gpu_relax: bool = True
     num_multimer_predictions_per_model: int = 1
+    job_name: str = field(default="AlphaFoldJob" + datetime.now().strftime("%Y%m%d%s"))
+    job_definition_name: str = field(default="AlphaFold2JobDefinition")
+    cpu: int = field(default=4)
+    memory: int = field(default=15)
+    gpu: int = field(default=1)
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -47,7 +52,6 @@ class AlphaFold2Job(BatchFoldJob):
         if self.use_precomputed_msas:
             command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/{self.target_id}/msas/"])
         command_list.extend([f"-o {self.output_dir}/{self.target_id}/:{self.output_s3_uri}"])
-
         command_list.extend([
             "/app/run_alphafold.sh",
             f"--data_dir={self.data_dir}",
@@ -65,7 +69,6 @@ class AlphaFold2Job(BatchFoldJob):
             f"--run_relax={self.run_relax}",
             f"--use_gpu_relax={self.use_gpu_relax}",
         ])
-
         if self.db_preset == "full_dbs":
             command_list.extend(
                 [
@@ -98,6 +101,6 @@ class AlphaFold2Job(BatchFoldJob):
             )
 
         logging.info(f"Command is \n{command_list}")
-        self.container_overrides["command"] = command_list
+        self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)
 
         return None

@@ -9,14 +9,17 @@ from datetime import datetime
 import os
 from time import sleep
 
+boto_session = boto3.Session(region_name=os.getenv("AWS_REGION"))
+
 @pytest.fixture()
 def batch_environment():
-    stack = BatchFoldEnvironment(boto_session = boto3.Session())
+    stack = BatchFoldEnvironment(boto_session = boto_session)
     return(stack)
 
 def test_alphafold_2_job_init():
     test_bucket = os.getenv("TEST_BUCKET")
     new_job = AlphaFold2Job(
+        boto_session = boto_session,
         target_id = "T1084",
         fasta_s3_uri = f"s3://{test_bucket}/T1084/fasta/T1084.fasta",
         output_s3_uri = f"s3://{test_bucket}/T1084/outputs/",
@@ -36,6 +39,7 @@ def test_alphafold_2_job_submission(batch_environment):
     test_bucket = os.getenv("TEST_BUCKET")
 
     new_job = AlphaFold2Job(
+        boto_session = boto_session,
         job_name = job_name,
         target_id = "T1084",
         fasta_s3_uri = f"s3://{test_bucket}/T1084/fasta/T1084.fasta",
