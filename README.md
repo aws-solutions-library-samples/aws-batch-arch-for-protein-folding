@@ -89,11 +89,11 @@ To remove all remaining data, browse to the S3 console and delete the S3 bucket 
 
 ### 4.1. JackHMMER
 
-Please visit [https://github.com/EddyRivasLab/hmmer] for more information about the JackHMMER algorithm.
+Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRivasLab/hmmer) for more information about the JackHMMER algorithm.
 
 ### 4.2. AlphaFold
 
-Please visit [https://github.com/deepmind/alphafold] for more information about the AlphaFold2 algorithm.
+Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
 
 The original AlphaFold 2 citation is
 
@@ -127,7 +127,7 @@ The AlphaFold-Multimer citation is
 
 ### 4.3. OpenFold
 
-Please visit [https://github.com/aqlaboratory/openfold] for more information about the OpenFold algorithm.
+Please visit [https://github.com/aqlaboratory/openfold](https://github.com/aqlaboratory/openfold) for more information about the OpenFold algorithm.
 
 The OpenFold citation is
 
@@ -144,7 +144,7 @@ The OpenFold citation is
 
 ### 4.4. OmegaFold
 
-Please visit [https://github.com/HeliXonProtein/OmegaFold] for more information about the OmegaFold algorithm.
+Please visit [https://github.com/HeliXonProtein/OmegaFold](https://github.com/HeliXonProtein/OmegaFold) for more information about the OmegaFold algorithm.
 
 The OmegaFold citation is
 
@@ -164,7 +164,7 @@ The OmegaFold citation is
 
 ### 4.5. RFDesign
 
-Please visit [https://github.com/RosettaCommons/RFDesign] for more information about the RFDesign hallucinate and inpainting algorithms.
+Please visit [https://github.com/RosettaCommons/RFDesign](https://github.com/RosettaCommons/RFDesign) for more information about the RFDesign hallucinate and inpainting algorithms.
 
 The RFDesign citation is
 
@@ -179,6 +179,22 @@ The RFDesign citation is
   URL = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999},
   eprint = {https://www.biorxiv.org/content/10.1101/2021.11.10.468128v2.full.pdf},
   journal = {bioRxiv}
+}
+```
+
+### 4.6. ESMFold
+
+Please visit [https://github.com/facebookresearch/esm](https://github.com/facebookresearch/esm) for more information about the ESMFold algorithm.
+
+The ESMFold citation is
+
+```text
+@article{lin2022language,
+  title={Language models of protein sequences at the scale of evolution enable accurate structure prediction},
+  author={Lin, Zeming and Akin, Halil and Rao, Roshan and Hie, Brian and Zhu, Zhongkai and Lu, Wenting and Smetanin, Nikita and dos Santos Costa, Allan and Fazel-Zarandi, Maryam and Sercu, Tom and Candido, Sal and others},
+  journal={bioRxiv},
+  year={2022},
+  publisher={Cold Spring Harbor Laboratory}
 }
 ```
 

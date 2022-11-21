@@ -12,7 +12,7 @@ Parameters:
   Environment:
     Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
     Type: String
-    Default: dev
+    Default: main
     AllowedValues:
       - main
       - dev     
