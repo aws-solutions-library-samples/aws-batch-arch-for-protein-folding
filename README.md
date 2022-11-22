@@ -226,13 +226,20 @@ Here are the estimated costs for using the default stack to run [100](https://ca
 To minimize costs, set the `MultiAZ` and `LaunchSageMakerNotebook` options to **N** when creating the stack. This will eliminate the intra-region data transfer costs between FSx for Lustre and EC2 as well as the SageMaker Notebook hosting costs.
 
 -----
+### 6. Troubleshooting/FAQ
 
-## 6. Security
+Q: When deploying the CloudFormation template, I get an error `Embedded stack arn:aws:cloudformation...  was not successfully created: The following resource(s) failed to create: [AWSServiceRoleForEC2SpotFleetServiceLinkedRole]`. How can I fix this?
+
+This can happen if the service role has already been created in a previous deployment. Try deleting the `AWSServiceRoleForEC2SpotFleetServiceLinkedRole` in the IAM console and redeploy the Cloud Formation template.
+
+-----
+
+## 7. Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
 -----
 
-## 7. License
+## 8. License
 
 This project is licensed under the Apache-2.0 License.
