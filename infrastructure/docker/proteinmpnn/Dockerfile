@@ -1,52 +1,26 @@
-ARG CUDA_VERSION=11.6.2
-ARG UBUNTU_VERSION=20.04
-FROM nvcr.io/nvidia/cuda:${CUDA_VERSION}-cudnn8-runtime-ubuntu${UBUNTU_VERSION}
-ARG PYTHON_VERSION=3.10.7
+FROM public.ecr.aws/amazonlinux/amazonlinux:latest
 
-# Use bash to support string substitution.
-SHELL ["/bin/bash", "-c"]
+RUN yum update -y \
+    && yum groupinstall "Development Tools" -y \
+    && yum install wget unzip -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        build-essential \
-        zlib1g-dev \
-        libncurses5-dev \
-        libgdbm-dev \
-        libnss3-dev \
-        libssl-dev \
-        libreadline-dev \
-        libffi-dev \
-        wget \
-        unzip \
-        tar \
-        git \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get autoremove -y \
-    && apt-get clean
+RUN amazon-linux-extras install python3.8
 
-RUN mkdir /python && cd /python \
-    && wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
-    && tar -xvf Python-${PYTHON_VERSION}.tgz \
-    && cd Python-${PYTHON_VERSION} && ./configure --enable-optimizations \
-    && make install \
-    && cd / && rm -rf /python \
-    && pip3 install --upgrade pip --no-cache-dir \
-    && pip3 install --upgrade wheel --no-cache-dir
+# # RUN pip3 install --upgrade pip wheel --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
 
-RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install \
-    && rm awscliv2.zip
+# RUN git clone --depth 1 https://github.com/dauparas/ProteinMPNN.git /opt/proteinmpnn
+# RUN python -m ensurepip --upgrade
+# RUN pip install --upgrade --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu torch numpy
+    
+# RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+#     && unzip awscliv2.zip \
+#     && ./aws/install \
+#     && rm awscliv2.zip
 
-RUN git clone --depth 1 https://github.com/dauparas/ProteinMPNN.git /opt/ProteinMPNN
-WORKDIR /opt/ProteinMPNN
-COPY run.sh run.sh
-RUN chmod 755 run.sh \    
-    && pip3 install --upgrade --no-cache-dir \
-      torch \
-      torchvision \
-      torchaudio \
-      --extra-index-url https://download.pytorch.org/whl/cu116 
-    # && rm -rf colab_notebooks examples inputs outputs training
+# # WORKDIR /opt/proteinmpnn
 
-ENTRYPOINT ["bash", "run.sh"]
+# # COPY run.sh run.sh
+
+# # ENTRYPOINT ["bash", "run.sh"]
