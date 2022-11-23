@@ -13,7 +13,7 @@ Follow these steps to add additional modules
 
 1. Create a new folder under `infrastructure/docker` with your Dockerfile and any supporting files. Look at the `run.sh` helper script included with other modules for and example of how to pass data back and forth with Amazon S3.
 2. Copy one of the `batch-protein-folding-cdn-module-*.yaml` files in `/infrastructure/cloudformation` and name it after your new module. Update the resource names, CodeBuild details, and Job Definition as needed.
-3. If your modeul needs data on the FSx for Lustre file system (e.g. model weights or reference data), create a new download script in `/infrastructure/docker/download/script`. You'll also need to add the name of the script to the download function defined in `prep_databases.py` and `infrastructure/cloudformation/batch-protein-folding-cfn-download.yaml`.
+3. If your module needs data on the FSx for Lustre file system (e.g. model weights or reference data), create a new download script in `/infrastructure/docker/download/script`. You'll also need to add the name of the script to the download function defined in `prep_databases.py` and `infrastructure/cloudformation/batch-protein-folding-cfn-download.yaml`.
 4. Create a new module for submitting your job in `src/batchfold` and tests in `tests`.
 5. Build and deploy your stack using the following AWS CLI commands:
 ```
