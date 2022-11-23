@@ -48,7 +48,7 @@ Resources:
       Description: Build Docker container for ProteinMPNN algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -61,7 +61,7 @@ Resources:
         Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: LINUX_CONTAINER
+        Type: ARM_CONTAINER
       ResourceAccessRole: !Ref CodeBuildRoleArn
       ServiceRole: !Ref CodeBuildRoleArn
       Source:
