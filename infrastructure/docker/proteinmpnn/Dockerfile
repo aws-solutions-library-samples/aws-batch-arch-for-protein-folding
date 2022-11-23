@@ -14,7 +14,7 @@ RUN amazon-linux-extras install python3.8 \
 
 RUN git clone --depth 1 https://github.com/dauparas/ProteinMPNN.git /opt/proteinmpnn
     
-RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" \
     && unzip awscliv2.zip \
     && ./aws/install \
     && rm awscliv2.zip
