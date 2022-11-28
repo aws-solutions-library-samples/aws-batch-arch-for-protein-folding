@@ -102,8 +102,8 @@ Resources:
             Value: 8
           - Type: MEMORY
             Value: 16000
-          - Type: GPU
-            Value: 1
+          # - Type: GPU
+          #   Value: 1
         Volumes:
           - Name: database
             Host:
