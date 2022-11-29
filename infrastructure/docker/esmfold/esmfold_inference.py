@@ -10,6 +10,7 @@ from pathlib import Path
 from timeit import default_timer as timer
 import json
 import re
+import uuid
 
 import torch
 
@@ -70,8 +71,11 @@ def create_batched_sequence_datasest(
         if (len(seq) + num_tokens > max_tokens_per_batch) and num_tokens > 0:
             yield batch_headers, batch_sequences
             batch_headers, batch_sequences, num_tokens = [], [], 0
-        clean_header =  re.search('^(.*?)[|\s$]', header).group(1)
-        batch_headers.append(clean_header)
+        clean_header =  re.search('^\w+', header)
+        if clean_header:
+            batch_headers.append(clean_header[0])
+        else:
+            batch_headers.append(uuid.uuid4().hex[:4])
         batch_sequences.append(seq)
         num_tokens += len(seq)
 
