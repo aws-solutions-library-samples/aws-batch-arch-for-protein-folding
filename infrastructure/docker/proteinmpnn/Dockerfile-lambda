@@ -1,0 +1,26 @@
+FROM public.ecr.aws/lambda/python:3.9
+
+RUN yum update -y \
+    && yum install git -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+RUN git clone --depth 1 https://github.com/dauparas/ProteinMPNN.git \
+    && cp ProteinMPNN/*.py ${LAMBDA_TASK_ROOT} \
+    && cp -r ProteinMPNN/helper_scripts ${LAMBDA_TASK_ROOT} \
+    && cp -r ProteinMPNN/ca_model_weights ${LAMBDA_TASK_ROOT} \
+    && cp -r ProteinMPNN/vanilla_model_weights ${LAMBDA_TASK_ROOT} \
+    && rm -rf ProteinMPNN
+
+RUN python -m pip install --upgrade pip wheel \
+    && python -m pip install --upgrade --no-cache-dir \
+      --extra-index-url https://download.pytorch.org/whl/cpu \
+      --target "${LAMBDA_TASK_ROOT}" \
+      torch numpy
+
+COPY app.py ${LAMBDA_TASK_ROOT}
+COPY 3HTN.pdb ${LAMBDA_TASK_ROOT}/tests/
+
+CMD [ "app.lambda_handler" ] 
