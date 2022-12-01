@@ -2,6 +2,8 @@
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
  
+from pathlib import Path
+import sys
 import argparse
 import logging
 import sys
@@ -10,6 +12,7 @@ from pathlib import Path
 from timeit import default_timer as timer
 import json
 import re
+import uuid
 
 import torch
 
@@ -70,8 +73,11 @@ def create_batched_sequence_datasest(
         if (len(seq) + num_tokens > max_tokens_per_batch) and num_tokens > 0:
             yield batch_headers, batch_sequences
             batch_headers, batch_sequences, num_tokens = [], [], 0
-        clean_header =  re.search('^(.*?)[|\s$]', header).group(1)
-        batch_headers.append(clean_header)
+        clean_header =  re.search('^\w+', header)
+        if clean_header:
+            batch_headers.append(clean_header[0])
+        else:
+            batch_headers.append(uuid.uuid4().hex[:4])
         batch_sequences.append(seq)
         num_tokens += len(seq)
 
@@ -89,6 +95,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-o", "--pdb", help="Path to output PDB directory", type=Path, required=True
+    )
+    parser.add_argument(
+        "-m", "--model-dir", help="Parent path to Pretrained ESM data directory. ", type=Path, default=None
     )
     parser.add_argument(
         "--num-recycles",
@@ -128,7 +137,15 @@ if __name__ == "__main__":
     logger.info(f"Loaded {len(all_sequences)} sequences from {args.fasta}")
 
     logger.info("Loading model")
+
+    # Use pre-downloaded ESM weights from model_pth.
+    if args.model_dir is not None:
+        # if pretrained model path is available
+        torch.hub.set_dir(args.model_dir)
+
     model = esm.pretrained.esmfold_v1()
+
+
     model = model.eval()
     model.set_chunk_size(args.chunk_size)
 
@@ -166,8 +183,8 @@ if __name__ == "__main__":
         output = {key: value.cpu() for key, value in output.items()}
         pdbs = model.output_to_pdb(output)
         tottime = timer() - start
-        metrics = {"time": tottime}
         time_string = f"{tottime / len(headers):0.1f}s"        
+        metrics = {"time": tottime}
 
         if len(sequences) > 1:
             time_string = time_string + f" (amortized, batch size {len(sequences)})"
