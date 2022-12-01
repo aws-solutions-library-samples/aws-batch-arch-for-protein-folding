@@ -9,11 +9,19 @@
     3.2. [Manual Data Download](#32-manual-data-download)  
     3.3. [Clean Up](#33-clean-up)  
 4. [Module Information](#4-module-information)  
+    4.1. [JackHMMER](#41-jackhmmer)  
+    4.2. [AlphaFold](#42-alphafold)  
+    4.3. [OpenFold](#43-openfold)  
+    4.4. [OmegaFold](#44-omegafold)  
+    4.5. [RFDesign](#45-rfdesign)  
+    4.6. [ESMFold](#46-esmfold)  
+    4.7. [ProteinMPNN](#47-proteinmpnn)
 5. [Architecture Details](#5-architecture-details)  
-    5.1. [Stack Creation Details](51-stack-creation-details)  
-    5.2. [Cost](52-cost)  
-6. [Security](#6-security)  
-7. [License](#7-license)  
+    5.1. [Stack Creation Details](#51-stack-creation-details)  
+    5.2. [Cost](#52-cost)  
+6. [FAQ](#6-faq)
+7. [Security](#7-security)
+8. [License](#8-license)
 
 -----
 
@@ -198,6 +206,25 @@ The ESMFold citation is
 }
 ```
 
+### 4.7. ProteinMPNN
+
+Please visit [https://github.com/dauparas/ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for more information about the ProteinMPNN algorithm.
+
+The ProteinMPNN citation is
+
+```text
+@article{dauparas2022robust,
+  title={Robust deep learning--based protein sequence design using ProteinMPNN},
+  author={Dauparas, Justas and Anishchenko, Ivan and Bennett, Nathaniel and Bai, Hua and Ragotte, Robert J and Milles, Lukas F and Wicky, Basile IM and Courbet, Alexis and de Haas, Rob J and Bethel, Neville and others},
+  journal={Science},
+  volume={378},
+  number={6615},  
+  pages={49--56},
+  year={2022},
+  publisher={American Association for the Advancement of Science}
+}
+```
+
 -----
 
 ## 5. Architecture Details
@@ -226,7 +253,8 @@ Here are the estimated costs for using the default stack to run [100](https://ca
 To minimize costs, set the `MultiAZ` and `LaunchSageMakerNotebook` options to **N** when creating the stack. This will eliminate the intra-region data transfer costs between FSx for Lustre and EC2 as well as the SageMaker Notebook hosting costs.
 
 -----
-### 6. Troubleshooting/FAQ
+
+## 6. FAQ
 
 Q: When deploying the CloudFormation template, I get an error `Embedded stack arn:aws:cloudformation...  was not successfully created: The following resource(s) failed to create: [AWSServiceRoleForEC2SpotFleetServiceLinkedRole]`. How can I fix this?
 

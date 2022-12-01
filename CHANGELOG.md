@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2022-12-1
+
+### 1.6.0 Added
+
+- Added support for ProteinMPNN jobs.
+
+### 1.6.0 Changed
+
+- Incorporated ProteinMPNN into protein design notebook.
+- Added list of supported algorithms to README index.
+
+---
+
 ## [1.5.1] - 2022-11-30
 
 ### 1.5.1 Fixed
