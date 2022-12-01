@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1] - 2022-11-30
+
+### 1.5.1 Fixed
+
+- Fixed ESMFold issue with malformed fasta headers
+- Pinned ESMFold dependencies
+
+---
+
 ## [1.5.0] - 2022-11-18
 
 ### 1.5.0 Added
