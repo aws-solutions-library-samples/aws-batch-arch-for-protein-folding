@@ -20,6 +20,7 @@ class ESMFoldJob(BatchFoldJob):
     chunk_size: int = None
     cpu_only: bool = False
     cpu_offload: bool = False
+    model_dir: str = "/database/esmfold_params/hub"
     job_name: str = field(default="ESMFoldJob" + datetime.now().strftime("%Y%m%d%s"))
     job_definition_name: str = field(default="ESMFoldJobDefinition")
     cpu: int = field(default=8)
@@ -35,7 +36,8 @@ class ESMFoldJob(BatchFoldJob):
             f"--fasta=input/{self.target_id}.fasta",
             f"--pdb=output",
             f"--num-recycles={self.num_recycles}",
-            f"--max-tokens-per-batch={self.max_tokens_per_batch}"
+            f"--max-tokens-per-batch={self.max_tokens_per_batch}",
+            f"--model-dir={self.model_dir}",
         ])
 
         if self.chunk_size:
