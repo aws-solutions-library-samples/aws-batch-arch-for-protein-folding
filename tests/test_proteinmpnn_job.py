@@ -25,7 +25,6 @@ def test_proteinmpnn_job_init():
         boto_session=boto_session,
         job_name = job_name,
         memory=15,
-        target_id = "3HTN",
         pdb_s3_uri = f"s3://{bucket}/mpnn/input/3HTN.pdb",
         output_s3_uri = f"s3://{bucket}/mpnn/output",
         pdb_path_chains = "A B",
@@ -35,7 +34,6 @@ def test_proteinmpnn_job_init():
         batch_size = 1
     )
     assert new_job.job_definition_name == "ProteinMPNNJobDefinition"
-    assert new_job.target_id == "3HTN"
     assert new_job.pdb_s3_uri == f"s3://{bucket}/mpnn/input/3HTN.pdb"
     assert new_job.output_s3_uri == f"s3://{bucket}/mpnn/output"
     assert new_job.pdb_path_chains == "A B"
@@ -47,13 +45,12 @@ def test_proteinmpnn_job_init():
 def test_proteinmpnn_job_submission(batch_environment):
 
     job_name = "ProteinMPNNJob" + datetime.now().strftime("%Y%m%d%s")
-    job_queue_name = "GravitonSpotJobQueue"
+    job_queue_name = "GravitonOnDemandJobQueue"
     bucket = os.getenv("TEST_BUCKET")
     new_job = ProteinMPNNJob(
         boto_session=boto_session,
         job_name = job_name,
         memory=15,
-        target_id = "3HTN",
         pdb_s3_uri = f"s3://{bucket}/mpnn/input/3HTN.pdb",
         output_s3_uri = f"s3://{bucket}/mpnn/output/{job_name}",
         pdb_path_chains = "A B",
