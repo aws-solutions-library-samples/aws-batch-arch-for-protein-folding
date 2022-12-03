@@ -34,13 +34,6 @@ RUN python -m pip install --no-cache-dir "fair-esm[esmfold]"
 
 FROM public.ecr.aws/lambda/python:3.9
 COPY --from=build /var/lang/lib/python3.9/site-packages ${LAMBDA_TASK_ROOT}
-
-RUN mkdir -p /tmp/hub/checkpoints \
-    && cd /tmp/hub/checkpoints \
-    && curl -O "https://dl.fbaipublicfiles.com/fair-esm/models/esmfold_3B_v1.pt" \
-    && curl -O "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t36_3B_UR50D.pt" \
-    && curl -O "https://dl.fbaipublicfiles.com/fair-esm/regression/esm2_t36_3B_UR50D-contact-regression.pt"
-
 COPY app.py ${LAMBDA_TASK_ROOT}
 WORKDIR ${LAMBDA_TASK_ROOT}
 ENV TORCH_HOME="/tmp"
