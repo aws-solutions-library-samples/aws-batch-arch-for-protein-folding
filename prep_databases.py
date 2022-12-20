@@ -32,7 +32,7 @@ def main():
         "download_pdb_seqres",
         "download_pdb70",
         "download_small_bfd",
-        "download_uniclust30",
+        "download_uniref30",
         "download_uniprot",                          
         "download_uniref90",
         "download_omegafold_params",
