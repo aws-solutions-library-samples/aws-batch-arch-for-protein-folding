@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.1] - 2022-12-27
+
+### 1.6.1 Fixed
+
+- Fixed issue with ESMFold Dockerfile
+
+---
+
 ## [1.6.0] - 2022-12-1
 
 ### 1.6.0 Added
