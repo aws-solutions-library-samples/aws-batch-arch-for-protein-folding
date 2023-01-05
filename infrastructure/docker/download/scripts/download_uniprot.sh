@@ -51,5 +51,5 @@ gunzip -f "${ROOT_DIR}/${SPROT_BASENAME}"
 # Concatenate TrEMBL and SwissProt, rename to uniprot and clean up.
 cat "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}" >> "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}"
 mv "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}" "${ROOT_DIR}/uniprot.fasta"
-rm "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}"
+# rm "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}"
 popd
