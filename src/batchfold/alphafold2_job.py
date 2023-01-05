@@ -24,12 +24,12 @@ class AlphaFold2Job(BatchFoldJob):
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"
     )
-    mgnify_database_path: str = "mgnify/mgy_clusters_2018_12.fa"
+    mgnify_database_path: str = "mgnify/mgy_clusters_2022_05.fa"
     pdb70_database_path: str = "pdb70/pdb70"
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
     pdb_seqres_database_path: str = "pdb_seqres/pdb_seqres.txt"
     small_bfd_database_path: str = "small_bfd/bfd-first_non_consensus_sequences.fasta"
-    uniref30_database_path: str = "uniref30/uniref30_2018_08/uniref30_2018_08"
+    uniref30_database_path: str = "uniref30/UniRef30_2021_03/UniRef30_2021_03"
     uniprot_database_path: str = "uniprot/uniprot.fasta"
     uniref90_database_path: str = "uniref90/uniref90.fasta"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
