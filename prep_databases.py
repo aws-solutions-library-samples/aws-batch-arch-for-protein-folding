@@ -25,19 +25,19 @@ def main():
 
     download_scripts = [
         "download_alphafold_params",
-        # "download_bfd",
+        "download_bfd",
+        "download_esmfold",
         "download_mgnify",
-        # "download_openfold_params",
-        # "download_pdb_mmcif",
+        "download_omegafold_params",
+        "download_openfold_params",
+        "download_pdb_mmcif",
         "download_pdb_seqres",
-        # "download_pdb70",
-        # "download_small_bfd",
+        "download_pdb70",
+        "download_rfdesign_params",
+        "download_small_bfd",
+        "download_uniprot",
         "download_uniref30",
-        # "download_uniprot",                          
-        # "download_uniref90",
-        # "download_omegafold_params",
-        # "download_rfdesign_params",
-        # "download_esmfold"
+        "download_uniref90"
     ]
 
     for script in download_scripts:

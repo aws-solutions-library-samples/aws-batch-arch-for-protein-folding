@@ -83,10 +83,12 @@ def run_msa_tool(msa_runner, input_fasta_path: str, msa_out_path: str,
   if not use_precomputed_msas or not os.path.exists(msa_out_path):
     if msa_format == 'sto' and max_sto_sequences is not None:
       result = msa_runner.query(input_fasta_path, max_sto_sequences)[0]  # pytype: disable=wrong-arg-count
+      ### Added by AWS
       a3m_result = parsers.convert_stockholm_to_a3m(result[msa_format], max_sequences=max_sto_sequences)
       a3m_out_path = msa_out_path.split(".sto")[0] + ".a3m"
       with open(a3m_out_path, 'w') as f:
         f.write(a3m_result)
+      ###
     else:
       result = msa_runner.query(input_fasta_path)[0]
     with open(msa_out_path, 'w') as f:

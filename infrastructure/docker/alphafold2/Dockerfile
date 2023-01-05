@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ARG CUDA=11.1.1
-ARG ALPHAFOLD2_VERSION=v2.2.4
+ARG ALPHAFOLD2_VERSION=v2.3.0
 FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
