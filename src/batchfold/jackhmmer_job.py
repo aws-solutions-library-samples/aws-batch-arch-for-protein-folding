@@ -16,7 +16,7 @@ class JackhmmerJob(BatchFoldJob):
     output_dir: str = uuid.uuid4().hex
     data_dir: str = "/database"
     uniref90_database_path: str = "uniref90/uniref90.fasta"
-    mgnify_database_path: str = "mgnify/mgy_clusters_2018_12.fa"
+    mgnify_database_path: str = "mgnify/mgy_clusters_2022_05.fa"
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
