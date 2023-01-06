@@ -51,7 +51,7 @@ COPY setup.py .
 RUN python setup.py install
 
 # Install ESMFold
-RUN git clone --depth 1 https://github.com/facebookresearch/esm.git /opt/esmfold \
+RUN git clone https://github.com/facebookresearch/esm.git /opt/esmfold \
   && cd /opt/esmfold \
   && git checkout 74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3
 WORKDIR /opt/esmfold
