@@ -38,7 +38,10 @@ RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64
     && ./aws/install \
     && rm awscliv2.zip
 
-RUN git clone --depth 1 https://github.com/HeliXonProtein/OmegaFold.git /opt/OmegaFold
+RUN git clone https://github.com/HeliXonProtein/OmegaFold.git /opt/OmegaFold \
+    && cd /opt/OmegaFold \
+    && git checkout 9a4209ff64f4d099fa06354d5156a2d6d735bf26
+
 WORKDIR /opt/OmegaFold
 COPY pipeline.py omegafold/pipeline.py
 COPY run.sh run.sh
