@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.2] - 2023-02-10
+
+### 1.6.2 Fixed
+
+- Pinned commit of OmegaFold repository
+
+---
+
 ## [1.6.1] - 2022-12-27
 
 ### 1.6.1 Fixed
