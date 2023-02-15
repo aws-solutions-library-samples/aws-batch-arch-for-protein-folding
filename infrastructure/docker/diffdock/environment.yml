@@ -1,0 +1,25 @@
+name: base
+channels:
+  - pytorch
+  - nvidia
+  - pyg
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pytorch
+  - pytorch-cuda=11.7
+  - pyg
+  - pytorch-scatter
+  - pytorch-sparse
+  - pytorch-cluster
+  - pytorch-spline-conv
+  - pyyaml
+  - scipy
+  - networkx
+  - biopython
+  - rdkit
+  - e3nn
+  - spyrmsd
+  - pandas
+  - biopandas
+prefix: /opt/conda
