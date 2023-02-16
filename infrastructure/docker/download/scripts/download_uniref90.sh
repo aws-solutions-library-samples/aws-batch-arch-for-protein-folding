@@ -31,11 +31,12 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniref90"
-SOURCE_URL="https://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz"
+SOURCE_URL=s3://aws-batch-architecture-for-alphafold-public-artifacts/uniref90/uniref90.fasta.gz
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+# aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+aws s3 cp ${SOURCE_URL} ${ROOT_DIR}/
 pushd "${ROOT_DIR}"
 gunzip -f "${ROOT_DIR}/${BASENAME}"
 popd
