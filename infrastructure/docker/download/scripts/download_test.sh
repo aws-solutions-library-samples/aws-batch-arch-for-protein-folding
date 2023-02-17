@@ -21,7 +21,7 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/test"
-SOURCE_URL="s3://openfold/LICENSE"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/test.txt"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"

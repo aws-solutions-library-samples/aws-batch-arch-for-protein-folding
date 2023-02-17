@@ -26,7 +26,7 @@ def main():
     download_scripts = [
         "download_alphafold_params",
         "download_bfd",
-        "download_esmfold",
+        "download_esmfold_params",
         "download_mgnify",
         "download_omegafold_params",
         "download_openfold_params",
@@ -35,6 +35,7 @@ def main():
         "download_pdb70",
         "download_rfdesign_params",
         "download_small_bfd",
+        "download_test",
         "download_uniprot",
         "download_uniref30",
         "download_uniref90"

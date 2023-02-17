@@ -4,9 +4,9 @@
 # Modifications Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Downloads and unzips the OpenFold parameters.
+# Downloads and unzips the RFDesign parameters.
 #
-# Usage: bash download_openfold_params.sh /path/to/download/directory
+# Usage: bash download_esmfold.sh /path/to/download/directory
 set -e
 
 if [[ $# -eq 0 ]]; then
@@ -20,11 +20,11 @@ if ! command -v aws &> /dev/null ; then
 fi
 
 DOWNLOAD_DIR="$1"
-ROOT_DIR="${DOWNLOAD_DIR}/omegafold_params"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/omegafold_params.tar.gz"
+ROOT_DIR="${DOWNLOAD_DIR}/esmfold_params/hub/checkpoints"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/esmfold_parameters_221230.tar"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir -p "${ROOT_DIR}"
 aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
-tar --extract --verbose -z --file="${ROOT_DIR}/${BASENAME}" \
+tar --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
   --directory="${ROOT_DIR}"
