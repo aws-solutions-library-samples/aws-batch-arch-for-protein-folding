@@ -35,7 +35,6 @@ SOURCE_URL=s3://aws-batch-architecture-for-alphafold-public-artifacts/uniref90/u
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-# aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
 aws s3 cp ${SOURCE_URL} ${ROOT_DIR}/
 pushd "${ROOT_DIR}"
 gunzip -f "${ROOT_DIR}/${BASENAME}"
