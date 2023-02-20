@@ -28,3 +28,4 @@ mkdir -p "${DOWNLOAD_DIR}"
 aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
 tar --extract --verbose -z --file="${ROOT_DIR}/${BASENAME}" \
   --directory="${ROOT_DIR}"
+rm "${ROOT_DIR}/${BASENAME}"  
