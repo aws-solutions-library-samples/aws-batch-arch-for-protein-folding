@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ARG CUDA=11.1.1
-ARG ALPHAFOLD2_VERSION=v2.2.4
+ARG ALPHAFOLD2_VERSION=v2.3.1
 FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
@@ -64,8 +64,8 @@ RUN wget -q -P /app/alphafold/alphafold/common/ \
 RUN pip3 install --upgrade pip --no-cache-dir \
   && pip3 install -r /app/alphafold/requirements.txt --no-cache-dir \
   && pip3 install --upgrade --no-cache-dir \
-    jax==0.3.17 \
-    jaxlib==0.3.15+cuda11.cudnn805 \
+    jax==0.3.25  \
+    jaxlib==0.3.25+cuda11.cudnn805 \
     -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Apply OpenMM patch.

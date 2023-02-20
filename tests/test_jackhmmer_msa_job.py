@@ -24,18 +24,18 @@ def test_jackhmmer_job_init():
         fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
         output_s3_uri = f"s3://{bucket}/T1084/outputs/",
         bfd_database_path = "TESTA",
-        uniclust30_database_path = "TESTB"
+        uniref30_database_path = "TESTB"
     )
     assert new_job.job_definition_name == "JackhmmerJobDefinition"
     assert new_job.target_id == "T1084"
     assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
     assert new_job.output_s3_uri == f"s3://{bucket}/T1084/outputs/"
     assert new_job.bfd_database_path == "TESTA" 
-    assert new_job.uniclust30_database_path == "TESTB" 
+    assert new_job.uniref30_database_path == "TESTB" 
 
 def test_jackhmmer_job_submission(batch_environment):
     job_name = "JackhmmerJob" + datetime.now().strftime("%Y%m%d%s")
-    job_queue_name = "GravitonSpotJobQueue"
+    job_queue_name = "GravitonOnDemandJobQueue"
     bucket = os.getenv("TEST_BUCKET")
     new_job = JackhmmerJob(
         boto_session = boto_session,

@@ -19,8 +19,13 @@ if ! command -v aws &> /dev/null ; then
     exit 1
 fi
 
-DOWNLOAD_DIR="${1}/rfdesign_params"
-mkdir -p "${DOWNLOAD_DIR}"
-aria2c "http://files.ipd.uw.edu/pub/rfdesign/weights/BFF_last.pt" --dir="${DOWNLOAD_DIR}/hallucination/rf_Nov05"
-aria2c "https://raw.githubusercontent.com/RosettaCommons/RFDesign/main/hallucination/weights/rf_Nov05/params_Nov05.json" --dir="${DOWNLOAD_DIR}/hallucination/rf_Nov05"
-aria2c "http://files.ipd.uw.edu/pub/rfdesign/weights/BFF_mix_epoch25.pt" --dir="${DOWNLOAD_DIR}/inpainting"
+DOWNLOAD_DIR="$1"
+ROOT_DIR="${DOWNLOAD_DIR}/rfdesign_params"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/rfdesign_params.tar.gz"
+BASENAME=$(basename "${SOURCE_URL}")
+
+mkdir -p "${ROOT_DIR}"
+aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
+tar --extract --verbose -z --file="${ROOT_DIR}/${BASENAME}" \
+  --directory="${ROOT_DIR}"
+rm "${ROOT_DIR}/${BASENAME}"  

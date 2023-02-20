@@ -7,9 +7,9 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name='alphafold',
+    name='alphafold-jackhmmer',
     version='1.0',
-    description='An implementation of the Jackhmmer MSA creation pipeline, based off the data pipeline included in AlphaFold v2.2.2',
+    description='An implementation of the Jackhmmer MSA creation pipeline, based off the data pipeline included in AlphaFold v2.3.0',
     author='AWS',
     license='Apache License, Version 2.0',
     packages=find_packages(),

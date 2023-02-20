@@ -32,8 +32,11 @@ from omegafold.utils.protein_utils import residue_constants as rc
 
 try:
     from torch.backends import mps  # Compatibility with earlier versions
+
+    _mps_is_available = mps.is_available
 except ImportError:
-    mps = None
+    def _mps_is_available():
+        return False
 
 import re
 
@@ -241,6 +244,7 @@ def _load_weights(
 
     """
 
+    weights_file = os.path.expanduser(weights_file)
     use_cache = os.path.exists(weights_file)
     if weights_file and weights_url and not use_cache:
         logging.info(
@@ -267,7 +271,7 @@ def _get_device(device) -> str:
     if device is None:
         if torch.cuda.is_available():
             return "cuda"
-        elif mps.is_available():
+        elif _mps_is_available():
             return "mps"
         else:
             return 'cpu'
@@ -279,7 +283,7 @@ def _get_device(device) -> str:
         else:
             raise ValueError(f"Device cuda is not available")
     elif device == "mps":
-        if mps.is_available():
+        if _mps_is_available():
             return device
         else:
             raise ValueError(f"Device mps is not available")
@@ -349,15 +353,19 @@ def get_args() -> typing.Tuple[
     )
     parser.add_argument(
         '--weights_file',
-        default=os.path.expanduser("~/.cache/omegafold_ckpt/model.pt"),
+        default=None,
         type=str,
-        help='The model cache to run'
+        help='The model cache to run, default os.path.expanduser("~/.cache/omegafold_ckpt/model.pt")'
     )
     parser.add_argument(
         '--weights',
         default="https://helixon.s3.amazonaws.com/release1.pt",
         type=str,
         help='The url to the weights of the model'
+    )
+    parser.add_argument(
+        '--model', default=1, type=int,
+        help='The model number to run, current we support 1 or 2'
     )
     parser.add_argument(
         '--pseudo_msa_mask_rate', default=0.12, type=float,
@@ -375,7 +383,23 @@ def get_args() -> typing.Tuple[
     args = parser.parse_args()
     _set_precision(args.allow_tf32)
 
-    weights_url = args.weights
+    if args.model == 1:
+        weights_url = "https://helixon.s3.amazonaws.com/release1.pt"
+        if args.weights_file is None:
+            args.weights_file = os.path.expanduser(
+                "~/.cache/omegafold_ckpt/model.pt"
+            )
+    elif args.model == 2:
+        weights_url = "https://helixon.s3.amazonaws.com/release2.pt"
+        if args.weights_file is None:
+            args.weights_file = os.path.expanduser(
+                "~/.cache/omegafold_ckpt/model2.pt"
+            )
+    else:
+        raise ValueError(
+            f"Model {args.model} is not available, "
+            f"we only support model 1 and 2"
+        )
     weights_file = args.weights_file
     # if the output directory is not provided, we will create one alongside the
     # input fasta file

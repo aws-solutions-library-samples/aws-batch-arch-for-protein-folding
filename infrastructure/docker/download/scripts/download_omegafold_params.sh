@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Original Copyright 2022 AlQuraishi Laboratory
-# Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Modifications Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Downloads and unzips the OpenFold parameters.
@@ -19,6 +19,13 @@ if ! command -v aws &> /dev/null ; then
     exit 1
 fi
 
-DOWNLOAD_DIR="${1}/omegafold_params"
-mkdir -p "${DOWNLOAD_DIR}"
-aws s3 cp --no-sign-request s3://helixon/release1.pt "${DOWNLOAD_DIR}"/model.pt
+DOWNLOAD_DIR="$1"
+ROOT_DIR="${DOWNLOAD_DIR}/omegafold_params"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/omegafold_params.tar.gz"
+BASENAME=$(basename "${SOURCE_URL}")
+
+mkdir -p "${ROOT_DIR}"
+aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
+tar --extract --verbose -z --file="${ROOT_DIR}/${BASENAME}" \
+  --directory="${ROOT_DIR}"
+rm "${ROOT_DIR}/${BASENAME}"
