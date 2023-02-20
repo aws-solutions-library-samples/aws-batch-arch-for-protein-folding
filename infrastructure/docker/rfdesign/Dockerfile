@@ -25,7 +25,9 @@ RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64
     && rm awscliv2.zip
 
 #clone the RF Design repo
-RUN git clone --depth 1 https://github.com/RosettaCommons/RFDesign.git /opt/rfdesign \
+RUN git clone https://github.com/RosettaCommons/RFDesign.git /opt/rfdesign \
+  && cd /opt/rfdesign \
+  && git checkout bba6992283de63faba6ff727bb4bc68327a5356c \
   && mkdir /opt/rfdesign/input /opt/rfdesign/output
 
 # Install Miniconda package manager.
