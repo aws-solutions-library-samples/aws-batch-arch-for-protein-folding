@@ -33,7 +33,7 @@ DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniref30"
 # Copy of:
 # https://wwwuser.gwdg.de/~compbiol/uniclust/2021_03/UniRef30_2021_03.tar.gz
-SOURCE_URL="https://aws-batch-architecture-for-alphafold-public-artifacts.s3.amazonaws.com/compressed/UniRef30_2021_03.tar.gz"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/UniRef30_2021_03.tar.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"

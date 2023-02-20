@@ -24,7 +24,7 @@ ROOT_DIR="${DOWNLOAD_DIR}/rfdesign_params"
 SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/rfdesign_params.tar.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
-mkdir -p "${DOWNLOAD_DIR}"
+mkdir -p "${ROOT_DIR}"
 aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
 tar --extract --verbose -z --file="${ROOT_DIR}/${BASENAME}" \
   --directory="${ROOT_DIR}"

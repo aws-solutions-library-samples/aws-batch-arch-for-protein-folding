@@ -20,7 +20,7 @@ def main():
 
     boto_session = boto3.session.Session()
     batch_environment = BatchFoldEnvironment(boto_session = boto_session)
-    job_queue_name="GravitonSpotJobQueue"
+    job_queue_name="GravitonOnDemandJobQueue"
     response = []
 
     download_scripts = [
