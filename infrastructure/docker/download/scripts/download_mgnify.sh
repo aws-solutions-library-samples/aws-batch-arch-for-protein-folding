@@ -41,6 +41,5 @@ mkdir --parents "${ROOT_DIR}"
 aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
 pushd "${ROOT_DIR}"
 gunzip -f "${ROOT_DIR}/${BASENAME}"
-rm "${ROOT_DIR}/${BASENAME}"
 popd
 
