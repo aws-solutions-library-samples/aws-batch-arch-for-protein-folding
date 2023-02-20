@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2023-02-21
+
+### 1.7.0 Added
+
+- Updated AlphaFold version to 2.3.1
+- Added support for OmegaFold release 2 models
+- Moved reference data to S3 for faster stack provisioning
+
+---
+
 ## [1.6.2] - 2023-02-10
 
 ### 1.6.2 Fixed
