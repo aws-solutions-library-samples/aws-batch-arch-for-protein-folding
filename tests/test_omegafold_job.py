@@ -29,7 +29,7 @@ def test_omegafold_job_init():
     assert new_job.fasta_s3_uri == f"s3://{bucket}/T1084/fasta/T1084.fasta"
     assert new_job.output_s3_uri == f"s3://{bucket}/T1084/outputs/"
 
-def test_omegafold_model_2_job_submission(batch_environment):
+def test_omegafold_model_1_job_submission(batch_environment):
 
     job_name = "OmegaFoldJob" + datetime.now().strftime("%Y%m%d%s")
     job_queue_name = "G4dnJobQueue"
@@ -38,7 +38,7 @@ def test_omegafold_model_2_job_submission(batch_environment):
         boto_session = boto_session,
         job_name = job_name,
         target_id = "T1084",
-        weights_file = "/database/omegafold_params/release1.pt",
+        model = 1,
         fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
         output_s3_uri = f"s3://{bucket}/T1084/outputs/",
     )
@@ -64,7 +64,7 @@ def test_omegafold_model_2_job_submission(batch_environment):
         boto_session = boto_session,
         job_name = job_name,
         target_id = "T1084",
-        weights_file = "/database/omegafold_params/release2.pt",
+        model = 2,
         fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
         output_s3_uri = f"s3://{bucket}/T1084/outputs/",
     )
