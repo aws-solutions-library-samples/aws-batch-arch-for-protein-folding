@@ -15,7 +15,7 @@ class OmegaFoldJob(BatchFoldJob):
     fasta_s3_uri: str = ""
     output_s3_uri: str = ""
     job_definition_name: str = "OmegaFoldJobDefinition"
-    weights_file: str = "/database/omegafold_params/model.pt"
+    weights_file: str = "/database/omegafold_params/release2.pt"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     allow_tf32: bool = True
     num_cycle: int = 10
