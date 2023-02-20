@@ -33,8 +33,10 @@ fi
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniprot"
 SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/uniprot.tar.gz"
+BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
 aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
-tar -xzvf ${ROOT_DIR}/uniprot.tar.gz -C ${ROOT_DIR}
+tar --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
+  --directory="${ROOT_DIR}"
 rm "${ROOT_DIR}/${BASENAME}"
