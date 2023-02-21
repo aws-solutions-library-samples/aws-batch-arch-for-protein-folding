@@ -38,7 +38,9 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"       
+          Value: !Ref "AWS::StackId"   
+        - Key: SolutionId
+          Value: SO9164      
 
   CodeBuildProjectJackhmmer:
     Type: AWS::CodeBuild::Project
@@ -74,7 +76,9 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"       
+          Value: !Ref "AWS::StackId"   
+        - Key: SolutionId
+          Value: SO9164      
 
   StartJackhmmerContainerBuild:
     Type: Custom::ResourceForBuildingContainer
@@ -114,6 +118,7 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164  
       Type: container      
 
   DeleteJackhmmerContainerRepo:
