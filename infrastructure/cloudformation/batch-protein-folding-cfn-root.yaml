@@ -328,7 +328,7 @@ Resources:
                       role_name = event["ResourceProperties"]["RoleName"]
                       try:
                           function_response = iam.get_role(RoleName=role_name)
-                      except iam.exceptions.NoSuchEntityException as e:
+                      except Exception as e:
                           LOGGER.info(e)
                           cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"N"})
                       LOGGER.info(f"Function response:\n{function_response}")
