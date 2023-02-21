@@ -35,6 +35,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   VPCFlowLogRole:
     Type: "AWS::IAM::Role"
@@ -67,6 +69,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   EncryptionKey:
     Type: "AWS::KMS::Key"
@@ -117,6 +121,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   VPCFlowLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -124,8 +130,12 @@ Resources:
       KmsKeyId: !GetAtt EncryptionKey.Arn
       RetentionInDays: 120
       Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   VPCFlowLog:
     Type: "AWS::EC2::FlowLog"
@@ -139,6 +149,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
       TrafficType: ALL
 
   InternetGateway:
@@ -151,6 +163,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   GatewayToInternet:
     Type: "AWS::EC2::VPCGatewayAttachment"
@@ -172,6 +186,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PublicRoute:
     Type: "AWS::EC2::Route"
@@ -212,6 +228,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateSubnet0:
     Type: "AWS::EC2::Subnet"
@@ -230,6 +248,8 @@ Resources:
           Value: Private
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PublicSubnetRouteTableAssociation0:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
@@ -248,6 +268,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   NATGateway0:
     Type: "AWS::EC2::NatGateway"
@@ -263,6 +285,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteTable0:
     Type: "AWS::EC2::RouteTable"
@@ -274,6 +298,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId    
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteToInternet0:
     Type: "AWS::EC2::Route"
@@ -311,6 +337,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateSubnet1:
     Type: "AWS::EC2::Subnet"
@@ -330,6 +358,8 @@ Resources:
           Value: Private
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PublicSubnetRouteTableAssociation1:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
@@ -350,6 +380,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   NATGateway1:
     Type: "AWS::EC2::NatGateway"
@@ -366,6 +398,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteTable1:
     Type: "AWS::EC2::RouteTable"
@@ -377,6 +411,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId    
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteToInternet1:
     Type: "AWS::EC2::Route"
@@ -416,6 +452,8 @@ Resources:
           Value: Public
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateSubnet2:
     Type: "AWS::EC2::Subnet"
@@ -435,6 +473,8 @@ Resources:
           Value: Private
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PublicSubnetRouteTableAssociation2:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
@@ -455,7 +495,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-
+        - Key: SolutionId
+          Value: SO9164  
   NATGateway2:
     Type: "AWS::EC2::NatGateway"
     Condition: MultiAZCondition
@@ -471,6 +512,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteTable2:
     Type: "AWS::EC2::RouteTable"
@@ -482,6 +525,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId    
+        - Key: SolutionId
+          Value: SO9164  
 
   PrivateRouteToInternet2:
     Type: "AWS::EC2::Route"
