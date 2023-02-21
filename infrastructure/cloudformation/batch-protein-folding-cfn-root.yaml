@@ -290,7 +290,7 @@ Resources:
               Action:
                 - iam:GetRole
               Resource: 
-                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/*"
+                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
