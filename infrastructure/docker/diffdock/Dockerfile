@@ -38,14 +38,31 @@ RUN wget -q -P /tmp \
   && rm /tmp/Miniconda3-latest-Linux-x86_64.sh \
   && conda update -n base -c conda-forge conda \
   && conda config --set ssl_verify no \
-  && conda init bash
-#   && conda env update -n base --file environment.yml \
-#   && conda clean --all --yes
+  && conda init bash \
+  && conda env update -n base --file environment.yml \
+  && conda clean --all --yes
 
-# # Install OpenFold
-# RUN git clone https://github.com/aqlaboratory/openfold.git /opt/openfold \
-#   && cd /opt/openfold \
-#   && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
-# WORKDIR /opt/openfold
-# COPY setup.py .
-# RUN python setup.py install
+# Install OpenFold
+RUN git clone https://github.com/aqlaboratory/openfold.git /opt/openfold \
+  && cd /opt/openfold \
+  && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
+WORKDIR /opt/openfold
+COPY setup.py .
+RUN python setup.py install
+
+# Install ESMFold
+RUN git clone https://github.com/facebookresearch/esm.git /opt/esmfold \
+  && cd /opt/esmfold \
+  && git checkout 74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3
+WORKDIR /opt/esmfold
+
+RUN pip install .
+
+# Install DiffDock
+RUN git clone https://github.com/gcorso/DiffDock.git /opt/diffdock \
+  && cd /opt/diffdock \
+  && git checkout 3829a23af8ba1971de63fa523361369f0b066a07
+WORKDIR /opt/diffdock
+COPY run.sh /opt/diffdock/
+RUN chmod 755 run.sh
+# ENTRYPOINT ["bash", "run.sh"]
