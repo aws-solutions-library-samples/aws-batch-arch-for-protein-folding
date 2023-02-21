@@ -65,6 +65,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
+        - Key: SolutionId
+          Value: SO9164  
 
   SageMakerNotebookExecutionRole:
     Type: "AWS::IAM::Role"
@@ -131,3 +133,5 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
+        - Key: SolutionId
+          Value: SO9164  

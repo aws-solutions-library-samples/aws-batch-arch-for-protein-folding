@@ -6,6 +6,10 @@ Description: >-
   batch-protein-folding-cfn-download.yaml: Download data to FSx for Lustre.
 
 Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: "Unknown"
   DownloadJobQueue:
     Description: Batch job queue for running download job.
     Type: String  
@@ -187,6 +191,13 @@ Resources:
         Fn::GetAtt: LambdaExecutionRole.Arn
       Runtime: python3.8
       Timeout: 10
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164      
 
   DownloadFsxData:
     Type: Custom::ResourceForDownloadingData

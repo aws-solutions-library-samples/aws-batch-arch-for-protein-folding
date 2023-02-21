@@ -66,6 +66,8 @@ Resources:
         - Key: StackId
           Value:
             Ref: AWS::StackId
+        - Key: SolutionId
+          Value: SO9164            
 
   DataRepoAssociation:
     Type: AWS::FSx::DataRepositoryAssociation
