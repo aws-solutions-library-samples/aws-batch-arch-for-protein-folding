@@ -249,7 +249,7 @@ Resources:
   StartCodeBuildLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 25
+      ReservedConcurrentExecutions: 10
       VpcConfig:
         SecurityGroupIds: 
           - !Ref LambdaSecurityGroupId
@@ -323,7 +323,7 @@ Resources:
   DeleteContainerRepoLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 25
+      ReservedConcurrentExecutions: 10
       VpcConfig:
         SecurityGroupIds: 
           - !Ref LambdaSecurityGroupId

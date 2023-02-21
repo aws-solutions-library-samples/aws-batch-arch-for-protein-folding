@@ -48,7 +48,7 @@ Resources:
   DownloadFsxDataLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 25
+      ReservedConcurrentExecutions: 1
       VpcConfig:
         SecurityGroupIds: 
           - !Ref LambdaSecurityGroupId
