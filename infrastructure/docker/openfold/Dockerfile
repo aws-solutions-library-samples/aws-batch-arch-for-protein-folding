@@ -30,7 +30,9 @@ RUN wget -P /tmp \
 
 ENV PATH /opt/conda/bin:$PATH
 
-RUN git clone --depth 1 https://github.com/aqlaboratory/openfold.git /opt/openfold
+RUN git clone https://github.com/aqlaboratory/openfold.git /opt/openfold \
+  && cd /opt/openfold \
+  && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
 
 # installing into the base environment since the docker container wont do anything other than run openfold
 RUN conda install -qy conda==4.13.0 \

@@ -37,6 +37,6 @@ BASENAME=$(basename "${SOURCE_URL}")
 mkdir --parents "${ROOT_DIR}"
 aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
 
-# Fix for https://github.com/deepmind/alphafold/issues/569
-tac ${ROOT_DIR}/pdb_seqres.txt | sed '/^CT05/,+1d' | tac > ${ROOT_DIR}/pdb_seqres_fixed.txt
-mv -f ${ROOT_DIR}/pdb_seqres_fixed.txt ${ROOT_DIR}/pdb_seqres.txt
+# Keep only protein sequences.
+grep --after-context=1 --no-group-separator '>.* mol:protein' "${ROOT_DIR}/pdb_seqres.txt" > "${ROOT_DIR}/pdb_seqres_filtered.txt"
+mv "${ROOT_DIR}/pdb_seqres_filtered.txt" "${ROOT_DIR}/pdb_seqres.txt"

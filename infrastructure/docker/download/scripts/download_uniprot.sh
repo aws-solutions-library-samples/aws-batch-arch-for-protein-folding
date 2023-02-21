@@ -25,31 +25,18 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-if ! command -v aria2c &> /dev/null ; then
-    echo "Error: aria2c could not be found. Please install aria2c (sudo apt install aria2)."
+if ! command -v aws &> /dev/null ; then
+    echo "Error: awscli could not be found. Please install awscli."
     exit 1
 fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/uniprot"
-
-TREMBL_SOURCE_URL="ftp://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz"
-TREMBL_BASENAME=$(basename "${TREMBL_SOURCE_URL}")
-TREMBL_UNZIPPED_BASENAME="${TREMBL_BASENAME%.gz}"
-
-SPROT_SOURCE_URL="ftp://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
-SPROT_BASENAME=$(basename "${SPROT_SOURCE_URL}")
-SPROT_UNZIPPED_BASENAME="${SPROT_BASENAME%.gz}"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/uniprot.tar.gz"
+BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-aria2c "${TREMBL_SOURCE_URL}" --dir="${ROOT_DIR}"
-aria2c "${SPROT_SOURCE_URL}" --dir="${ROOT_DIR}"
-pushd "${ROOT_DIR}"
-gunzip -f "${ROOT_DIR}/${TREMBL_BASENAME}"
-gunzip -f "${ROOT_DIR}/${SPROT_BASENAME}"
-
-# Concatenate TrEMBL and SwissProt, rename to uniprot and clean up.
-cat "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}" >> "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}"
-mv "${ROOT_DIR}/${TREMBL_UNZIPPED_BASENAME}" "${ROOT_DIR}/uniprot.fasta"
-rm "${ROOT_DIR}/${SPROT_UNZIPPED_BASENAME}"
-popd
+aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
+tar --extract --verbose --file="${ROOT_DIR}/${BASENAME}" \
+  --directory="${ROOT_DIR}"
+rm "${ROOT_DIR}/${BASENAME}"

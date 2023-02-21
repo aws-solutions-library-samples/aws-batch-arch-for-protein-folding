@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Downloads and unzips all required data for AlphaFold.
 #
@@ -29,6 +30,11 @@ if ! command -v aria2c &> /dev/null ; then
   exit 1
 fi
 
+if ! command -v aws &> /dev/null ; then
+    echo "Error: awscli could not be found. Please install awscli."
+    exit 1
+fi
+
 DOWNLOAD_DIR="$1"
 DOWNLOAD_MODE="${2:-full_dbs}"  # Default mode to full_dbs.
 if [[ "${DOWNLOAD_MODE}" != full_dbs && "${DOWNLOAD_MODE}" != reduced_dbs ]]
@@ -39,8 +45,24 @@ fi
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
+echo "Downloading Test..."
+bash "${SCRIPT_DIR}/download_test.sh" "${DOWNLOAD_DIR}"
+
 echo "Downloading AlphaFold parameters..."
 bash "${SCRIPT_DIR}/download_alphafold_params.sh" "${DOWNLOAD_DIR}"
+
+echo "Downloading ESMFold parameters..."
+bash "${SCRIPT_DIR}/download_esmfold_params.sh.sh" "${DOWNLOAD_DIR}"
+
+echo "Downloading OmegaFold parameters..."
+bash "${SCRIPT_DIR}/download_omegafold_params.sh.sh" "${DOWNLOAD_DIR}"
+
+echo "Downloading OpenFold parameters..."
+bash "${SCRIPT_DIR}/download_openfold_params.sh.sh" "${DOWNLOAD_DIR}"
+
+echo "Downloading RFDesign parameters..."
+bash "${SCRIPT_DIR}/download_rfdesign_params.sh.sh" "${DOWNLOAD_DIR}"
+
 
 if [[ "${DOWNLOAD_MODE}" = reduced_dbs ]] ; then
   echo "Downloading Small BFD..."
@@ -59,16 +81,20 @@ bash "${SCRIPT_DIR}/download_pdb70.sh" "${DOWNLOAD_DIR}"
 echo "Downloading PDB mmCIF files..."
 bash "${SCRIPT_DIR}/download_pdb_mmcif.sh" "${DOWNLOAD_DIR}"
 
-echo "Downloading Uniclust30..."
-bash "${SCRIPT_DIR}/download_uniclust30.sh" "${DOWNLOAD_DIR}"
-
-echo "Downloading Uniref90..."
-bash "${SCRIPT_DIR}/download_uniref90.sh" "${DOWNLOAD_DIR}"
+echo "Downloading PDB SeqRes..."
+bash "${SCRIPT_DIR}/download_pdb_seqres.sh" "${DOWNLOAD_DIR}"
 
 echo "Downloading UniProt..."
 bash "${SCRIPT_DIR}/download_uniprot.sh" "${DOWNLOAD_DIR}"
 
-echo "Downloading PDB SeqRes..."
-bash "${SCRIPT_DIR}/download_pdb_seqres.sh" "${DOWNLOAD_DIR}"
+echo "Downloading Uniref30..."
+bash "${SCRIPT_DIR}/download_uniref30.sh" "${DOWNLOAD_DIR}"
+
+echo "Downloading Uniref90..."
+bash "${SCRIPT_DIR}/download_uniref90.sh" "${DOWNLOAD_DIR}"
+
+
+
+
 
 echo "All data downloaded."

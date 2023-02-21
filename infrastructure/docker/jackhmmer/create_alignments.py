@@ -51,7 +51,7 @@ flags.DEFINE_string('bfd_database_path', None, 'Path to the BFD '
                     'database for use by HHblits.')
 flags.DEFINE_string('small_bfd_database_path', None, 'Path to the small '
                     'version of BFD used with the "reduced_dbs" preset.')
-flags.DEFINE_string('uniclust30_database_path', None, 'Path to the Uniclust30 '
+flags.DEFINE_string('uniref30_database_path', None, 'Path to the UniRef30 '
                     'database for use by HHblits.')
 flags.DEFINE_string('uniprot_database_path', None, 'Path to the Uniprot '
                     'database for use by JackHMMer.')
@@ -150,7 +150,7 @@ def main(argv):
                 should_be_set=use_small_bfd)
     _check_flag('bfd_database_path', 'db_preset',
                 should_be_set=not use_small_bfd)
-    _check_flag('uniclust30_database_path', 'db_preset',
+    _check_flag('uniref30_database_path', 'db_preset',
                 should_be_set=not use_small_bfd)
 
     run_multimer_system = 'multimer' in FLAGS.model_preset
@@ -196,7 +196,7 @@ def main(argv):
         uniref90_database_path=FLAGS.uniref90_database_path,
         mgnify_database_path=FLAGS.mgnify_database_path,
         bfd_database_path=FLAGS.bfd_database_path,
-        uniclust30_database_path=FLAGS.uniclust30_database_path,
+        uniref30_database_path=FLAGS.uniref30_database_path,
         small_bfd_database_path=FLAGS.small_bfd_database_path,
         template_searcher=template_searcher,
         template_featurizer=template_featurizer,

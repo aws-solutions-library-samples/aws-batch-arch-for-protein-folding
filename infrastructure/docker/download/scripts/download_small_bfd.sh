@@ -24,18 +24,18 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-if ! command -v aria2c &> /dev/null ; then
-    echo "Error: aria2c could not be found. Please install aria2c (sudo apt install aria2)."
+if ! command -v aws &> /dev/null ; then
+    echo "Error: awscli could not be found. Please install awscli."
     exit 1
 fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/small_bfd"
-SOURCE_URL="https://storage.googleapis.com/alphafold-databases/reduced_dbs/bfd-first_non_consensus_sequences.fasta.gz"
+SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/bfd-first_non_consensus_sequences.fasta.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"
-aria2c "${SOURCE_URL}" --dir="${ROOT_DIR}"
+aws s3 cp --no-sign-request ${SOURCE_URL} ${ROOT_DIR}
 pushd "${ROOT_DIR}"
 gunzip -f "${ROOT_DIR}/${BASENAME}"
 popd

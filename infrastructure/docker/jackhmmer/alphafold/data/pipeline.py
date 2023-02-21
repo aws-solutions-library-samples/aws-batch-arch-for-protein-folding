@@ -83,10 +83,12 @@ def run_msa_tool(msa_runner, input_fasta_path: str, msa_out_path: str,
   if not use_precomputed_msas or not os.path.exists(msa_out_path):
     if msa_format == 'sto' and max_sto_sequences is not None:
       result = msa_runner.query(input_fasta_path, max_sto_sequences)[0]  # pytype: disable=wrong-arg-count
+      ### Added by AWS
       a3m_result = parsers.convert_stockholm_to_a3m(result[msa_format], max_sequences=max_sto_sequences)
       a3m_out_path = msa_out_path.split(".sto")[0] + ".a3m"
       with open(a3m_out_path, 'w') as f:
         f.write(a3m_result)
+      ###
     else:
       result = msa_runner.query(input_fasta_path)[0]
     with open(msa_out_path, 'w') as f:
@@ -112,7 +114,7 @@ class DataPipeline:
                uniref90_database_path: str,
                mgnify_database_path: str,
                bfd_database_path: Optional[str],
-               uniclust30_database_path: Optional[str],
+               uniref30_database_path: Optional[str],
                small_bfd_database_path: Optional[str],
                template_searcher: TemplateSearcher,
                template_featurizer: templates.TemplateHitFeaturizer,
@@ -133,9 +135,9 @@ class DataPipeline:
           database_path=small_bfd_database_path,
           n_cpu=n_cpu)
     else:
-      self.hhblits_bfd_uniclust_runner = hhblits.HHBlits(
+      self.hhblits_bfd_uniref_runner = hhblits.HHBlits(
           binary_path=hhblits_binary_path,
-          databases=[bfd_database_path, uniclust30_database_path],
+          databases=[bfd_database_path, uniref30_database_path],
           n_cpu = n_cpu)
     self.jackhmmer_mgnify_runner = jackhmmer.Jackhmmer(
         binary_path=jackhmmer_binary_path,
@@ -211,14 +213,14 @@ class DataPipeline:
           use_precomputed_msas=self.use_precomputed_msas)
       bfd_msa = parsers.parse_stockholm(jackhmmer_small_bfd_result['sto'])
     else:
-      bfd_out_path = os.path.join(msa_output_dir, 'bfd_uniclust_hits.a3m')
-      hhblits_bfd_uniclust_result = run_msa_tool(
-          msa_runner=self.hhblits_bfd_uniclust_runner,
+      bfd_out_path = os.path.join(msa_output_dir, 'bfd_uniref_hits.a3m')
+      hhblits_bfd_uniref_result = run_msa_tool(
+          msa_runner=self.hhblits_bfd_uniref_runner,
           input_fasta_path=input_fasta_path,
           msa_out_path=bfd_out_path,
           msa_format='a3m',
           use_precomputed_msas=self.use_precomputed_msas)
-      bfd_msa = parsers.parse_a3m(hhblits_bfd_uniclust_result['a3m'])
+      bfd_msa = parsers.parse_a3m(hhblits_bfd_uniref_result['a3m'])
 
     templates_result = self.template_featurizer.get_templates(
         query_sequence=input_sequence,

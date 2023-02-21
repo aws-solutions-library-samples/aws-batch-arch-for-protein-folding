@@ -20,24 +20,25 @@ def main():
 
     boto_session = boto3.session.Session()
     batch_environment = BatchFoldEnvironment(boto_session = boto_session)
-    job_queue_name="GravitonSpotJobQueue"
+    job_queue_name="GravitonOnDemandJobQueue"
     response = []
 
     download_scripts = [
         "download_alphafold_params",
         "download_bfd",
+        "download_esmfold_params",
         "download_mgnify",
+        "download_omegafold_params",
         "download_openfold_params",
         "download_pdb_mmcif",
         "download_pdb_seqres",
         "download_pdb70",
-        "download_small_bfd",
-        "download_uniclust30",
-        "download_uniprot",                          
-        "download_uniref90",
-        "download_omegafold_params",
         "download_rfdesign_params",
-        "download_esmfold"
+        "download_small_bfd",
+        "download_test",
+        "download_uniprot",
+        "download_uniref30",
+        "download_uniref90"
     ]
 
     for script in download_scripts:
