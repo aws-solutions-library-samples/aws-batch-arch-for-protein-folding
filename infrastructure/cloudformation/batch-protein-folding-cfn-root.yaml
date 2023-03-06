@@ -290,7 +290,7 @@ Resources:
               Action:
                 - iam:GetRole
               Resource: 
-                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/*"
+                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
@@ -328,11 +328,11 @@ Resources:
                       role_name = event["ResourceProperties"]["RoleName"]
                       try:
                           function_response = iam.get_role(RoleName=role_name)
-                      except iam.exceptions.NoSuchEntityException as e:
+                          LOGGER.info(f"Function response:\n{function_response}")
+                          cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"Y"})
+                      except Exception as e:
                           LOGGER.info(e)
                           cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"N"})
-                      LOGGER.info(f"Function response:\n{function_response}")
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"Y"})
                   elif event["RequestType"] == "Update":
                       LOGGER.info("UPDATE!")
                       cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
