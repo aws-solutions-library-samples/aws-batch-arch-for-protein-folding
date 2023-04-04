@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-root.yaml: Root stack for installing the Guidance for Protein Folding on AWS (SO9164).
+  batch-protein-folding-cfn-root.yaml: Root stack for running protein folding on AWS Batch
 
 Parameters:
   ApplicationName:
@@ -95,8 +95,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   S3BucketPolicy:
     Type: "AWS::S3::BucketPolicy"
@@ -178,7 +176,7 @@ Resources:
         DownloadFsxData:
           Ref: DownloadFsxData
         S3BucketARN:
-          "Fn::GetAtt": BatchFoldS3Bucket.Arn        
+          "Fn::GetAtt": BatchFoldS3Bucket.Arn
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -212,10 +210,7 @@ Resources:
         DownloadContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         S3BucketName:
-          Ref: BatchFoldS3Bucket    
-        CreateAWSServiceRoleForEC2Spot: GetAWSServiceRoleForEC2Spot.role_exists
-        CreateAWSServiceRoleForEC2SpotFleet: GetAWSServiceRoleForEC2SpotFleet.role_exists
-
+          Ref: BatchFoldS3Bucket
 
   Notebook:
     Type: "AWS::CloudFormation::Stack"
@@ -248,8 +243,6 @@ Resources:
     Properties:
       TemplateURL: batch-protein-folding-cfn-download.yaml
       Parameters:
-        ApplicationName:
-          Ref: ApplicationName
         DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.GravitonOnDemandJobQueue
         JobDefinition:
@@ -264,117 +257,6 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup             
-
-  ####################################################################################################
-  # Custom Resources
-  ####################################################################################################
-
-  GetServiceRoleRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: GetIamRolePolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-            - Effect: Allow
-              Action:
-                - iam:GetRole
-              Resource: 
-                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-
-  GetServiceRoleLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      ReservedConcurrentExecutions: 2
-      VpcConfig:
-        SecurityGroupIds:
-          - "Fn::If":
-            - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
-            - Ref: DefaultSecurityGroup
-        SubnetIds: 
-          - "Fn::If":
-            - CreateNetwork
-            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
-            - Ref: Subnet
-      Code:
-        ZipFile: |
-          import logging          
-          import cfnresponse
-          import boto3
-          LOGGER = logging.getLogger()
-          LOGGER.setLevel(logging.INFO)
-          def lambda_handler(event, context):
-              LOGGER.info(event)
-              try:
-                  LOGGER.info("REQUEST RECEIVED:\n %s", event)
-                  LOGGER.info("REQUEST RECEIVED:\n %s", context)
-                  if event["RequestType"] == "Create":
-                      LOGGER.info("CREATE!")
-                      iam = boto3.client("iam")
-                      role_name = event["ResourceProperties"]["RoleName"]
-                      try:
-                          function_response = iam.get_role(RoleName=role_name)
-                          LOGGER.info(f"Function response:\n{function_response}")
-                          cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"Y"})
-                      except Exception as e:
-                          LOGGER.info(e)
-                          cfnresponse.send(event, context, cfnresponse.SUCCESS, {"role_exists":"N"})
-                  elif event["RequestType"] == "Update":
-                      LOGGER.info("UPDATE!")
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
-                  elif event["RequestType"] == "Delete":
-                      LOGGER.info("DELETE!")
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource deletion successful!"})
-                  else:
-                      LOGGER.info("FAILED!")
-                      cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Unexpected event received from CloudFormation"})
-              except Exception as e:
-                  LOGGER.info("FAILED!")
-                  LOGGER.info(e)
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Exception during processing"})
-
-      Description: Get Status of Service Linked Roles
-      Handler: index.lambda_handler
-      MemorySize: 512
-      Role:
-        Fn::GetAtt: GetServiceRoleRole.Arn
-      Runtime: python3.8
-      Timeout: 10     
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-        - Key: SolutionId
-          Value: SO9164
-
-  GetAWSServiceRoleForEC2Spot:
-    Type: Custom::GetAWSServiceRole
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: GetServiceRoleLambda.Arn
-      RoleName: "AWSServiceRoleForEC2Spot"
-
-  GetAWSServiceRoleForEC2SpotFleet:
-    Type: Custom::GetAWSServiceRole
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: GetServiceRoleLambda.Arn
-      RoleName: "AWSServiceRoleForEC2SpotFleet"            
 
 #################################################################################
 # Modules
@@ -486,12 +368,12 @@ Resources:
         StartCodeBuildLambdaArn:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn 
 
-  ModuleProteinMPNN:
+  ModuleNextflow:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: batch-protein-folding-cfn-module-proteinmpnn.yaml
+      TemplateURL: batch-protein-folding-cfn-module-nextflow.yaml
       Parameters:
         ApplicationName:
           Ref: ApplicationName
@@ -504,7 +386,7 @@ Resources:
         StartCodeBuildLambdaArn:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn               
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
 
 Outputs:
   ApplicationName:
