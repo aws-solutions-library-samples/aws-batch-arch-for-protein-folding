@@ -68,7 +68,7 @@ recursive_cp () {
 }
 
 # Check that necessary programs are available
-which aws >/dev/null 2>&1 || error_exit "Unable to find AWS CLI executable."
+aws --version >/dev/null 2>&1 || error_exit "Unable to find AWS CLI executable."
 
 # Parse inputs
 inputs=()

@@ -91,7 +91,8 @@ Resources:
                           "/scripts/download_uniprot.sh",                          
                           "/scripts/download_uniref90.sh",
                           "/scripts/download_omegafold_params.sh",
-                          "/scripts/download_rfdesign_params.sh"
+                          "/scripts/download_rfdesign_params.sh",
+                          "/scripts/download_diffdock_params.sh"
                       ]
                       
                       responses = []
