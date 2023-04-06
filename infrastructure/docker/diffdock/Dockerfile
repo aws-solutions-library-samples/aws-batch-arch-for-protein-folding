@@ -75,4 +75,5 @@ COPY run.sh /opt/DiffDock/
 COPY inference.py /opt/DiffDock/
 
 WORKDIR /opt/DiffDock
-ENTRYPOINT ["python", "inference.py"]
+# ENTRYPOINT ["python", "inference.py"]
+ENTRYPOINT ["bash", "run.sh"]
