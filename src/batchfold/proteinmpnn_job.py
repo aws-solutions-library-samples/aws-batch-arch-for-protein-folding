@@ -15,7 +15,6 @@ class ProteinMPNNJob(BatchFoldJob):
     pdb_s3_uri: str = ""
     jsonl_s3_uri: str = ""
     output_s3_uri: str = ""
-    job_definition_name: str = "ProteinMPNNJobDefinition"
     job_name: str = field(default="ProteinMPNNJob" + datetime.now().strftime("%Y%m%d%s"))
     job_definition_name: str = field(default="ProteinMPNNJobDefinition")
     cpu: int = field(default=4)

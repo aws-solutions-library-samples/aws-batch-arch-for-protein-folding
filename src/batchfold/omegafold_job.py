@@ -14,7 +14,6 @@ class OmegaFoldJob(BatchFoldJob):
     output_dir: str = uuid.uuid4().hex
     fasta_s3_uri: str = ""
     output_s3_uri: str = ""
-    job_definition_name: str = "OmegaFoldJobDefinition"
     model: int = 2
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     allow_tf32: bool = True

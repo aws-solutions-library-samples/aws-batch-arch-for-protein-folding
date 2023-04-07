@@ -13,7 +13,6 @@ class ESMFoldJob(BatchFoldJob):
 
     fasta_s3_uri: str = ""
     output_s3_uri: str = ""
-    job_definition_name: str = "ESMFoldJobDefinition"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     num_recycles: int = 4
     max_tokens_per_batch: int = 1024
