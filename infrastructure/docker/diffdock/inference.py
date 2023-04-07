@@ -1,3 +1,7 @@
+# Copyright (c) 2022 Gabriele Corso, Hannes Stärk, Bowen Jing
+# Modifications Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 from argparse import ArgumentParser, Namespace
 import os
 import shutil
@@ -147,7 +151,7 @@ tr_schedule = get_t_schedule(inference_steps=args.inference_steps)
 
 failures, skipped = 0, 0
 N = args.samples_per_complex
-print('Size of test dataset: ', len(test_dataset))
+print('Size of test dataset: ', len(complex_name_list))
 for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
     if not orig_complex_graph.success[0]:
         skipped += 1
@@ -200,13 +204,14 @@ for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
             ligand_pos = ligand_pos[re_order]
 
         # save predictions
+        metrics.update({"confidence_scores": confidence.tolist()})
+        metrics.update({"best_confidence_score": confidence[0].item()})
         write_dir = f'{args.out_dir}/{complex_name_list[idx]}'
         for rank, pos in enumerate(ligand_pos):
             mol_pred = copy.deepcopy(lig)
             if score_model_args.remove_hs: mol_pred = RemoveHs(mol_pred)
             if rank == 0: write_mol_with_coords(mol_pred, pos, os.path.join(write_dir, f'rank{rank+1}.sdf'))
             write_mol_with_coords(mol_pred, pos, os.path.join(write_dir, f'rank{rank+1}_confidence{confidence[rank]:.2f}.sdf'))
-            metrics.update({"confidence_scores": {f"rank_{rank+1}": confidence.tolist()}})
 
         # save visualisation frames
         if args.save_visualisation:
@@ -220,8 +225,7 @@ for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
     except Exception as e:
         print("Failed on", orig_complex_graph["name"], e)
         failures += 1
-
-metrics.update({"timings": {"prediction": round(timer() - start_prediction_time, 3)}})
+metrics["timings"].update({"prediction": round(timer() - start_prediction_time, 3)})
 
 peak_mem = getrusage(RUSAGE_SELF).ru_maxrss / 1000000
 peak_gpu_mem = torch.cuda.max_memory_allocated() / 1000000000
@@ -232,14 +236,15 @@ metrics["timings"].update({"total": total_time})
 metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
 metrics.update(
         {
-            "best_confidence_score": confidence[0],
+            "best_confidence_score": confidence[0].item(),
             "failed_complexes": failures,
             "skipped_complexes": skipped,
             "peak_memory_gb": peak_mem,
             "peak_gpu_memory_gb": peak_gpu_mem,
         }
     )
-with open(f"{args.out_dir}/metrics.json", "w") as f:
+print(metrics)
+with open(f"{write_dir}/metrics.json", "w") as f:
     json.dump(metrics, f)
 
 print(f'Failed for {failures} complexes')
