@@ -156,7 +156,7 @@ class BatchFoldTarget:
             bucket=self.s3_bucket,
             local_path=local_path,
             prefix=prefix,
-            extensions=[".pdb", ".pkl", ".json"],
+            extensions=[".pdb", ".pkl", ".json", ".sdf"],
         )
 
     def download_all(self, local_path: str = ".") -> str:

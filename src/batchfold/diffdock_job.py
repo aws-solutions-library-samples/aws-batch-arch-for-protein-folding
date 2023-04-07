@@ -38,13 +38,14 @@ class DiffDockJob(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
         command_list = [f"-i {self.protein_s3_uri}:{self.protein_path}"]
-        command_list.extend([f"-i {self.ligand_s3_uri}:{self.ligand_description}"])
+        if self.ligand_description.endswith(".sdf"):
+            command_list.extend([f"-i {self.ligand_s3_uri}:{self.ligand_description}"])
         command_list.extend([f"-o {self.out_dir}/:{self.output_s3_uri}"])
         command_list.extend([
             "python inference.py",
             f"--complex_name={self.complex_name}",
             f"--protein_path={self.protein_path}",
-            f"--ligand_description={self.ligand_description}",
+            f"--ligand_description='{self.ligand_description}'",
             f"--out_dir={self.out_dir}",
             f"--samples_per_complex={self.samples_per_complex}",
             f"--model_dir={self.model_dir}",
