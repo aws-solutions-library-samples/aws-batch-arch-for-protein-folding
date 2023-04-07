@@ -16,6 +16,7 @@
     4.5. [RFDesign](#45-rfdesign)  
     4.6. [ESMFold](#46-esmfold)  
     4.7. [ProteinMPNN](#47-proteinmpnn)
+    4.8. [DiffDock](#48-diffdock)
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
     5.2. [Cost](#52-cost)  
@@ -222,6 +223,21 @@ The ProteinMPNN citation is
   pages={49--56},
   year={2022},
   publisher={American Association for the Advancement of Science}
+}
+```
+
+### 4.8. DiffDock
+
+Please visit [https://github.com/gcorso/DiffDock](https://github.com/gcorso/DiffDock) for more information about the DiffDock algorithm.
+
+The DiffDock citation is
+
+```text
+@article{corso2023diffdock,
+      title={DiffDock: Diffusion Steps, Twists, and Turns for Molecular Docking}, 
+      author = {Corso, Gabriele and Stärk, Hannes and Jing, Bowen and Barzilay, Regina and Jaakkola, Tommi},
+      journal={International Conference on Learning Representations (ICLR)},
+      year={2023}
 }
 ```
 
