@@ -3,12 +3,20 @@ import os
 import shutil
 from glob import glob
 import yaml
-from datetime import datetime
+from time import gmtime, strftime
+from timeit import default_timer as timer
+from resource import getrusage, RUSAGE_SELF
+import json
 
+start_time = timer()
+metrics = {
+    "model_name": "DiffDock",
+    "start_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())
+}
 
 parser = ArgumentParser()
 parser.add_argument('--protein_ligand_csv', type=str, default=None, help='Path to a .csv file specifying the input as described in the README. If this is not None, it will be used instead of the --protein_path, --protein_sequence and --ligand parameters')
-parser.add_argument('--complex_name', type=str, default=datetime.now().strftime("%Y%m%d%s"), help='Name that the complex will be saved with')
+parser.add_argument('--complex_name', type=str, default=strftime("%H%M%S", gmtime()), help='Name that the complex will be saved with')
 parser.add_argument('--protein_path', type=str, default=None, help='Path to the protein file')
 parser.add_argument('--protein_sequence', type=str, default=None, help='Sequence of the protein for ESMFold, this is ignored if --protein_path is not None')
 parser.add_argument('--ligand_description', type=str, default='CCCCC(NC(=O)CCC(=O)O)P(=O)(O)OC1=CC=CC=C1', help='Either a SMILES string or the path to a molecule file that rdkit can read')
@@ -116,6 +124,9 @@ else:
 
 t_to_sigma = partial(t_to_sigma_compl, args=score_model_args)
 
+metrics.update({"timings": {"data_load": round(timer() - start_time, 3)}})
+start_prediction_time = timer()
+
 model = get_model(score_model_args, device, t_to_sigma=t_to_sigma, no_parallel=True)
 state_dict = torch.load(f'{args.model_dir}/{args.ckpt}', map_location=torch.device('cpu'))
 model.load_state_dict(state_dict, strict=True)
@@ -195,6 +206,7 @@ for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
             if score_model_args.remove_hs: mol_pred = RemoveHs(mol_pred)
             if rank == 0: write_mol_with_coords(mol_pred, pos, os.path.join(write_dir, f'rank{rank+1}.sdf'))
             write_mol_with_coords(mol_pred, pos, os.path.join(write_dir, f'rank{rank+1}_confidence{confidence[rank]:.2f}.sdf'))
+            metrics.update({"confidence_scores": {f"rank_{rank+1}": confidence.tolist()}})
 
         # save visualisation frames
         if args.save_visualisation:
@@ -209,12 +221,29 @@ for idx, orig_complex_graph in tqdm(enumerate(test_loader)):
         print("Failed on", orig_complex_graph["name"], e)
         failures += 1
 
+metrics.update({"timings": {"prediction": round(timer() - start_prediction_time, 3)}})
+
+peak_mem = getrusage(RUSAGE_SELF).ru_maxrss / 1000000
+peak_gpu_mem = torch.cuda.max_memory_allocated() / 1000000000
+
+end_time = timer()
+total_time = round(end_time - start_time, 3)
+metrics["timings"].update({"total": total_time})
+metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
+metrics.update(
+        {
+            "best_confidence_score": confidence[0],
+            "failed_complexes": failures,
+            "skipped_complexes": skipped,
+            "peak_memory_gb": peak_mem,
+            "peak_gpu_memory_gb": peak_gpu_mem,
+        }
+    )
+with open(f"{args.out_dir}/metrics.json", "w") as f:
+    json.dump(metrics, f)
+
 print(f'Failed for {failures} complexes')
 print(f'Skipped {skipped} complexes')
 print(f'Results are in {args.out_dir}')
-
-from resource import getrusage, RUSAGE_SELF
-peak_mem = getrusage(RUSAGE_SELF).ru_maxrss / 1000000
-peak_gpu_mem = torch.cuda.max_memory_allocated() / 1000000000
-print(f"Max memory usage is {peak_mem} GB")
-print(f"Max VRAM usage is {peak_gpu_mem} GB")
+print(f"Peak memory usage is {peak_mem} GB")
+print(f"Peak GPU memory usage is {peak_gpu_mem} GB")
