@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running DiffDock jobs on GPU instances.
     Value:
       Ref: DiffDockJobDefinition
+  DiffDockContainerURI:
+    Description: ECR URI for DiffDock container image.
+    Value:
+      Ref: DiffDockContainerRegistry

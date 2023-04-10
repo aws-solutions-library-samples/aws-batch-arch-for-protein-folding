@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running OmegaFold jobs on GPU instances.
     Value:
       Ref: OmegaFoldJobDefinition
+  OmegaFoldContainerURI:
+    Description: ECR URI for OmegaFold container image.
+    Value:
+      Ref: OmegaFoldContainerRegistry

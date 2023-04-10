@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running OpenFold jobs on GPU instances.
     Value:
       Ref: OpenFoldJobDefinition
+  OpenFoldContainerURI:
+    Description: ECR URI for OpenFold container image.
+    Value:
+      Ref: OpenFoldContainerRegistry
