@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running ESMFold jobs on GPU instances.
     Value:
       Ref: ESMFoldJobDefinition
+  ESMFoldContainerURI:
+    Description: ECR URI for ESMFold container image.
+    Value:
+      Ref: ESMFoldContainerRegistry

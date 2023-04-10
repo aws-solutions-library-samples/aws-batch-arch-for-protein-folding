@@ -452,7 +452,7 @@ Resources:
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
 
-  ModuleRFDesignFold:
+  ModuleRFDesign:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: batch-protein-folding-cfn-module-rfdesign.yaml
@@ -506,8 +506,59 @@ Resources:
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn               
 
+  ModuleDiffDock:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-diffdock.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn                   
+
 Outputs:
   ApplicationName:
     Description: Name of the application
     Value:
       Ref: ApplicationName
+  AlphaFold2ContainerURI:
+    Description: ECR URI for AlphaFold2 container image.
+    Value:
+      "Fn::GetAtt": ModuleAlphaFold2.Outputs.AlphaFold2ContainerURI
+  DiffDockContainerURI:
+    Description: ECR URI for DiffDock container image.
+    Value:
+      "Fn::GetAtt": ModuleDiffDock.Outputs.DiffDockContainerURI
+  ESMFoldContainerURI:
+    Description: ECR URI for ESMFold container image.
+    Value:
+      "Fn::GetAtt": ModuleESMFold.Outputs.ESMFoldContainerURI
+  JackhmmerContainerURI:
+    Description: ECR URI for Jackhmmer container image.
+    Value:
+      "Fn::GetAtt": ModuleJackhmmer.Outputs.JackhmmerContainerURI
+  OmegaFoldContainerURI:
+    Description: ECR URI for OmegaFold container image.
+    Value:
+      "Fn::GetAtt": ModuleOmegaFold.Outputs.OmegaFoldContainerURI
+  ProteinMPNNContainerURI:
+    Description: ECR URI for ProteinMPNN container image.
+    Value:
+      "Fn::GetAtt": ModuleProteinMPNN.Outputs.ProteinMPNNContainerURI
+  RFDesignContainerURI:
+    Description: ECR URI for RFDesign container image.
+    Value:
+      "Fn::GetAtt": ModuleRFDesign.Outputs.RFDesignContainerURI
+  OpenFoldContainerURI:
+    Description: ECR URI for OpenFold container image.
+    Value:
+      "Fn::GetAtt": ModuleOpenFold.Outputs.OpenFoldContainerURI
+  

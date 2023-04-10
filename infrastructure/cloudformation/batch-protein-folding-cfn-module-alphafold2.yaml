@@ -142,3 +142,7 @@ Outputs:
     Description: Job definition for running AlphaFold2 jobs on GPU instances.
     Value:
       Ref: AlphaFold2JobDefinition
+  AlphaFold2ContainerURI:
+    Description: ECR URI for AlphaFold2 container image.
+    Value:
+      Ref: AlphaFold2ContainerRegistry
