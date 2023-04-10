@@ -452,7 +452,7 @@ Resources:
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
 
-  ModuleRFDesignFold:
+  ModuleRFDesign:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: batch-protein-folding-cfn-module-rfdesign.yaml
