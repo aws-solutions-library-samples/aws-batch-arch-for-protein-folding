@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running ProteinMPNN jobs on GPU instances.
     Value:
       Ref: ProteinMPNNJobDefinition
+  ProteinMPNNContainerURI:
+    Description: ECR URI for ProteinMPNN container image.
+    Value:
+      Ref: ProteinMPNNContainerRegistry

@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running RFDesign jobs on GPU instances.
     Value:
       Ref: RFDesignJobDefinition
+  RFDesignContainerURI:
+    Description: ECR URI for RFDesign container image.
+    Value:
+      Ref: RFDesignContainerRegistry
