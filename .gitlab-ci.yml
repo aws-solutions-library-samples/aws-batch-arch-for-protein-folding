@@ -22,18 +22,18 @@ stages:
 # .pre
 ################################
 
-# cfn-lint:
-#   image: python:3.8
-#   stage: lint
-#   before_script:
-#     - python --version # For debugging
-#     - pip install virtualenv
-#     - virtualenv venv
-#     - source venv/bin/activate
-#     - pip install -U cfn-lint
-#     - pip freeze
-#   script:
-#     - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002
+cfn-lint:
+  image: python:3.8
+  stage: lint
+  before_script:
+    - python --version # For debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install -U cfn-lint
+    - pip freeze
+  script:
+    - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002
 
 cfn-nag:
   image:
