@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 1.8.0 Added
 
 - Added support for DiffDock
+- Added ECR URIs as outputs to the CloudFormation template
 
 ### 1.8.0 Fixed
 
