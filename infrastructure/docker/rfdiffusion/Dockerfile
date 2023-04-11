@@ -46,7 +46,7 @@ RUN apt-get -q update \
 
 COPY run.sh setup.py /app/RFdiffusion/
 WORKDIR /app/RFdiffusion
-RUN pip install --no-cache-dir --no-deps
+RUN pip install --no-cache-dir --no-deps .
 ENV DGLBACKEND="pytorch"
 
 ENTRYPOINT ["bash", "run.sh"]
