@@ -32,8 +32,9 @@ def test_rfdiffusion_job_init():
         memory=15,
         input_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/",
         output_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/outputs/",
+        params=params
     )
-    assert new_job.job_definition_name == "RFDesignJobDefinition"
+    assert new_job.job_definition_name == "RFDiffusionJobDefinition"
     assert new_job.input_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/"
     assert new_job.output_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/outputs/"
     assert new_job.params['inference.output_prefix'] == "outputs"
