@@ -24,6 +24,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get -q update \ 
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
   git \
+  wget \
   python3.9 \
   python3-pip \
   && python3.9 -m pip install -q -U --no-cache-dir pip \
