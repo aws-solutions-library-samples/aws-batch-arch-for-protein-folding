@@ -15,7 +15,7 @@ class RFDiffusionJob(BatchFoldJob):
     output_s3_uri: str
     params: dict = {}
     weights_dir: str = "/database/rfdiffusion_params"
-    output_dir: str = "output"
+    output_dir: str = "outputs"
     job_name: str = field(
         default="RFDiffusionJob" + datetime.now().strftime("%Y%m%d%s")
     )
@@ -27,8 +27,13 @@ class RFDiffusionJob(BatchFoldJob):
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
 
-        command_list = [f"-i {self.input_s3_uri}:input/"]
-        command_list.extend([f"-o output/:{self.output_s3_uri}"])
+        if "inference.model_directory_path" in self.params.keys():
+            raise AttributeError("Please provide the model directory path as a separate argument.") 
+        elif "inference.output_prefix" in self.params.keys():
+            raise AttributeError("Please provide the output prefix as a separate argument.") 
+
+        command_list = [f"-i {self.input_s3_uri}:inputs/"]
+        command_list.extend([f"-o outputs/:{self.output_s3_uri}"])
         command_list.extend(
             [
                 "python3.9 scripts/run_inference.py",
@@ -36,7 +41,7 @@ class RFDiffusionJob(BatchFoldJob):
                 f"inference.output_prefix={self.output_dir}",
             ]
         )
-        command_list.extend([f"--{key}={value}" for key, value in self.params.items()])
+        command_list.extend([f"{key}={value}" for key, value in self.params.items()])
         logging.info(f"Command is \n{command_list}")
         self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)
         return None

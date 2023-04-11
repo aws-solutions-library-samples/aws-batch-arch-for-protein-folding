@@ -93,7 +93,7 @@ Resources:
                           "/scripts/download_omegafold_params.sh",
                           "/scripts/download_rfdesign_params.sh",
                           "/scripts/download_diffdock_params.sh",
-                          "/scripts/download_rfdiffusion_params"
+                          "/scripts/download_rfdiffusion_params.sh"
                       ]
                       
                       responses = []
