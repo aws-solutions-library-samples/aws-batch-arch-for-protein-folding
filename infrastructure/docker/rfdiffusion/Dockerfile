@@ -30,19 +30,19 @@ RUN apt-get -q update \
   && rm -rf /var/lib/apt/lists/* \
   && apt-get autoremove -y \
   && apt-get clean \
+  && git clone --depth=1 https://github.com/RosettaCommons/RFdiffusion.git /app/RFdiffusion \
   && pip install -q --no-cache-dir \
   dgl==1.0.2+cu116 -f https://data.dgl.ai/wheels/cu116/repo.html \
   torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 \
   e3nn==0.3.3 \
-  wandb==0.12.0 \
+  # wandb==0.12.0 \
   pynvml==11.0.0 \
-  git+https://github.com/NVIDIA/dllogger#egg=dllogger \
+  # git+https://github.com/NVIDIA/dllogger#egg=dllogger \
   decorator==5.1.0 \
   hydra-core==1.3.2 \
   pyrsistent==0.19.3 \
   icecream==2.1.3 \
-  /app/RFdiffusion/env/SE3Transformer \
-  && git clone --depth=1 https://github.com/RosettaCommons/RFdiffusion.git /app/RFdiffusion
+  /app/RFdiffusion/env/SE3Transformer
 
 COPY run.sh setup.py /app/RFdiffusion/
 WORKDIR /app/RFdiffusion
