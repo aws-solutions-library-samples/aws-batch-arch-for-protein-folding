@@ -38,7 +38,7 @@ class RFDiffusionJob(BatchFoldJob):
             [
                 "python3.9 scripts/run_inference.py",
                 f"inference.model_directory_path={self.weights_dir}",
-                f"inference.output_prefix={self.output_dir}",
+                f"inference.output_prefix={self.output_dir}/output",
             ]
         )
         command_list.extend([f"{key}={value}" for key, value in self.params.items()])

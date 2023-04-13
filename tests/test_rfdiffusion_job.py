@@ -20,7 +20,7 @@ def test_rfdiffusion_job_init():
     bucket = os.getenv("TEST_BUCKET")
     job_name = "RFDiffusionJob" + datetime.now().strftime("%Y%m%d%s")
     params = {
-        "inference.input_pdb": "$HOME/inputs/5TPN.pdb",
+        "inference.input_pdb": "inputs/5TPN.pdb",
         "inference.num_designs": "3",
         "contigmap.contigs": "[10-40/A163-181/10-40]"
     }
@@ -35,7 +35,7 @@ def test_rfdiffusion_job_init():
     assert new_job.job_definition_name == "RFDiffusionJobDefinition"
     assert new_job.input_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/"
     assert new_job.output_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/outputs/"
-    assert new_job.params["inference.input_pdb"] == "$HOME/inputs/5TPN.pdb"
+    assert new_job.params["inference.input_pdb"] == "inputs/5TPN.pdb"
     assert new_job.params["inference.num_designs"] == "3"
     assert new_job.params["contigmap.contigs"] == "[10-40/A163-181/10-40]"
 
@@ -56,6 +56,7 @@ def test_rfdiffusion_job_submission(batch_environment):
         output_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/outputs/",
         params = params
     )
+    assert new_job.job_definition_name == "RFDiffusionJobDefinition"
     submission = batch_environment.submit_job(new_job, job_queue_name)
     assert job_name == submission.job_name    
     job_description = new_job.describe_job()        

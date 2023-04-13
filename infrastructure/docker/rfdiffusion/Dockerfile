@@ -1,22 +1,3 @@
-# Usage: 
-# git clone https://github.com/RosettaCommons/RFdiffusion.git
-# cd RFdiffusion
-# docker build -f docker/Dockerfile -t rfdiffusion .
-# mkdir $HOME/inputs $HOME/outputs $HOME/models
-# bash scripts/download_models.sh $HOME/models
-# wget -P $HOME/inputs https://files.rcsb.org/view/5TPN.pdb
-
-# docker run -it --rm --gpus all \
-#   -v $HOME/models:$HOME/models \
-#   -v $HOME/inputs:$HOME/inputs \
-#   -v $HOME/outputs:$HOME/outputs \
-#   rfdiffusion \
-#   inference.output_prefix=$HOME/outputs/motifscaffolding \
-#   inference.model_directory_path=$HOME/models \
-#   inference.input_pdb=$HOME/inputs/5TPN.pdb \
-#   inference.num_designs=3 \
-#   'contigmap.contigs=[10-40/A163-181/10-40]'
-
 FROM nvcr.io/nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -55,5 +36,3 @@ RUN pip install --no-cache-dir --no-deps . \
 ENV DGLBACKEND="pytorch"
 
 ENTRYPOINT ["bash", "run.sh"]
-
-# ENTRYPOINT ["python3.9", "scripts/run_inference.py"]
