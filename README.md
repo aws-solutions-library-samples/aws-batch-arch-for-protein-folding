@@ -15,7 +15,7 @@
     4.4. [OmegaFold](#44-omegafold)  
     4.5. [RFDesign](#45-rfdesign)  
     4.6. [ESMFold](#46-esmfold)  
-    4.7. [ProteinMPNN](#47-proteinmpnn)
+    4.7. [ProteinMPNN](#47-proteinmpnn)  
     4.8. [DiffDock](#48-diffdock)
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
