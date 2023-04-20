@@ -33,7 +33,7 @@ RUN NVIDIA_GPGKEY_SUM="d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba
   libcublas-11-7-11.10.3.66-1 \
   libnccl-2.13.4-1+cuda11.7 \
   libcudnn8-8.5.0.96-1.cuda11.7 \
-  wget \
+  wget-1.14 \
   git-2.39.2-1.amzn2.0.1  \
   unzip-6.0-57.amzn2.0.1 \
   which-2.20-7.amzn2.0.2 \
