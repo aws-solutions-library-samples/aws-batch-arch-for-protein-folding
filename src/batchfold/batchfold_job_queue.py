@@ -113,10 +113,10 @@ class JobSubmission:
 
         batch = self.boto_session.client("batch")
         print(f"Waiting for job {self.job_name} to complete.")
-        status = ""
+        status = batch.describe_jobs(jobs=[self.job_id]).get("jobs", [])[0].get("status")
+        print(status)
         while status not in ["SUCCEEDED", "FAILED"]:
             time.sleep(interval)
-            batch = self.boto_session.client("batch")
             status = batch.describe_jobs(jobs=[self.job_id]).get("jobs", [])[0].get("status")
             print(status)
         return None

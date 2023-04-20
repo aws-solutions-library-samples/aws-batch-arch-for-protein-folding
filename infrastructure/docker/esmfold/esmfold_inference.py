@@ -201,5 +201,5 @@ if __name__ == "__main__":
             )
             metrics.update({header: {"length": len(seq), "mean_plddt": mean_plddt.item(), "pTM":ptm.item()}})
         
-        with open(f"{args.pdb}/metrics.json", "w") as f:
-            json.dump(metrics, f)
+    with open(f"{args.pdb}/metrics.json", "w") as f:
+        json.dump(metrics, f)
