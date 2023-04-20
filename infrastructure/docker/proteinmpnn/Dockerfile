@@ -14,7 +14,7 @@ RUN amazon-linux-extras install python3.8 \
 
 RUN git clone https://github.com/dauparas/ProteinMPNN.git /opt/proteinmpnn \
     && cd /opt/proteinmpnn \
-    && git checkout e61ecb7e3c32e630ff7a34d16c3a43fcf8f8a8bd \
+    && git checkout be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9 \
     && rm -rf colab_notebooks examples inputs outputs training .git
     
 RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" \
@@ -25,5 +25,6 @@ RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$(unam
 WORKDIR /opt/proteinmpnn
 
 COPY run.sh run.sh
+COPY protein_mpnn_run.py /opt/proteinmpnn/
 
 ENTRYPOINT ["bash", "run.sh"]
