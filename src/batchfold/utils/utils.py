@@ -259,6 +259,8 @@ def extract_chain(input_file, model = None, chain = None):
     structure = p.get_structure("X", input_file)
     if model is not None:
         structure = structure[model]
+    else:
+        structure = structure[0]
     if chain is not None:
         structure = structure[chain]
     io = PDBIO()
