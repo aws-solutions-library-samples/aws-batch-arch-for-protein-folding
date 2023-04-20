@@ -379,7 +379,8 @@ def main(args):
                                         print_model_name = 'CA_model_name'
                                     else:
                                         print_model_name = 'model_name'
-                                    f.write('>{}, score={}, global_score={}, fixed_chains={}, designed_chains={}, {}={}, git_hash={}, seed={}\n{}\n'.format(name_, native_score_print, global_native_score_print, print_visible_chains, print_masked_chains, print_model_name, args.model_name, commit_str, seed, native_seq)) #write the native sequence
+                                    if args.global_output:
+                                        f.write('>{}, score={}, global_score={}, fixed_chains={}, designed_chains={}, {}={}, git_hash={}, seed={}\n{}\n'.format(name_, native_score_print, global_native_score_print, print_visible_chains, print_masked_chains, print_model_name, args.model_name, commit_str, seed, native_seq)) #write the native sequence
                                 start = 0
                                 end = 0
                                 list_of_AAs = []
@@ -463,6 +464,9 @@ if __name__ == "__main__":
     argparser.add_argument("--pssm_bias_flag", type=int, default=0, help="0 for False, 1 for True")
     
     argparser.add_argument("--tied_positions_jsonl", type=str, default='', help="Path to a dictionary with tied positions")
+
+    argparser.add_argument("--global_output", action="store_true", default=True, help="Include global metrics in the output file (default: true)")   
+
     
     args = argparser.parse_args()    
     main(args)   
