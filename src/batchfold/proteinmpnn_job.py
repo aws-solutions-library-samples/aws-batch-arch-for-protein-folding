@@ -19,7 +19,7 @@ class ProteinMPNNJob(BatchFoldJob):
     job_definition_name: str = field(default="ProteinMPNNJobDefinition")
     cpu: int = field(default=4)
     memory: int = field(default=15)
-    gpu: int = field(default=0)
+    gpu: int = field(default=1)
 
     chain_id_jsonl: str = field(default="")
     fixed_positions_jsonl: str = field(default="")
