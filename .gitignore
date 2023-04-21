@@ -18,4 +18,4 @@ analysis/
 .security_scans/
 test.sh
 tests/data/
-data/
+data
