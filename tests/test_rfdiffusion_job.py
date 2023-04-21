@@ -20,7 +20,6 @@ def test_rfdiffusion_job_init():
     bucket = os.getenv("TEST_BUCKET")
     job_name = "RFDiffusionJob" + datetime.now().strftime("%Y%m%d%s")
     params = {
-        "inference.input_pdb": "inputs/5TPN.pdb",
         "inference.num_designs": "3",
         "contigmap.contigs": "[10-40/A163-181/10-40]"
     }
@@ -28,14 +27,13 @@ def test_rfdiffusion_job_init():
         boto_session=boto_session,
         job_name = job_name,
         memory=15,
-        input_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/",
+        input_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/5TPN.pdb",
         output_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/outputs/",
         params=params
     )
     assert new_job.job_definition_name == "RFDiffusionJobDefinition"
-    assert new_job.input_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/"
+    assert new_job.input_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/5TPN.pdb"
     assert new_job.output_s3_uri == f"s3://{bucket}/rfdiffusion/5TPN/outputs/"
-    assert new_job.params["inference.input_pdb"] == "inputs/5TPN.pdb"
     assert new_job.params["inference.num_designs"] == "3"
     assert new_job.params["contigmap.contigs"] == "[10-40/A163-181/10-40]"
 
@@ -44,7 +42,6 @@ def test_rfdiffusion_job_submission(batch_environment):
     job_queue_name = "G4dnJobQueue"
     job_name = "RFDiffusionJob" + datetime.now().strftime("%Y%m%d%s")
     params = {
-        "inference.input_pdb": "inputs/5TPN.pdb",
         "inference.num_designs": "3",
         "contigmap.contigs": "[10-40/A163-181/10-40]"
     }
@@ -52,7 +49,7 @@ def test_rfdiffusion_job_submission(batch_environment):
         boto_session=boto_session,
         job_name = job_name,
         memory=15,
-        input_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/",
+        input_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/5TPN.pdb",
         output_s3_uri = f"s3://{bucket}/rfdiffusion/5TPN/outputs/",
         params = params
     )
