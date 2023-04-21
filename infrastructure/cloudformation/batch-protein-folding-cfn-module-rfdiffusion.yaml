@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-module-proteinmpnn.yaml: Implement ProteinMPNN module.
+  batch-protein-folding-cfn-module-rfdiffusion.yaml: Implement RFDiffusion module.
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -27,7 +27,7 @@ Parameters:
 
 Resources:
 
-  ProteinMPNNContainerRegistry:
+  RFDiffusionContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
       EncryptionConfiguration:
@@ -42,12 +42,12 @@ Resources:
         - Key: SolutionId
           Value: SO9164  
 
-  CodeBuildProjectProteinMPNN:
+  CodeBuildProjectRFDiffusion:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: Build Docker container for ProteinMPNN algorithm on AWS Batch
+      Description: Build Docker container for RFDiffusion algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
@@ -55,11 +55,11 @@ Resources:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref ProteinMPNNContainerRegistry
+            Value: !Ref RFDiffusionContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/proteinmpnn
+            Value: infrastructure/docker/rfdiffusion
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -80,21 +80,21 @@ Resources:
         - Key: SolutionId
           Value: SO9164  
 
-  StartProteinMPNNContainerBuild:
+  StartRFDiffusionContainerBuild:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
         Ref: StartCodeBuildLambdaArn
       ProjectName:
-        Ref: CodeBuildProjectProteinMPNN  
+        Ref: CodeBuildProjectRFDiffusion  
 
-  ProteinMPNNJobDefinition:
+  RFDiffusionJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
       ContainerProperties:
         Command:
           - "nvidia-smi"
-        Image: !Sub "${ProteinMPNNContainerRegistry.RepositoryUri}:latest"
+        Image: !Sub "${RFDiffusionContainerRegistry.RepositoryUri}:latest"
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
@@ -123,20 +123,16 @@ Resources:
         SolutionId: SO9164  
       Type: container
 
-  DeleteProteinMPNNContainerRepo:
+  DeleteRFDiffusionContainerRepo:
     Type: Custom::ResourceForDeletingECR
     Properties:
       ServiceToken:
         Ref: DeleteContainerRepoLambdaArn
       ContainerRepo:
-        Ref: ProteinMPNNContainerRegistry
+        Ref: RFDiffusionContainerRegistry
 
 Outputs:
-  ProteinMPNNJobDefinition:
-    Description: Job definition for running ProteinMPNN jobs on GPU instances.
+  RFDiffusionJobDefinition:
+    Description: Job definition for running RFDiffusion jobs on GPU instances.
     Value:
-      Ref: ProteinMPNNJobDefinition
-  ProteinMPNNContainerURI:
-    Description: ECR URI for ProteinMPNN container image.
-    Value:
-      Ref: ProteinMPNNContainerRegistry
+      Ref: RFDiffusionJobDefinition

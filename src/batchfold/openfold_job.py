@@ -22,7 +22,6 @@ class OpenFoldJob(BatchFoldJob):
     hhblits_binary_path: str = "/usr/bin/hhblits"
     hhsearch_binary_path: str = "/usr/bin/hhsearch"
     jackhmmer_binary_path: str = "/usr/bin/jackhmmer"
-    job_definition_name: str = "OpenFoldJobDefinition"
     kalign_binary_path: str = "/usr/bin/kalign"
     jax_param_path: str = ""
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")

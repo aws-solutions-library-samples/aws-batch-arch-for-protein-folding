@@ -20,7 +20,6 @@ class JackhmmerJob(BatchFoldJob):
     template_mmcif_dir: str = "pdb_mmcif/mmcif_files"
     max_template_date: str = datetime.now().strftime("%Y-%m-%d")
     obsolete_pdbs_path: str = "pdb_mmcif/obsolete.dat"
-    job_definition_name: str = "JackhmmerJobDefinition"
     pdb70_database_path: str = "pdb70/pdb70"
     bfd_database_path: str = (
         "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt"

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2023-04-21
+
+### 1.9.0 Added
+
+- Added support for RFDiffusion
+
+### 1.9.0 Changed
+
+- Removed deprecated notebook for RFDesign
+- Update ProteinMPNN container and job definition to use accelerated instance types.
+- Add new option to ProteinMPNN inference script to remove the input sequence from the output
+
+### 1.8.0 Fixed
+
+- Fixed bug with ESMFold metric logging for multiple sequence inputs.
+
+---
+
 ## [1.8.0] - 2023-04-10
 
 ### 1.8.0 Added

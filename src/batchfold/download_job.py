@@ -10,7 +10,6 @@ import logging
 class DownloadJob(BatchFoldJob):
     """Define Download MSA Creation Job"""
 
-    job_definition_name: str = "DownloadJobDefinition"
     script: str = "./scripts/download_test.sh"
     data_dir: str = "/database"
     job_name: str = field(default="DownloadJob" + datetime.now().strftime("%Y%m%d%s"))

@@ -4,7 +4,7 @@ from __future__ import annotations
 # SPDX-License-Identifier: Apache-2.0
 
 import boto3
-from attrs import define
+from attrs import define, field
 from typing import List, Dict
 import time
 from batchfold.batchfold_job import BatchFoldJob
@@ -104,3 +104,19 @@ class JobSubmission:
     job_definition: str
     job_type: str
     depends_on: List
+    boto_session: boto3.session.Session = field(
+        default=boto3.DEFAULT_SESSION or boto3.Session()
+    )    
+
+    def wait(self, interval: int = 30) -> None:
+        """Wait for the submission to finish"""
+
+        batch = self.boto_session.client("batch")
+        print(f"Waiting for job {self.job_name} to complete.")
+        status = batch.describe_jobs(jobs=[self.job_id]).get("jobs", [])[0].get("status")
+        print(status)
+        while status not in ["SUCCEEDED", "FAILED"]:
+            time.sleep(interval)
+            status = batch.describe_jobs(jobs=[self.job_id]).get("jobs", [])[0].get("status")
+            print(status)
+        return None

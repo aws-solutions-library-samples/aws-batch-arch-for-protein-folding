@@ -3,6 +3,7 @@ import requests
 from Bio import AlignIO
 from Bio.PDB.PDBList import PDBList
 from Bio.PDB import PDBParser, PDBIO
+from Bio.PDB.PDBIO import Select
 import matplotlib.pyplot as plt
 import py3Dmol
 import io
@@ -11,7 +12,7 @@ from batchfold.utils import residue_constants
 from batchfold.utils import protein
 import json
 
-def download_rcsb_pdb_file(pdb_code, output_dir, file_format="pdb"):
+def download_rcsb_pdb_file(pdb_code, output_dir, model = None, chain = None, file_format="pdb"):
     """ Download a pdb file from rcsb.org """
 
     pdb_code = str.upper(pdb_code)
@@ -24,6 +25,9 @@ def download_rcsb_pdb_file(pdb_code, output_dir, file_format="pdb"):
     if os.path.exists(ent_filename):
         pdb_filename = os.path.join(output_dir, pdb_code + ".pdb")
         os.rename(ent_filename, pdb_filename)
+
+        if model is not None or chain is not None:
+            extract_chain(pdb_filename, model, chain)
         return pdb_filename
     else:
         raise Exception("Desired structure doesn't exist at rcsb.org")
@@ -238,3 +242,29 @@ def plot_msa_output_folder(path, id=None):
         if monomer:
             plot_msa_folder(path, id)
     return None    
+
+
+class SelectChain(Select):
+    def __init__(self, chain):
+        self.chain = chain
+
+    def accept_chain(self, chain):
+        if chain.__repr__ == self.chain:
+            return 1
+        else:
+            return 0
+    
+def extract_chain(input_file, model = None, chain = None):
+    p = PDBParser()
+    structure = p.get_structure("X", input_file)
+    if model is not None:
+        structure = structure[model]
+    else:
+        structure = structure[0]
+    if chain is not None:
+        structure = structure[chain]
+    io = PDBIO()
+    io.set_structure(structure)
+    new_filename = os.path.splitext(input_file)[0] + "_" + chain + ".pdb"
+    io.save(new_filename)
+    return new_filename

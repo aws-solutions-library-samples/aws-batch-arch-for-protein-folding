@@ -13,6 +13,7 @@ from timeit import default_timer as timer
 import json
 import re
 import uuid
+from time import gmtime, strftime
 
 import torch
 
@@ -85,6 +86,12 @@ def create_batched_sequence_datasest(
 
 
 if __name__ == "__main__":
+
+    start_time = timer()
+    metrics = {
+        "model_name": "ESMFold",
+        "start_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())
+    }
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
@@ -200,6 +207,11 @@ if __name__ == "__main__":
                 f"{num_completed} / {num_sequences} completed."
             )
             metrics.update({header: {"length": len(seq), "mean_plddt": mean_plddt.item(), "pTM":ptm.item()}})
-        
-        with open(f"{args.pdb}/metrics.json", "w") as f:
-            json.dump(metrics, f)
+
+    end_time = timer()
+    total_time = round(end_time - start_time, 3)
+    metrics.update({"total": total_time})
+
+    metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
+    with open(f"{args.pdb}/metrics.json", "w") as f:
+        json.dump(metrics, f)
