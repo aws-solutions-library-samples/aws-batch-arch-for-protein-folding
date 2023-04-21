@@ -43,7 +43,7 @@ RUN NVIDIA_GPGKEY_SUM="d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba
   && bash aws/install \
   && rm awscli-exe-linux-$(uname -m).zip \
   && amazon-linux-extras install python3.8 \
-  && git clone /opt/DiffDock && cd /opt/DiffDock && git checkout 3c3c728cf2e444cf8df45b58067604d982159471 \
+  && git clone https://github.com/gcorso/DiffDock.git /opt/DiffDock && cd /opt/DiffDock && git checkout 3c3c728cf2e444cf8df45b58067604d982159471 \
   && rm -rf /opt/DiffDock/data /opt/DiffDock/__pycache__ /opt/DiffDock/visualizations /opt/DiffDock/.git \  
   && python3.8 -m venv /opt/DiffDock/venv \
   && source /opt/DiffDock/venv/bin/activate \
