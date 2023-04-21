@@ -379,7 +379,7 @@ def main(args):
                                         print_model_name = 'CA_model_name'
                                     else:
                                         print_model_name = 'model_name'
-                                    if args.global_output:
+                                    if not args.remove_input_from_output:
                                         f.write('>{}, score={}, global_score={}, fixed_chains={}, designed_chains={}, {}={}, git_hash={}, seed={}\n{}\n'.format(name_, native_score_print, global_native_score_print, print_visible_chains, print_masked_chains, print_model_name, args.model_name, commit_str, seed, native_seq)) #write the native sequence
                                 start = 0
                                 end = 0
@@ -465,7 +465,7 @@ if __name__ == "__main__":
     
     argparser.add_argument("--tied_positions_jsonl", type=str, default='', help="Path to a dictionary with tied positions")
 
-    argparser.add_argument("--global_output", action="store_true", default=True, help="Include global metrics in the output file (default: true)")   
+    argparser.add_argument("--remove_input_from_output", action="store_true", default=False, help="Remove input record from the output file (default: false)")   
 
     
     args = argparser.parse_args()    
