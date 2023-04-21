@@ -52,7 +52,7 @@ class ProteinMPNNJob(BatchFoldJob):
     pssm_log_odds_flag: int = field(default=0)
     pssm_bias_flag: int = field(default=0)
 
-    global_output: bool = field(default=True)
+    remove_input_from_output: bool = field(default=False)
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -149,8 +149,8 @@ class ProteinMPNNJob(BatchFoldJob):
             command_list.extend([f"--pssm_bias_flag={self.pssm_bias_flag}"])    
         if self.suppress_print:
             command_list.extend([f"--suppress_print={self.suppress_print}"])            
-        if self.global_output:
-            command_list.extend([f"--global_output"])
+        if self.remove_input_from_output:
+            command_list.extend([f"--remove_input_from_output"])
         
         logging.info(f"Command is \n{command_list}")
         self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)
