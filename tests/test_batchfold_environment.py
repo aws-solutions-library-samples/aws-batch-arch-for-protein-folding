@@ -20,6 +20,7 @@ def test_get_stack_outputs(batch_environment):
     assert "JackhmmerJobDefinition" in output_keys
     assert "OpenFoldJobDefinition" in output_keys
     assert "DownloadJobDefinition" in output_keys
+    assert "RFDiffusionJobDefinition" in output_keys
     assert "G4dnJobQueue" in output_keys
     assert "GravitonOnDemandJobQueue" in output_keys
     assert "GravitonSpotJobQueue" in output_keys

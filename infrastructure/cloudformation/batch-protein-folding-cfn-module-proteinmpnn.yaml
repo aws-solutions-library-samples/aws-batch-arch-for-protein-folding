@@ -50,7 +50,7 @@ Resources:
       Description: Build Docker container for ProteinMPNN algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -60,10 +60,10 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/proteinmpnn
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: ARM_CONTAINER
+        Type: LINUX_CONTAINER
       ResourceAccessRole: !Ref CodeBuildRoleArn
       ServiceRole: !Ref CodeBuildRoleArn
       Source:
@@ -106,8 +106,8 @@ Resources:
             Value: 8
           - Type: MEMORY
             Value: 16000
-          # - Type: GPU
-          #   Value: 1
+          - Type: GPU
+            Value: 1
         Volumes:
           - Name: database
             Host:
@@ -136,3 +136,7 @@ Outputs:
     Description: Job definition for running ProteinMPNN jobs on GPU instances.
     Value:
       Ref: ProteinMPNNJobDefinition
+  ProteinMPNNContainerURI:
+    Description: ECR URI for ProteinMPNN container image.
+    Value:
+      Ref: ProteinMPNNContainerRegistry

@@ -38,7 +38,9 @@ def main():
         "download_test",
         "download_uniprot",
         "download_uniref30",
-        "download_uniref90"
+        "download_uniref90",
+        "download_diffdock_params",
+        "download_rfdiffusion_params"
     ]
 
     for script in download_scripts:

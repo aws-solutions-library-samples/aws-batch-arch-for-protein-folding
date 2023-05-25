@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2023-04-21
+
+### 1.9.0 Added
+
+- Added support for RFDiffusion
+
+### 1.9.0 Changed
+
+- Removed deprecated notebook for RFDesign
+- Update ProteinMPNN container and job definition to use accelerated instance types.
+- Add new option to ProteinMPNN inference script to remove the input sequence from the output
+
+### 1.8.0 Fixed
+
+- Fixed bug with ESMFold metric logging for multiple sequence inputs.
+
+---
+
+## [1.8.0] - 2023-04-10
+
+### 1.8.0 Added
+
+- Added support for DiffDock
+- Added ECR URIs as outputs to the CloudFormation template
+
+### 1.8.0 Fixed
+
+- Fixed typo in the pip install cell of the AlphaFold-Multimer notebook
+- Updated version of py3Dmol to address structure visualization issue in JupyterLab
+
+---
+
 ## [1.7.2] - 2023-03-21
 
 ### 1.7.2 Fixed

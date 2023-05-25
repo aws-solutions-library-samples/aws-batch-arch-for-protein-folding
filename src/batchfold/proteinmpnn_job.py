@@ -15,12 +15,11 @@ class ProteinMPNNJob(BatchFoldJob):
     pdb_s3_uri: str = ""
     jsonl_s3_uri: str = ""
     output_s3_uri: str = ""
-    job_definition_name: str = "ProteinMPNNJobDefinition"
     job_name: str = field(default="ProteinMPNNJob" + datetime.now().strftime("%Y%m%d%s"))
     job_definition_name: str = field(default="ProteinMPNNJobDefinition")
     cpu: int = field(default=4)
     memory: int = field(default=15)
-    gpu: int = field(default=0)
+    gpu: int = field(default=1)
 
     chain_id_jsonl: str = field(default="")
     fixed_positions_jsonl: str = field(default="")
@@ -52,6 +51,8 @@ class ProteinMPNNJob(BatchFoldJob):
     pssm_threshold: float = field(default=0.00)
     pssm_log_odds_flag: int = field(default=0)
     pssm_bias_flag: int = field(default=0)
+
+    remove_input_from_output: bool = field(default=False)
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -147,7 +148,9 @@ class ProteinMPNNJob(BatchFoldJob):
         if self.pssm_bias_flag:
             command_list.extend([f"--pssm_bias_flag={self.pssm_bias_flag}"])    
         if self.suppress_print:
-            command_list.extend([f"--suppress_print={self.suppress_print}"])                  
+            command_list.extend([f"--suppress_print={self.suppress_print}"])            
+        if self.remove_input_from_output:
+            command_list.extend([f"--remove_input_from_output"])
         
         logging.info(f"Command is \n{command_list}")
         self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)

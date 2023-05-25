@@ -134,3 +134,7 @@ Outputs:
     Description: Job definition for running Jackhmmer jobs.
     Value:
       Ref: JackhmmerJobDefinition
+  JackhmmerContainerURI:
+    Description: ECR URI for Jackhmmer container image.
+    Value:
+      Ref: JackhmmerContainerRegistry

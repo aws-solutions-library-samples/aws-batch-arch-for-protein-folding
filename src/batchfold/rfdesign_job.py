@@ -14,7 +14,6 @@ class RFDesignHallucinateJob(BatchFoldJob):
     input_s3_uri: str
     output_s3_uri: str 
     pdb: str    
-    job_definition_name: str = "RFDesignJobDefinition"
     weights_dir: str = "/database/rfdesign_params/hallucination"
     params: dict = {}
     job_name: str = field(default="RFDesignHallucinateJob" + datetime.now().strftime("%Y%m%d%s"))

@@ -15,7 +15,9 @@
     4.4. [OmegaFold](#44-omegafold)  
     4.5. [RFDesign](#45-rfdesign)  
     4.6. [ESMFold](#46-esmfold)  
-    4.7. [ProteinMPNN](#47-proteinmpnn)
+    4.7. [ProteinMPNN](#47-proteinmpnn)  
+    4.8. [DiffDock](#48-diffdock)  
+    4.9. [RFDiffusion](#49-rfdiffusion)  
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
     5.2. [Cost](#52-cost)  
@@ -222,6 +224,38 @@ The ProteinMPNN citation is
   pages={49--56},
   year={2022},
   publisher={American Association for the Advancement of Science}
+}
+```
+
+### 4.8. DiffDock
+
+Please visit [https://github.com/gcorso/DiffDock](https://github.com/gcorso/DiffDock) for more information about the DiffDock algorithm.
+
+The DiffDock citation is
+
+```text
+@article{corso2023diffdock,
+      title={DiffDock: Diffusion Steps, Twists, and Turns for Molecular Docking}, 
+      author = {Corso, Gabriele and Stärk, Hannes and Jing, Bowen and Barzilay, Regina and Jaakkola, Tommi},
+      journal={International Conference on Learning Representations (ICLR)},
+      year={2023}
+}
+```
+
+### 4.9. RFDiffusion
+
+Please visit [https://github.com/RosettaCommons/RFdiffusion](https://github.com/RosettaCommons/RFdiffusion) for more information about the RFDiffusion algorithm.
+
+The RFDiffusion citation is
+
+```text
+@article{joseph_l_watson_broadly_2022,
+  title = {Broadly applicable and accurate protein design by integrating structure prediction networks and diffusion generative models},
+  url = {http://biorxiv.org/content/early/2022/12/14/2022.12.09.519842.abstract},
+  doi = {10.1101/2022.12.09.519842},
+  journal = {bioRxiv},
+  author = {{Joseph L. Watson} and {David Juergens} and {Nathaniel R. Bennett} and {Brian L. Trippe} and {Jason Yim} and {Helen E. Eisenach} and {Woody Ahern} and {Andrew J. Borst} and {Robert J. Ragotte} and {Lukas F. Milles} and {Basile I. M. Wicky} and {Nikita Hanikel} and {Samuel J. Pellock} and {Alexis Courbet} and {William Sheffler} and {Jue Wang} and {Preetham Venkatesh} and {Isaac Sappington} and {Susana Vázquez Torres} and {Anna Lauko} and {Valentin De Bortoli} and {Emile Mathieu} and {Regina Barzilay} and {Tommi S. Jaakkola} and {Frank DiMaio} and {Minkyung Baek} and {David Baker}},
+  year = {2022}
 }
 ```
 

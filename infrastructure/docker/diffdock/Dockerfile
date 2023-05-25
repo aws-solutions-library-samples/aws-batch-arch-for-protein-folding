@@ -33,7 +33,6 @@ RUN NVIDIA_GPGKEY_SUM="d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba
   libcublas-11-7-11.10.3.66-1 \
   libnccl-2.13.4-1+cuda11.7 \
   libcudnn8-8.5.0.96-1.cuda11.7 \
-  wget-1.14 \
   git-2.39.2-1.amzn2.0.1  \
   unzip-6.0-57.amzn2.0.1 \
   which-2.20-7.amzn2.0.2 \
@@ -44,24 +43,36 @@ RUN NVIDIA_GPGKEY_SUM="d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba
   && bash aws/install \
   && rm awscli-exe-linux-$(uname -m).zip \
   && amazon-linux-extras install python3.8 \
-  && git clone https://github.com/dauparas/ProteinMPNN.git /opt/proteinmpnn && cd /opt/proteinmpnn && git checkout be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9 \
-  && rm -rf colab_notebooks examples inputs outputs training .git \
-  && python3.8 -m venv /opt/venv \
-  && source /opt/venv/bin/activate \
+  && git clone https://github.com/gcorso/DiffDock.git /opt/DiffDock && cd /opt/DiffDock && git checkout 3c3c728cf2e444cf8df45b58067604d982159471 \
+  && rm -rf /opt/DiffDock/data /opt/DiffDock/__pycache__ /opt/DiffDock/visualizations /opt/DiffDock/.git \  
+  && python3.8 -m venv /opt/DiffDock/venv \
+  && source /opt/DiffDock/venv/bin/activate \
   && python3.8 -m ensurepip --upgrade \
-  && python -m pip install -q --no-cache-dir \
-  torch \
-  numpy \
+  && python -m pip install -q --no-cache-dir -f https://data.pyg.org/whl/torch-1.13.0+cu117.html --extra-index-url https://download.pytorch.org/whl/cu117 \
+  torch==1.13.1+cu117 \
+  torch_geometric==2.3.0 \
+  torch_scatter==2.1.1 \
+  torch_sparse==0.6.17 \
+  torch_cluster==1.6.1 \
+  torch_spline_conv==1.2.2 \  
+  PyYAML==6.0 \
+  scipy==1.10.1 \
+  "networkx[default]"==3.1 \
+  biopython==1.81 \
+  rdkit-pypi==2022.9.5 \
+  e3nn==0.5.1 \
+  spyrmsd==0.5.2 \
+  pandas==2.0.0 \
+  biopandas==0.4.1 \
+  fair-esm==2.0.0 \  
   && yum clean all \
   && rm -rf /var/cache/yum \
   && mkdir --parents /root/.cache/torch/hub/checkpoints
 
-ENV VIRTUAL_ENV="/opt/venv"
+ENV VIRTUAL_ENV="/opt/DiffDock/venv"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY run.sh /opt/DiffDock/
+COPY inference.py /opt/DiffDock/
 
-WORKDIR /opt/proteinmpnn
-
-COPY run.sh run.sh
-COPY protein_mpnn_run.py /opt/proteinmpnn/
-
+WORKDIR /opt/DiffDock
 ENTRYPOINT ["bash", "run.sh"]

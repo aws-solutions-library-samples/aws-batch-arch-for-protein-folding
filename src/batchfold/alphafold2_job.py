@@ -12,7 +12,6 @@ import uuid
 class AlphaFold2Job(BatchFoldJob):
     """Define AlphaFold 2 Job"""
 
-    job_definition_name: str = "AlphaFold2JobDefinition"
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     fasta_s3_uri: str = ""
     msa_s3_uri: str = ""

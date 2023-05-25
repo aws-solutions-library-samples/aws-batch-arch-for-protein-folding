@@ -14,6 +14,7 @@ import re
 import os
 from io import StringIO
 import pathlib
+from Bio.PDB.PDBParser import PDBParser
 
 
 @define
@@ -25,6 +26,7 @@ class BatchFoldTarget:
     s3_base_prefix: str = field(kw_only=True)
     s3_fastas_prefix: str = "fastas"
     s3_msas_prefix: str = "msas"
+    s3_pdbs_prefix: str = "pdbs"
     s3_predictions_prefix: str = "predictions"
     boto_session: boto3.session.Session = boto3.DEFAULT_SESSION or boto3.Session()
     sequences: Dict = field(kw_only=True)
@@ -156,7 +158,7 @@ class BatchFoldTarget:
             bucket=self.s3_bucket,
             local_path=local_path,
             prefix=prefix,
-            extensions=[".pdb", ".pkl", ".json"],
+            extensions=[".pdb", ".pkl", ".json", ".sdf", ".fa", ".fasta"],
         )
 
     def download_all(self, local_path: str = ".") -> str:
@@ -232,3 +234,33 @@ class BatchFoldTarget:
 
     def get_last_job_name(self, bucket=None, client=None, job_type=""):
         return self.list_job_names(bucket, client, job_type)[-1]
+
+    def get_pdbs_s3_uri(self) -> str:
+        """Get the s3 uri for the pdbs folder"""
+        return os.path.join(
+            "s3://", self.s3_bucket, self.s3_base_prefix, self.s3_pdbs_prefix
+        )
+
+    def upload_pdb(self, local_path: str) -> str:
+        """Upload a pdb file to s3"""
+        pdb_base = os.path.basename(local_path)
+
+        s3_pdb_key = os.path.join(
+            self.s3_base_prefix, self.s3_pdbs_prefix, pdb_base
+        )
+        self.boto_session.client("s3").upload_file(
+            local_path, self.s3_bucket, s3_pdb_key
+        )
+        return os.path.join("s3://", self.s3_bucket, s3_pdb_key)
+    
+    def download_pdbs(self, local_path: str = ".") -> str:
+        """Download pdb files from s3"""
+
+        prefix = os.path.join(self.s3_base_prefix, self.s3_pdbs_prefix)
+
+        return self._download_dir(
+            bucket=self.s3_bucket,
+            local_path=local_path,
+            prefix=prefix,
+            extensions=[".pdb", ".cif"],
+        )

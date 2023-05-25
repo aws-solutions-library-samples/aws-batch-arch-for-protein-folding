@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-module-openfold.yaml: Implement OpenFold module.
+  batch-protein-folding-cfn-module-diffdock.yaml: Implement DiffDock module.
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -27,7 +27,7 @@ Parameters:
 
 Resources:
 
-  OpenFoldContainerRegistry:
+  DiffDockContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
       EncryptionConfiguration:
@@ -42,12 +42,12 @@ Resources:
         - Key: SolutionId
           Value: SO9164  
 
-  CodeBuildProjectOpenFold:
+  CodeBuildProjectDiffDock:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: Build Docker container for OpenFold algorithm on AWS Batch
+      Description: Build Docker container for DiffDock algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
@@ -55,11 +55,11 @@ Resources:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref OpenFoldContainerRegistry
+            Value: !Ref DiffDockContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/openfold
+            Value: infrastructure/docker/diffdock
         Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -80,27 +80,27 @@ Resources:
         - Key: SolutionId
           Value: SO9164  
 
-  StartOpenFoldContainerBuild:
+  StartDiffDockContainerBuild:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
         Ref: StartCodeBuildLambdaArn
       ProjectName:
-        Ref: CodeBuildProjectOpenFold  
+        Ref: CodeBuildProjectDiffDock  
 
-  OpenFoldJobDefinition:
+  DiffDockJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
       ContainerProperties:
         Command:
           - "nvidia-smi"
-        Image: !Sub "${OpenFoldContainerRegistry.RepositoryUri}:latest"
+        Image: !Sub "${DiffDockContainerRegistry.RepositoryUri}:latest"
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
           - ContainerPath: /database
-            ReadOnly: True
-            SourceVolume: database
+            ReadOnly: False
+            SourceVolume: database          
         ResourceRequirements:
           - Type: VCPU
             Value: 8
@@ -111,7 +111,7 @@ Resources:
         Volumes:
           - Name: database
             Host:
-              SourcePath: /fsx
+              SourcePath: /fsx            
       PlatformCapabilities:
         - EC2
       PropagateTags: true
@@ -123,20 +123,20 @@ Resources:
         SolutionId: SO9164  
       Type: container
 
-  DeleteOpenFoldContainerRepo:
+  DeleteDiffDockContainerRepo:
     Type: Custom::ResourceForDeletingECR
     Properties:
       ServiceToken:
         Ref: DeleteContainerRepoLambdaArn
       ContainerRepo:
-        Ref: OpenFoldContainerRegistry
+        Ref: DiffDockContainerRegistry
 
 Outputs:
-  OpenFoldJobDefinition:
-    Description: Job definition for running OpenFold jobs on GPU instances.
+  DiffDockJobDefinition:
+    Description: Job definition for running DiffDock jobs on GPU instances.
     Value:
-      Ref: OpenFoldJobDefinition
-  OpenFoldContainerURI:
-    Description: ECR URI for OpenFold container image.
+      Ref: DiffDockJobDefinition
+  DiffDockContainerURI:
+    Description: ECR URI for DiffDock container image.
     Value:
-      Ref: OpenFoldContainerRegistry
+      Ref: DiffDockContainerRegistry
