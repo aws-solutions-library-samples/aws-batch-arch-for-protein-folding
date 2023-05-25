@@ -370,6 +370,24 @@ Resources:
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn 
 
+  ModuleProteinMPNN:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-proteinmpnn.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepositoryUrl:
+            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeBuildEncryptionKey:
+            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+        CodeBuildRoleArn:
+            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+        DeleteContainerRepoLambdaArn:
+            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+
   ModuleNextflow:
     Type: "AWS::CloudFormation::Stack"
     Properties:
