@@ -1,66 +1,58 @@
 import boto3
 import os
-import random
-import sagemaker
-import argparse
+from datetime import datetime
+from batchfold.batchfold_environment import BatchFoldEnvironment
+from batchfold.nextflow_job import NextFlowJob
+from batchfold.utils import utils
 
 
-def main(orchestrator_compute_environment, nextflow_job_definition):
-    sess = sagemaker.Session()
-    bucket = sess.default_bucket()
-    random_str = str(random.randint(100000, 9999999))
+def main():
 
+    # Create AWS clients
+    boto_session = boto3.session.Session()
+
+    batch_environment = BatchFoldEnvironment(boto_session=boto_session)
+    s3 = boto_session.client("s3")
+
+    S3_BUCKET = batch_environment.default_bucket
+    print(f" S3 bucket name is {S3_BUCKET}") 
+
+    random_str = datetime.now().strftime("%Y%m%d%s")
     nextflow_script = "run_rfdesign_esmfold_multiple_sequences.nf"
+    asset_prefix = "assets_input"
+    input_prefix = 'pd1-demo'
+    rf_design_prefix = "myrfdesign_hallucination_" + random_str
+    esmfold_prefix = "FinalESMFoldOutput_" + random_str
+       
+    # copy NextFlow script to S3
+    s3.upload_file(nextflow_script, S3_BUCKET, os.path.join(input_prefix, nextflow_script))
 
-    my_asset_uri = f"s3://{bucket}/assets_input"  # modify to your own bucket
-    my_input_bucket = f"s3://{bucket}/pd1-demo/"
-    rf_design_output = f"s3://{bucket}/myrfdesign_hallucination_{random_str}"
-    esmf_output = f"s3://{bucket}/FinalESMFoldOutput_{random_str}/"
-    print(my_asset_uri)
-    print(rf_design_output)
-    print(esmf_output)
+    # copy pdb structures to S3
+    s3.upload_file('pd1_demo/pd1.pdb', S3_BUCKET, os.path.join(input_prefix, 'pd1.pdb'))
+    s3.upload_file('pd1_demo/pdl1.pdb', S3_BUCKET, os.path.join(input_prefix, 'pdl1.pdb'))
 
-    # move input files and code to their respective buckets in S3.
-    # copy pdb structures
-    os.system(f"aws s3 cp  pd1_demo/pd1.pdb s3://{bucket}/pd1-demo/")
-    os.system(f"aws s3 cp  pd1_demo/pdl1.pdb s3://{bucket}/pd1-demo/")
+    # copy additional scripts to s3
+    utils.upload_dir(bucket = S3_BUCKET, local_path = "bin", prefix = os.path.join(asset_prefix, "bin"), boto_session=boto_session)
 
-    # copy dependencies to s3 in the bin directory
-    os.system(f"aws s3 cp --recursive bin/ {my_asset_uri}/bin/")
-    os.system(
-        f"aws s3 cp {nextflow_script} {my_asset_uri}/"
-    )  # copy nextflow script to s3
-
-    # Next we specify the commands for the nextflow orchestrator to run.
-    # First we copy in the data from the asset bucket, which includes the .nf script and dependencies
-    # Next we run the .nf script, and print a finished message when done.
-    nextflow_commands = [
-        f"""aws s3 cp --recursive {my_asset_uri} . 
-        nextflow run {nextflow_script} --s3_input {my_input_bucket}  --rf_design_output  {rf_design_output} --esmfold_output {esmf_output};
-        echo Finished"""
-    ]
-
-    client = boto3.client("batch")
-    response = client.submit_job(
-        jobName=f"nextflow_job_{random_str}",
-        jobQueue=orchestrator_compute_environment,  # modify this to your own JobQueue
-        jobDefinition=nextflow_job_definition,  # modify this to your own Job Definition
-        containerOverrides={"command": nextflow_commands},
+    job_name = "NexFlowJob_" + datetime.now().strftime("%Y%m%d%s")
+    nextflow_job = NextFlowJob(
+        boto_session=boto_session,
+        job_name = job_name,
+        assets_s3_uri = os.path.join("s3://", S3_BUCKET, asset_prefix),
+        nextflow_script = nextflow_script,
+        params = {
+            "s3_input": os.path.join("s3://", S3_BUCKET, input_prefix),
+            "rf_design_output": os.path.join("s3://", S3_BUCKET, rf_design_prefix),
+            "esmfold_output": os.path.join("s3://", S3_BUCKET, esmfold_prefix),
+        }
     )
-    print(response)
+
+    nextflow_submission = batch_environment.submit_job(
+        nextflow_job, job_queue_name="CPUOnDemandJobQueue"
+    )
+
+    print(nextflow_submission)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Parse the options")
-    parser.add_argument(
-        "orchestrator_compute_environment",
-        help="Compute environment for your orchestrator on the Batch console.",
-    )
-    parser.add_argument(
-        "nextflow_job_definition",
-        help="Job definition for your orchestrator on the Batch console.",
-    )
-
-    args = parser.parse_args()
-    args = vars(args)
     main()

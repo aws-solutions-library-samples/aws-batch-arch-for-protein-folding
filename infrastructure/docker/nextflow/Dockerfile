@@ -59,6 +59,6 @@ RUN cd /root \
   && pip install -U -q -r notebook-requirements.txt
 
 
-WORKDIR /root
+WORKDIR /home
 
 ENTRYPOINT ["bash", "-c"] #enable passing of arbitrary commands to nextflow

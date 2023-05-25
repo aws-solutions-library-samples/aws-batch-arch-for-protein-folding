@@ -11,9 +11,14 @@ import numpy as np
 from batchfold.utils import residue_constants
 from batchfold.utils import protein
 import json
+import boto3
+import pathlib
 
-def download_rcsb_pdb_file(pdb_code, output_dir, model = None, chain = None, file_format="pdb"):
-    """ Download a pdb file from rcsb.org """
+
+def download_rcsb_pdb_file(
+    pdb_code, output_dir, model=None, chain=None, file_format="pdb"
+):
+    """Download a pdb file from rcsb.org"""
 
     pdb_code = str.upper(pdb_code)
     pdbl = PDBList()
@@ -32,8 +37,9 @@ def download_rcsb_pdb_file(pdb_code, output_dir, model = None, chain = None, fil
     else:
         raise Exception("Desired structure doesn't exist at rcsb.org")
 
+
 def download_rcsb_fasta_file(pdb_code, output_dir):
-    """ Download a FASTA file from rcsb.org """
+    """Download a FASTA file from rcsb.org"""
     pdb_code = str.upper(pdb_code)
     os.makedirs(output_dir, exist_ok=True)
     r = requests.get(f"https://www.rcsb.org/fasta/entry/{pdb_code}")
@@ -41,6 +47,7 @@ def download_rcsb_fasta_file(pdb_code, output_dir):
     with open(fasta_filename, "wb") as f:
         f.write(r.content)
     return fasta_filename
+
 
 def get_bfactors(pdb_file):
     p = PDBParser()
@@ -55,8 +62,9 @@ def get_bfactors(pdb_file):
                     # print(residue["CA"].get_bfactor())
                     bfactors.append(residue["CA"].get_bfactor())
             chains.append(bfactors)
-        output[model.id] = chains    
+        output[model.id] = chains
     return output
+
 
 def overwrite_b_factors(pdb_str: str, bfactors: np.ndarray) -> str:
     """Overwrites the B-factors in pdb_str with contents of bfactors array.
@@ -99,11 +107,12 @@ def overwrite_b_factors(pdb_str: str, bfactors: np.ndarray) -> str:
     pdb_io.save(new_pdb)
     return new_pdb.getvalue()
 
-def plot_banded_pdb(pdb_file, show_sidechains = False, width = 800, height = 600):
+
+def plot_banded_pdb(pdb_file, show_sidechains=False, width=800, height=600):
     with open(pdb_file) as f:
-            best_pdb = f.read()
+        best_pdb = f.read()
     target_protein = protein.from_pdb_string(best_pdb)
-    plddt_list = target_protein.b_factors[:,0]
+    plddt_list = target_protein.b_factors[:, 0]
     atom_mask = target_protein.atom_mask
     banded_b_factors = []
     for plddt in plddt_list:
@@ -112,9 +121,7 @@ def plot_banded_pdb(pdb_file, show_sidechains = False, width = 800, height = 600
                 banded_b_factors.append(idx)
                 break
 
-    banded_b_factors = (
-            np.array(banded_b_factors)[:, None] * atom_mask
-    )
+    banded_b_factors = np.array(banded_b_factors)[:, None] * atom_mask
 
     to_visualize_pdb = overwrite_b_factors(best_pdb, banded_b_factors)
     # Color the structure by per-residue pLDDT
@@ -128,6 +135,7 @@ def plot_banded_pdb(pdb_file, show_sidechains = False, width = 800, height = 600
     view.zoomTo()
     view.show()
     return None
+
 
 def plot_plddt_legend():
     """Plots the legend for pLDDT."""
@@ -155,11 +163,12 @@ def plot_plddt_legend():
     plt.title("Model Confidence", fontsize=20, pad=20)
     return plt
 
+
 def plot_metrics(pdb_file, pae=None):
     with open(pdb_file) as f:
         best_pdb = f.read()
     target_protein = protein.from_pdb_string(best_pdb)
-    plddt_list = target_protein.b_factors[:,0]
+    plddt_list = target_protein.b_factors[:, 0]
 
     fig = plt.figure(figsize=(8, 3))
     ax1 = fig.add_subplot(121)
@@ -175,10 +184,12 @@ def plot_metrics(pdb_file, pae=None):
         ax2.set_xlabel("Scored residue")
         ax2.set_ylabel("Aligned residue")
 
+
 def get_best_alphafold_model(ranking_file):
     with open(ranking_file, "r") as f:
         j = json.load(f)
-    return(j["order"][0])
+    return j["order"][0]
+
 
 def reduce_stockholm_file(sto_file):
     """Read in a .sto file and parse format it into a numpy array of the
@@ -241,7 +252,7 @@ def plot_msa_output_folder(path, id=None):
                 plot_msa_folder(obj.path, id + " " + obj.name)
         if monomer:
             plot_msa_folder(path, id)
-    return None    
+    return None
 
 
 class SelectChain(Select):
@@ -253,8 +264,9 @@ class SelectChain(Select):
             return 1
         else:
             return 0
-    
-def extract_chain(input_file, model = None, chain = None):
+
+
+def extract_chain(input_file, model=None, chain=None):
     p = PDBParser()
     structure = p.get_structure("X", input_file)
     if model is not None:
@@ -268,3 +280,20 @@ def extract_chain(input_file, model = None, chain = None):
     new_filename = os.path.splitext(input_file)[0] + "_" + chain + ".pdb"
     io.save(new_filename)
     return new_filename
+
+
+def upload_dir(
+    bucket, local_path=".", prefix="", extensions=[], boto_session=boto3.Session()
+):
+    """Recursively upload files to S3."""
+
+    s3 = boto_session.client("s3")
+    for root, _, files in os.walk(local_path):
+        for file in files:
+            if extensions is [] or pathlib.Path(file.get("Key")).suffix in extensions:
+                s3.upload_file(
+                    os.path.join(root, file), bucket, os.path.join(prefix, file)
+                )
+                file_count += 1
+    print(f"{file_count} files uploaded to s3.")
+    return os.path.join("s3://", bucket, prefix)
