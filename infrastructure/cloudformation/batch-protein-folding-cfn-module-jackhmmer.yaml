@@ -13,7 +13,7 @@ Parameters:
     Description: Clone URL for the CodeCommit repository
     Type: String
   CodeBuildEncryptionKey:
-    Description: Encryption key for CodeBuild jobs  
+    Description: Encryption key for CodeBuild jobs
     Type: String
   CodeBuildRoleArn:
     Description: IAM role for CodeBuild jobs
@@ -23,7 +23,7 @@ Parameters:
     Type: String      
   DeleteContainerRepoLambdaArn:
     Description: Lambda function for deleting container repos
-    Type: String 
+    Type: String
 
 Resources:
 
@@ -38,9 +38,9 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"   
+          Value: !Ref "AWS::StackId"
         - Key: SolutionId
-          Value: SO9164      
+          Value: SO9164
 
   CodeBuildProjectJackhmmer:
     Type: AWS::CodeBuild::Project
@@ -78,7 +78,7 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"   
         - Key: SolutionId
-          Value: SO9164      
+          Value: SO9164
 
   StartJackhmmerContainerBuild:
     Type: Custom::ResourceForBuildingContainer
@@ -119,7 +119,7 @@ Resources:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
         SolutionId: SO9164  
-      Type: container      
+      Type: container
 
   DeleteJackhmmerContainerRepo:
     Type: Custom::ResourceForDeletingECR
