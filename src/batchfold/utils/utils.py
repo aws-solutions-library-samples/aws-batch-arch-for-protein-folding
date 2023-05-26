@@ -42,7 +42,7 @@ def download_rcsb_fasta_file(pdb_code, output_dir):
     """Download a FASTA file from rcsb.org"""
     pdb_code = str.upper(pdb_code)
     os.makedirs(output_dir, exist_ok=True)
-    r = requests.get(f"https://www.rcsb.org/fasta/entry/{pdb_code}")
+    r = requests.get(f"https://www.rcsb.org/fasta/entry/{pdb_code}", timeout=10)
     fasta_filename = os.path.join(output_dir, pdb_code + ".fasta")
     with open(fasta_filename, "wb") as f:
         f.write(r.content)
