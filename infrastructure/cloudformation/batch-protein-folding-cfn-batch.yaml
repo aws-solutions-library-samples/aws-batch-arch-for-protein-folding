@@ -194,7 +194,7 @@ Resources:
            LaunchTemplateId: !Ref InstanceLaunchTemplate
            Version: $Latest
          MaxvCpus: 256
-         MinvCpus: 0
+         MinvCpus: 8
          SecurityGroupIds:
            - !Ref DefaultSecurityGroupID
          Subnets: !Ref Subnets

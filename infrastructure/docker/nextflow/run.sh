@@ -57,9 +57,10 @@ error_exit () {
   exit 1
 }
 
-# Function to cp files recursively if the last character is a "/"
+# Function to cp files recursively if the src is a "folder"
 recursive_cp () {
-    if [ ${1:0-1} = "/" ]
+    # if [ ${1:0-1} = "/" ]
+    if aws s3 ls $1 > /dev/null
     then
         aws s3 cp --recursive $2 $3;
     else

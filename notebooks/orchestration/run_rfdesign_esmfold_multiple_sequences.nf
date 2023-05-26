@@ -40,7 +40,7 @@ process run_esmfold {
     file 'hello_from_esmfold.txt'
 
     """
-python /root/bin/get_fastas.py ${params.rf_design_output} |while read line; do python /root/bin/run_esmfold.py \$line ${params.esmfold_output}; done > hello_from_esmfold.txt
+python ${project_dir}/bin/get_fastas.py ${params.rf_design_output} |while read line; do python ${project_dir}/bin/run_esmfold.py \$line ${params.esmfold_output}; done > hello_from_esmfold.txt
     """
 
 }

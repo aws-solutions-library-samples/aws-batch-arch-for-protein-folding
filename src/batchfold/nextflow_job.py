@@ -22,7 +22,7 @@ class NextFlowJob(BatchFoldJob):
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
-        command_list = [f"-i {self.assets_s3_uri}/:/home"]
+        command_list = [f"-i {self.assets_s3_uri}:/home"]
         command_list.extend(["nextflow", "run", os.path.join("/home", self.nextflow_script)])
         command_list.extend([f"--{key}=\'{value}\'" for key, value in self.params.items()])
 
