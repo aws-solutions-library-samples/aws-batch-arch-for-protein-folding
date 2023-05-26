@@ -41,7 +41,7 @@ def main():
         assets_s3_uri = os.path.join("s3://", S3_BUCKET, asset_prefix),
         nextflow_script = nextflow_script,
         params = {
-            "s3_input": os.path.join("s3://", S3_BUCKET, input_prefix),
+            "s3_input": os.path.join("s3://", S3_BUCKET, input_prefix + '/'), # The slash is important here - you want to download the "folder" recursively
             "rf_design_output": os.path.join("s3://", S3_BUCKET, rf_design_prefix),
             "esmfold_output": os.path.join("s3://", S3_BUCKET, esmfold_prefix),
         }

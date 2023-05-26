@@ -24,10 +24,9 @@ process wait_for_batch{
     output: 
     path "hello_from_waiter.txt"
 
-
-   """
-   python ${project_dir}/bin/wait_for_batch.py batch_job_ids.txt > hello_from_waiter.txt
-   """
+    """
+    python ${project_dir}/bin/wait_for_batch.py batch_job_ids.txt > hello_from_waiter.txt
+    """
 
 }
 
@@ -40,7 +39,7 @@ process run_esmfold {
     file 'hello_from_esmfold.txt'
 
     """
-python ${project_dir}/bin/get_fastas.py ${params.rf_design_output} |while read line; do python ${project_dir}/bin/run_esmfold.py \$line ${params.esmfold_output}; done > hello_from_esmfold.txt
+    python ${project_dir}/bin/get_fastas.py ${params.rf_design_output} |while read line; do python ${project_dir}/bin/run_esmfold.py \$line ${params.esmfold_output}; done > hello_from_esmfold.txt
     """
 
 }
