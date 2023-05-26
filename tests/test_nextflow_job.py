@@ -16,7 +16,7 @@ def batch_environment():
     stack = BatchFoldEnvironment(boto_session = boto_session)
     return(stack)
 
-def test_rfdiffusion_job_init():
+def test_nextflow_job_init():
     bucket = os.getenv("TEST_BUCKET")
     job_name = "NextFlowJob" + datetime.now().strftime("%Y%m%d%s")
     params = {
@@ -30,7 +30,7 @@ def test_rfdiffusion_job_init():
         nextflow_script = 'test.nf',
         params = params
     )
-    assert new_job.job_definition_name == "NextFlowJobDefinition"
+    assert new_job.job_definition_name == "NextflowJobDefinition"
     assert new_job.assets_s3_uri == os.path.join("s3://", bucket, "assets")
     assert new_job.nextflow_script == 'test.nf'
     assert new_job.params["parameterA"] == "A"
