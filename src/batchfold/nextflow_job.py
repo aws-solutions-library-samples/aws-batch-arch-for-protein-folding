@@ -5,6 +5,7 @@ from attrs import define, field
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
+import os
 
 @define
 class NextFlowJob(BatchFoldJob):
@@ -21,8 +22,8 @@ class NextFlowJob(BatchFoldJob):
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
-        command_list = [f"-i {self.assets_s3_uri}/:/home/"]
-        command_list.extend(["nextflow", "run", self.nextflow_script])
+        command_list = [f"-i {self.assets_s3_uri}/:/home"]
+        command_list.extend(["nextflow", "run", os.path.join("/home", self.nextflow_script)])
         command_list.extend([f"--{key}=\'{value}\'" for key, value in self.params.items()])
 
         logging.info(f"Command is \n{command_list}")

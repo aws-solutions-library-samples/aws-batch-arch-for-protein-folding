@@ -10,7 +10,6 @@ def main():
 
     # Create AWS clients
     boto_session = boto3.session.Session()
-
     batch_environment = BatchFoldEnvironment(boto_session=boto_session)
     s3 = boto_session.client("s3")
 
@@ -23,17 +22,18 @@ def main():
     input_prefix = 'pd1-demo'
     rf_design_prefix = "myrfdesign_hallucination_" + random_str
     esmfold_prefix = "FinalESMFoldOutput_" + random_str
-       
-    # copy NextFlow script to S3
-    s3.upload_file(nextflow_script, S3_BUCKET, os.path.join(input_prefix, nextflow_script))
 
     # copy pdb structures to S3
     s3.upload_file('pd1_demo/pd1.pdb', S3_BUCKET, os.path.join(input_prefix, 'pd1.pdb'))
     s3.upload_file('pd1_demo/pdl1.pdb', S3_BUCKET, os.path.join(input_prefix, 'pdl1.pdb'))
 
+    # copy NextFlow script to S3
+    s3.upload_file(nextflow_script, S3_BUCKET, os.path.join(asset_prefix, nextflow_script))
+
     # copy additional scripts to s3
     utils.upload_dir(bucket = S3_BUCKET, local_path = "bin", prefix = os.path.join(asset_prefix, "bin"), boto_session=boto_session)
 
+    # Submit job
     job_name = "NexFlowJob_" + datetime.now().strftime("%Y%m%d%s")
     nextflow_job = NextFlowJob(
         boto_session=boto_session,
