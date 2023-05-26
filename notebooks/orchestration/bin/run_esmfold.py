@@ -2,7 +2,6 @@ import boto3
 from datetime import datetime
 from batchfold.batchfold_environment import BatchFoldEnvironment
 from batchfold.esmfold_job import ESMFoldJob
-import numpy as np
 import os
 import sys
 
