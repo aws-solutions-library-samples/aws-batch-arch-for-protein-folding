@@ -288,9 +288,11 @@ def upload_dir(
     """Recursively upload files to S3."""
 
     s3 = boto_session.client("s3")
+    file_count = 0
     for root, _, files in os.walk(local_path):
         for file in files:
-            if extensions is [] or pathlib.Path(file.get("Key")).suffix in extensions:
+            if not extensions or pathlib.Path(file).suffix in extensions:
+                print(f"Uploading {os.path.join(root, file)} to s3://{bucket}/{prefix}/{file}")
                 s3.upload_file(
                     os.path.join(root, file), bucket, os.path.join(prefix, file)
                 )
