@@ -60,6 +60,5 @@ RUN cd /root \
 
 
 WORKDIR /home
-
-# ENTRYPOINT ["bash", "-c"] #enable passing of arbitrary commands to nextflow
+COPY run.sh /home/
 ENTRYPOINT ["bash", "run.sh"]
