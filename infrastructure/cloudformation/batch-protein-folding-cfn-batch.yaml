@@ -344,12 +344,14 @@ Resources:
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"               
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
       State: ENABLED
       Type: MANAGED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"        
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   ####################################################################################################
   # Batch Job Queues
