@@ -5,7 +5,6 @@ from attrs import define, field
 from batchfold.batchfold_job import BatchFoldJob
 from datetime import datetime
 import logging
-import uuid
 
 @define
 class ESMFoldJob(BatchFoldJob):

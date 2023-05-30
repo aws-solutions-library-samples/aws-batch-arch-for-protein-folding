@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-module-jackhmmer.yaml: Implement Jackhmmer module.
+  batch-protein-folding-cfn-module-nextflow.yaml: Implement Nextflow module.
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -27,7 +27,7 @@ Parameters:
 
 Resources:
 
-  JackhmmerContainerRegistry:
+  NextflowContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
       EncryptionConfiguration:
@@ -42,28 +42,28 @@ Resources:
         - Key: SolutionId
           Value: SO9164
 
-  CodeBuildProjectJackhmmer:
+  CodeBuildProjectNextflow:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: Build Docker container for Jackhmmer algorithm on AWS Batch
+      Description: Build Docker container for Nextflow algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref JackhmmerContainerRegistry
+            Value: !Ref NextflowContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/jackhmmer  
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+            Value: infrastructure/docker/nextflow
+        Image: aws/codebuild/standard:4.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: ARM_CONTAINER
+        Type: LINUX_CONTAINER
       ResourceAccessRole: !Ref CodeBuildRoleArn
       ServiceRole: !Ref CodeBuildRoleArn
       Source:
@@ -80,26 +80,26 @@ Resources:
         - Key: SolutionId
           Value: SO9164
 
-  StartJackhmmerContainerBuild:
+  StartNextflowContainerBuild:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
         Ref: StartCodeBuildLambdaArn
       ProjectName:
-        Ref: CodeBuildProjectJackhmmer                 
+        Ref: CodeBuildProjectNextflow  
 
-  JackhmmerJobDefinition:
+  NextflowJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
       ContainerProperties:
         Command:
           - "echo hello"
-        Image: !Sub "${JackhmmerContainerRegistry.RepositoryUri}:latest"
+        Image: !Sub "${NextflowContainerRegistry.RepositoryUri}:latest"
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
           - ContainerPath: /database
-            ReadOnly: False
+            ReadOnly: True
             SourceVolume: database
         ResourceRequirements:
           - Type: VCPU
@@ -121,20 +121,20 @@ Resources:
         SolutionId: SO9164  
       Type: container
 
-  DeleteJackhmmerContainerRepo:
+  DeleteNextflowContainerRepo:
     Type: Custom::ResourceForDeletingECR
     Properties:
       ServiceToken:
         Ref: DeleteContainerRepoLambdaArn
       ContainerRepo:
-        Ref: JackhmmerContainerRegistry
+        Ref: NextflowContainerRegistry
 
 Outputs:
-  JackhmmerJobDefinition:
-    Description: Job definition for running Jackhmmer jobs.
+  NextflowJobDefinition:
+    Description: Job definition for running Nextflow jobs on GPU instances.
     Value:
-      Ref: JackhmmerJobDefinition
-  JackhmmerContainerURI:
-    Description: ECR URI for Jackhmmer container image.
+      Ref: NextflowJobDefinition
+  NextflowContainerURI:
+    Description: ECR URI for Nextflow container image.
     Value:
-      Ref: JackhmmerContainerRegistry
+      Ref: NextflowContainerRegistry

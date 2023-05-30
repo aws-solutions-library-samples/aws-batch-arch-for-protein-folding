@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.0] - 2023-05-25
+
+### 1.10.0 Added
+
+- Added support for NextFlow
+
+---
+
 ## [1.9.0] - 2023-04-21
 
 ### 1.9.0 Added
@@ -19,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update ProteinMPNN container and job definition to use accelerated instance types.
 - Add new option to ProteinMPNN inference script to remove the input sequence from the output
 
-### 1.8.0 Fixed
+### 1.9.0 Fixed
 
 - Fixed bug with ESMFold metric logging for multiple sequence inputs.
 

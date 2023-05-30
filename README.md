@@ -18,6 +18,7 @@
     4.7. [ProteinMPNN](#47-proteinmpnn)  
     4.8. [DiffDock](#48-diffdock)  
     4.9. [RFDiffusion](#49-rfdiffusion)  
+    4.10. [NextFlow](#410-nextflow)  
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
     5.2. [Cost](#52-cost)  
@@ -258,6 +259,10 @@ The RFDiffusion citation is
   year = {2022}
 }
 ```
+
+### 4.10. NextFlow
+
+Please visit [https://www.nextflow.io](https://www.nextflow.io) for more information about the RFDiffusion algorithm. For a fully-managed NextFlow solution, you may also be interested in [Amazon Omics Workflows](https://docs.aws.amazon.com/omics/latest/dev/workflows.html).
 
 -----
 

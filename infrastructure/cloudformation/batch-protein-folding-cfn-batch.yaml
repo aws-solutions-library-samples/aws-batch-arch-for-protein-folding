@@ -92,6 +92,8 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
         - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSBatchFullAccess #allow batch jobs to submit other batch jobs
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess #allow reading of Cloudformation stacks etc.
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -201,6 +203,34 @@ Resources:
   ####################################################################################################
   # Batch Compute Environments
   ####################################################################################################
+
+  CPUComputeEnvironmentOnDemand:
+     Type: AWS::Batch::ComputeEnvironment
+     Properties:
+       ComputeResources:
+         AllocationStrategy: BEST_FIT_PROGRESSIVE
+         InstanceRole: !Ref InstanceProfile
+         InstanceTypes:
+           - m5
+           - r5
+           - c5
+         LaunchTemplate:
+           LaunchTemplateId: !Ref InstanceLaunchTemplate
+           Version: $Latest
+         MaxvCpus: 256
+         MinvCpus: 0
+         SecurityGroupIds:
+           - !Ref DefaultSecurityGroupID
+         Subnets: !Ref Subnets
+         Type: EC2
+         Tags:
+           Application: !Ref ApplicationName
+           StackId: !Ref "AWS::StackId"        
+       State: ENABLED
+       Type: MANAGED
+       Tags:
+         Application: !Ref ApplicationName
+         StackId: !Ref "AWS::StackId"
 
   GravitonComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
@@ -327,6 +357,18 @@ Resources:
   # Batch Job Queues
   ####################################################################################################
 
+  CPUOnDemandJobQueue:
+     Type: AWS::Batch::JobQueue
+     Properties:
+       ComputeEnvironmentOrder:
+         - ComputeEnvironment: !Ref CPUComputeEnvironmentOnDemand
+           Order: 1
+       Priority: 10
+       State: ENABLED
+       Tags:
+         Application: !Ref ApplicationName
+         StackId: !Ref "AWS::StackId"
+
   GravitonOnDemandJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
@@ -418,6 +460,10 @@ Outputs:
     Description: Launch template for EC2 instances.
     Value:
       Ref: InstanceLaunchTemplate
+  CPUOnDemandJobQueue:
+     Description: Job queue for on-demand CPU instances.
+     Value:
+       Ref: CPUOnDemandJobQueue
   G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
     Value:
