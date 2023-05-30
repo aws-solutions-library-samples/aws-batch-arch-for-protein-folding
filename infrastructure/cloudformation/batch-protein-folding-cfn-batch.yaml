@@ -31,11 +31,25 @@ Parameters:
   CreateG5ComputeEnvironment:
     Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
     Type: String
-    Default: "N"    
-    
+    Default: "N"
+  CreateAWSServiceRoleForEC2Spot:
+    Description: Create the AWSServiceRoleForEC2Spot service-linked role
+    Type: String
+    Default: "N"
+  CreateAWSServiceRoleForEC2SpotFleet:
+    Description: Create the AWSServiceRoleForEC2SpotFleet service-linked role
+    Type: String
+    Default: "N"
+
 Conditions:
   CreateG5ComputeEnvironment:
-    "Fn::Equals": [Ref: "CreateG5ComputeEnvironment", "Y"]  
+    "Fn::Equals": [Ref: "CreateG5ComputeEnvironment", "Y"]
+
+  CreateAWSServiceRoleForEC2Spot:
+    "Fn::Equals": [Ref: "CreateAWSServiceRoleForEC2Spot", "Y"]
+
+  CreateAWSServiceRoleForEC2SpotFleet:
+    "Fn::Equals": [Ref: "CreateAWSServiceRoleForEC2SpotFleet", "Y"]
 
 Resources:
   ##################################################
@@ -85,6 +99,8 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164
 
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
@@ -112,6 +128,8 @@ Resources:
                 Value: !Ref ApplicationName
               - Key: StackId
                 Value: !Ref AWS::StackId
+              - Key: SolutionId
+                Value: SO9164
         UserData:
           Fn::Base64:
             Fn::Join:
@@ -163,18 +181,24 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+        - Key: SolutionId
+          Value: SO9164
         
   AWSServiceRoleForEC2SpotServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
+    Condition: CreateAWSServiceRoleForEC2Spot
     Properties:
       AWSServiceName: spot.amazonaws.com
       Description: Default EC2 Spot Service Linked Role
+      CustomSuffix: !Select [6, !Split ["-", !Ref "AWS::StackId"]]
 
   AWSServiceRoleForEC2SpotFleetServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
+    Condition: CreateAWSServiceRoleForEC2SpotFleet
     Properties:
       AWSServiceName: spotfleet.amazonaws.com
       Description: Default EC2 Spot Service Linked Role
+      CustomSuffix: !Select [6, !Split ["-", !Ref "AWS::StackId"]]
 
   ####################################################################################################
   # Batch Compute Environments
@@ -208,38 +232,6 @@ Resources:
          Application: !Ref ApplicationName
          StackId: !Ref "AWS::StackId"
 
-  # CPUComputeEnvironmentSpot:
-  #   Type: AWS::Batch::ComputeEnvironment
-  #   Properties:
-  #     ComputeResources:
-  #       AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
-  #       BidPercentage: 100
-  #       InstanceRole: !Ref InstanceProfile
-  #       InstanceTypes:
-  #         - m5
-  #         - r5
-  #         - c5
-  #       LaunchTemplate:
-  #         LaunchTemplateId: 
-  #           Ref: InstanceLaunchTemplate
-  #         Version: $Latest
-  #       MaxvCpus: 256
-  #       MinvCpus: 0
-  #       SecurityGroupIds:
-  #         - Ref: DefaultSecurityGroupID
-  #       SpotIamFleetRole:
-  #         "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
-  #       Subnets: !Ref Subnets
-  #       Type: SPOT
-  #       Tags:
-  #         Application: !Ref ApplicationName
-  #         StackId: !Ref "AWS::StackId"               
-  #     State: ENABLED
-  #     Type: MANAGED
-  #     Tags:
-  #       Application: !Ref ApplicationName
-  #       StackId: !Ref "AWS::StackId"        
-
   GravitonComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
@@ -252,7 +244,7 @@ Resources:
           - r6g
           - c6g
         LaunchTemplate:
-          LaunchTemplateId: 
+          LaunchTemplateId:
             Ref: InstanceLaunchTemplate
           Version: $Latest
         MaxvCpus: 256
@@ -265,15 +257,17 @@ Resources:
         Type: SPOT
         Tags:
           Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"               
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
       State: ENABLED
       Type: MANAGED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"            
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   GravitonComputeEnvironmentOnDemand:
-    Type: AWS::Batch::ComputeEnvironment      
+    Type: AWS::Batch::ComputeEnvironment
     Properties:
       ComputeResources:
         AllocationStrategy: BEST_FIT_PROGRESSIVE
@@ -293,12 +287,14 @@ Resources:
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"               
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
       State: ENABLED
       Type: MANAGED
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   G4dnComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
@@ -319,12 +315,14 @@ Resources:
         Type: EC2
         Tags:
           Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"               
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
       State: ENABLED
       Type: MANAGED
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   G5ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
@@ -369,18 +367,6 @@ Resources:
          Application: !Ref ApplicationName
          StackId: !Ref "AWS::StackId"
 
-  # CPUSpotJobQueue:
-  #   Type: AWS::Batch::JobQueue
-  #   Properties:
-  #     ComputeEnvironmentOrder:
-  #       - ComputeEnvironment: !Ref CPUComputeEnvironmentSpot
-  #         Order: 1
-  #     Priority: 10
-  #     State: ENABLED
-  #     Tags:
-  #       Application: !Ref ApplicationName
-  #       StackId: !Ref "AWS::StackId"      
-
   GravitonOnDemandJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
@@ -391,7 +377,8 @@ Resources:
       State: ENABLED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"   
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   GravitonSpotJobQueue:
     Type: AWS::Batch::JobQueue
@@ -403,7 +390,8 @@ Resources:
       State: ENABLED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"              
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   G4dnJobQueue:
     Type: AWS::Batch::JobQueue
@@ -416,10 +404,11 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   G5JobQueue:
     Type: AWS::Batch::JobQueue
-    Condition: CreateG5ComputeEnvironment    
+    Condition: CreateG5ComputeEnvironment
     Properties:
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref G5ComputeEnvironment
@@ -428,7 +417,8 @@ Resources:
       State: ENABLED
       Tags:
         Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"        
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
 
   DownloadJobDefinition:
     Type: AWS::Batch::JobDefinition
@@ -460,7 +450,8 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-      Type: container            
+        SolutionId: SO9164
+      Type: container
 
 Outputs:
   LaunchTemplate:
@@ -471,31 +462,27 @@ Outputs:
      Description: Job queue for on-demand CPU instances.
      Value:
        Ref: CPUOnDemandJobQueue
-  #CPUSpotJobQueue:
-     #Description: Job queue for spot CPU instances.
-     #Value:
-       #Ref: CPUSpotJobQueue
   G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
-    Value: 
+    Value:
       Ref: G4dnJobQueue
   G5JobQueue:
     Condition: CreateG5ComputeEnvironment
     Description: Job queue for on-demand G5 instances.
-    Value: 
-      Ref: G5JobQueue      
+    Value:
+      Ref: G5JobQueue
   GravitonSpotJobQueue:
     Description: Job queue for spot Graviton instances.
-    Value: 
-      Ref: GravitonSpotJobQueue       
+    Value:
+      Ref: GravitonSpotJobQueue
   GravitonOnDemandJobQueue:
     Description: Job queue for On-Demand Graviton instances.
-    Value: 
-      Ref: GravitonOnDemandJobQueue         
+    Value:
+      Ref: GravitonOnDemandJobQueue
   DownloadJobDefinition:
     Description: Job definition for downloading reference data.
     Value:
-      Ref: DownloadJobDefinition                
+      Ref: DownloadJobDefinition
   S3BucketName:
     Description: Optional S3 Bucket name.
     Value:
