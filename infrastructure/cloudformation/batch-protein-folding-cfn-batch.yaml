@@ -23,7 +23,7 @@ Parameters:
     Type: CommaDelimitedList
   DownloadContainerRegistryURI:
     Description: URI of the download container
-    Type: String  
+    Type: String
   S3BucketName:
     Description: Optional S3 Bucket Name
     Type: String
@@ -183,7 +183,7 @@ Resources:
           Value: !Ref AWS::StackId
         - Key: SolutionId
           Value: SO9164
-        
+
   AWSServiceRoleForEC2SpotServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
     Condition: CreateAWSServiceRoleForEC2Spot
