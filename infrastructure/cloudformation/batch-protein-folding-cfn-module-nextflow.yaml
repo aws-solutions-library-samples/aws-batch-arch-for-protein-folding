@@ -94,6 +94,9 @@ Resources:
       ContainerProperties:
         Command:
           - "echo hello"
+        Environment:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
         Image: !Sub "${NextflowContainerRegistry.RepositoryUri}:latest"
         LogConfiguration:
           LogDriver: awslogs
