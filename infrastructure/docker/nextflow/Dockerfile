@@ -32,7 +32,7 @@ RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$(unam
   && rm awscliv2.zip
 
 #need to specify default region for boto3 to behave
-ENV AWS_DEFAULT_REGION=us-east-1 
+# ENV AWS_DEFAULT_REGION=us-east-1 
 
 # Install Miniconda package manager and dependencies
 ENV PATH="/opt/conda/bin:$PATH"
