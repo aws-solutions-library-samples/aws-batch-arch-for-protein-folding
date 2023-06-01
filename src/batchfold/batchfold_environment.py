@@ -46,24 +46,46 @@ class BatchFoldEnvironment:
             "ROLLBACK_COMPLETE",
             "UPDATE_COMPLETE",
         ]
-        for stack in cfn.list_stacks(StackStatusFilter=stack_status_filter)["StackSummaries"]:
-            if "batch-protein-folding-cfn-root.yaml" in stack.get("TemplateDescription", []):
-                batchfold_stacks.append((stack["CreationTime"], stack["StackId"]))
-        return sorted(batchfold_stacks, key = lambda x: x[0], reverse=True)[0][1]
+
+        paginator = cfn.get_paginator("list_stacks")
+        pages = paginator.paginate(StackStatusFilter=stack_status_filter)
+
+        for page in pages:
+            for stack in page["StackSummaries"]:
+                if "batch-protein-folding-cfn-root.yaml" in stack.get(
+                    "TemplateDescription", []
+                ):
+                    batchfold_stacks.append((stack["CreationTime"], stack["StackId"]))
+        return sorted(batchfold_stacks, key=lambda x: x[0], reverse=True)[0][1]
 
     @nested_stacks.default
     def load_nested_stacks(self) -> List:
         cfn = self.boto_session.client("cloudformation")
-        resources = cfn.list_stack_resources(StackName=self.stack_id).get("StackResourceSummaries", [])
-        return [ x.get("PhysicalResourceId", []) for x in resources if x.get("ResourceType", []) ==  "AWS::CloudFormation::Stack" ]
+
+        paginator = cfn.get_paginator("list_stack_resources")
+        pages = paginator.paginate(StackName=self.stack_id)
+        resources = []
+
+        for page in pages:
+            resources.append(page.get("StackResourceSummaries", []))
+
+        return [
+            x.get("PhysicalResourceId", [])
+            for x in resources
+            if x.get("ResourceType", []) == "AWS::CloudFormation::Stack"
+        ]
 
     @stack_outputs.default
     def load_stack_outputs(self) -> List:
         cfn = self.boto_session.client("cloudformation")
         stack_outputs = []
         for nested_stack in self.nested_stacks:
-            stack_outputs.extend(cfn.describe_stacks(StackName=nested_stack).get("Stacks")[0].get("Outputs", []))
-        return(stack_outputs)
+            stack_outputs.extend(
+                cfn.describe_stacks(StackName=nested_stack)
+                .get("Stacks")[0]
+                .get("Outputs", [])
+            )
+        return stack_outputs
 
     def get_stack_outputs(self, filter: str = "") -> Dict:
         """Get a dict of the cloudformation stack outputs, optionally with key filtered by a string"""
@@ -141,4 +163,3 @@ class BatchFoldEnvironment:
             all_jobs[queue.name] = jobs
 
         return all_jobs
-
