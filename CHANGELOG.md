@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.2] - 2023-06-06
+
+### 1.10.2 Changed
+
+- Added additional error handling to batchfold package
+
+---
+
 ## [1.10.1] - 2023-05-31
 
 ### 1.10.1 Fixed

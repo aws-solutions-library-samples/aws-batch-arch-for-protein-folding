@@ -56,6 +56,10 @@ class BatchFoldEnvironment:
                     "TemplateDescription", []
                 ):
                     batchfold_stacks.append((stack["CreationTime"], stack["StackId"]))
+        if not batchfold_stacks:
+            raise ValueError(
+                f"No valid batchfold stack found. Please verify that a BatchFold CloudFormation stack exists in one of the following statuses: {'.'.join(stack_status_filter)}"
+            )
         return sorted(batchfold_stacks, key=lambda x: x[0], reverse=True)[0][1]
 
     @nested_stacks.default
@@ -69,11 +73,16 @@ class BatchFoldEnvironment:
         for page in pages:
             resources.append(page.get("StackResourceSummaries", []))
 
-        return [
+        nested_stacks =  [
             x.get("PhysicalResourceId", [])
             for x in resources
             if x.get("ResourceType", []) == "AWS::CloudFormation::Stack"
         ]
+        if not nested_stacks:
+            raise ValueError(
+                f"No nested stacks found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
+        return nested_stacks
 
     @stack_outputs.default
     def load_stack_outputs(self) -> List:
@@ -85,6 +94,10 @@ class BatchFoldEnvironment:
                 .get("Stacks")[0]
                 .get("Outputs", [])
             )
+        if not stack_outputs:
+            raise ValueError(
+                f"No stack outputs found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
         return stack_outputs
 
     def get_stack_outputs(self, filter: str = "") -> Dict:
@@ -94,6 +107,10 @@ class BatchFoldEnvironment:
             for output in self.stack_outputs
             if filter in output["OutputKey"]
         }
+        if not output_dict:
+            raise ValueError(
+                f"No stack outputs found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
         return output_dict
 
     @queues.default
@@ -110,6 +127,10 @@ class BatchFoldEnvironment:
     def list_job_queue_names(self) -> List:
         """List the names of all available job queues."""
         queue_names = list(self.queues.keys())
+        if not queue_names:
+            raise ValueError(
+                f"No job queues found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
         queue_names.sort()
         return queue_names
 
@@ -118,17 +139,30 @@ class BatchFoldEnvironment:
         """Get the valid job definition names and add them to the BatchFold Environment instance."""
 
         job_definitions = self.get_stack_outputs(filter="JobDefinition")
+        if not job_definitions:
+            raise ValueError(
+                f"No job definitions found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
         return job_definitions
 
     def list_job_definition_names(self) -> List:
         """List the names of all available job definitions."""
         names = list(self.job_definitions.keys())
         names.sort()
+        if not names:
+            raise ValueError(
+                f"No job definitions found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
         return names
 
     @default_bucket.default
     def load_default_bucket(self):
-        return self.get_stack_outputs().get("S3BucketName", [])
+        bucket_name = self.get_stack_outputs().get("S3BucketName", [])
+        if not bucket_name:
+            raise ValueError(
+                f"No bucket found. Please verify that a valid BatchFold CloudFormation stack exists."
+            )
+        return bucket_name
 
     def submit_job(
         self,
