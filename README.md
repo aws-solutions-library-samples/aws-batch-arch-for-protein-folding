@@ -262,7 +262,7 @@ The RFDiffusion citation is
 
 ### 4.10. NextFlow
 
-Please visit [https://www.nextflow.io](https://www.nextflow.io) for more information about the RFDiffusion algorithm. For a fully-managed NextFlow solution, you may also be interested in [Amazon Omics Workflows](https://docs.aws.amazon.com/omics/latest/dev/workflows.html).
+Please visit [https://www.nextflow.io](https://www.nextflow.io) for more information about Nextflow. For a fully-managed NextFlow solution, you may also be interested in [Amazon Omics Workflows](https://docs.aws.amazon.com/omics/latest/dev/workflows.html).
 
 -----
 
