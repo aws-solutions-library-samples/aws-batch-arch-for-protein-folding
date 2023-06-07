@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.3] - 2023-06-07
+
+### 1.10.3 Fixed
+
+- Fixed bug preventing load of nested stacks.
+
+---
+
 ## [1.10.2] - 2023-06-06
 
 ### 1.10.2 Changed
 
-- Added additional error handling to batchfold package
+- Added additional error handling to batchfold package.
 
 ---
 

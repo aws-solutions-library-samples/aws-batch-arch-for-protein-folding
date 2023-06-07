@@ -71,7 +71,7 @@ class BatchFoldEnvironment:
         resources = []
 
         for page in pages:
-            resources.append(page.get("StackResourceSummaries", []))
+            resources.extend(page.get("StackResourceSummaries", []))
 
         nested_stacks =  [
             x.get("PhysicalResourceId", [])
