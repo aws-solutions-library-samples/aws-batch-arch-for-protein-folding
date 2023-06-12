@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.4] - 2023-06-12
+
+### 1.10.4 Changed
+
+- Updated AlphaFold CUDA version to 11.6
+
+### 1.10.4 Fixed
+
+- Fixed bug causing hhsearch errors on g5 instance types
+
+---
+
 ## [1.10.3] - 2023-06-07
 
 ### 1.10.3 Fixed

@@ -2,7 +2,8 @@
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-ARG CUDA=11.1.1
+# ARG CUDA=11.1.1
+ARG CUDA=11.6.0
 ARG ALPHAFOLD2_VERSION=v2.3.1
 FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
@@ -32,7 +33,7 @@ RUN apt-get update \
 RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
   && mkdir /tmp/hh-suite/build \
   && pushd /tmp/hh-suite/build \
-  && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
+  && cmake -DHAVE_AVX2=1 -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
   && make -j 4 && make install \
   && ln -s /opt/hhsuite/bin/* /usr/bin \
   && popd \
@@ -46,13 +47,14 @@ RUN wget -q -P /tmp \
 
 # Install conda packages.
 ENV PATH="/opt/conda/bin:$PATH"
-RUN conda install -qy conda==4.13.0 \
-  && conda install -y -c conda-forge \
+# RUN conda install -qy conda==4.13.0 
+#   && conda install -y -c conda-forge
+RUN conda install -y -c conda-forge \
     openmm=7.5.1 \    
-    cudatoolkit==${CUDA_VERSION} \
-    pdbfixer \
+    cudatoolkit=${CUDA_VERSION} \
+    pdbfixer=1.7 \
     pip \
-    python=3.9 \
+    python=3.9.16 \
   && conda clean --all --force-pkgs-dirs --yes
 
 RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
