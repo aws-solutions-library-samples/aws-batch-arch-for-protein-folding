@@ -36,13 +36,14 @@ class AlphaFold2Job(BatchFoldJob):
     model_preset: str = "monomer_ptm"
     benchmark: bool = False
     run_relax: bool = True
-    use_gpu_relax: bool = True
+    use_gpu_relax: bool = False
     num_multimer_predictions_per_model: int = 1
     job_name: str = field(default="AlphaFoldJob" + datetime.now().strftime("%Y%m%d%s"))
     job_definition_name: str = field(default="AlphaFold2JobDefinition")
     cpu: int = field(default=4)
     memory: int = field(default=15)
-    gpu: int = field(default=1)
+    gpu: int = field(default=0)
+    environment_vars: dict = field(default={})
 
     def __attrs_post_init__(self) -> None:
         """Override default BatchFoldJob command"""
@@ -51,6 +52,12 @@ class AlphaFold2Job(BatchFoldJob):
         if self.use_precomputed_msas:
             command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/{self.target_id}/msas/"])
         command_list.extend([f"-o {self.output_dir}/{self.target_id}/:{self.output_s3_uri}"])
+
+        if self.environment_vars:
+            for item in self.environment_vars.items():
+                command_list.extend([f"export {item[0]}={item[1]}"])
+
+
         command_list.extend([
             "/app/run_alphafold.sh",
             f"--data_dir={self.data_dir}",
@@ -66,7 +73,7 @@ class AlphaFold2Job(BatchFoldJob):
             f"--use_precomputed_msas={self.use_precomputed_msas}",
             f"--benchmark={self.benchmark}",
             f"--run_relax={self.run_relax}",
-            f"--use_gpu_relax={self.use_gpu_relax}",
+            # f"--use_gpu_relax={self.use_gpu_relax}",
         ])
         if self.db_preset == "full_dbs":
             command_list.extend(
@@ -97,6 +104,19 @@ class AlphaFold2Job(BatchFoldJob):
         else:
             command_list.extend(
                 [f"--pdb70_database_path={self.data_dir}/{self.pdb70_database_path}"]
+            )
+
+        if self.gpu > 0:
+            command_list.extend(
+                [
+                    f"--use_gpu_relax=True",
+                ]
+            )
+        else:
+            command_list.extend(
+                [
+                    f"--use_gpu_relax=False",
+                ]
             )
 
         logging.info(f"Command is \n{command_list}")

@@ -104,6 +104,8 @@ Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRiva
 
 ### 4.2. AlphaFold
 
+[Version 2.3.1](https://github.com/deepmind/alphafold/releases/tag/v2.3.1) from 1/12/2023.
+
 Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
 
 The original AlphaFold 2 citation is
@@ -138,6 +140,8 @@ The AlphaFold-Multimer citation is
 
 ### 4.3. OpenFold
 
+Commit [109442b14e6184fbee45e2696f21b052eb3fb1e5](https://github.com/aqlaboratory/openfold/commit/109442b14e6184fbee45e2696f21b052eb3fb1e5) from November 23, 2022.
+
 Please visit [https://github.com/aqlaboratory/openfold](https://github.com/aqlaboratory/openfold) for more information about the OpenFold algorithm.
 
 The OpenFold citation is
@@ -154,6 +158,8 @@ The OpenFold citation is
 ```
 
 ### 4.4. OmegaFold
+
+Commit [313c873ad190b64506a497c926649e15fcd88fcd](https://github.com/HeliXonProtein/OmegaFold/commit/313c873ad190b64506a497c926649e15fcd88fcd) from December 12, 2022.
 
 Please visit [https://github.com/HeliXonProtein/OmegaFold](https://github.com/HeliXonProtein/OmegaFold) for more information about the OmegaFold algorithm.
 
@@ -175,6 +181,8 @@ The OmegaFold citation is
 
 ### 4.5. RFDesign
 
+Commit [bba6992283de63faba6ff727bb4bc68327a5356c](https://github.com/RosettaCommons/RFDesign/commit/bba6992283de63faba6ff727bb4bc68327a5356c) from November 21, 2022.
+
 Please visit [https://github.com/RosettaCommons/RFDesign](https://github.com/RosettaCommons/RFDesign) for more information about the RFDesign hallucinate and inpainting algorithms.
 
 The RFDesign citation is
@@ -195,6 +203,8 @@ The RFDesign citation is
 
 ### 4.6. ESMFold
 
+Commit [74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3](https://github.com/facebookresearch/esm/commit/74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3) from November 26, 2023.
+
 Please visit [https://github.com/facebookresearch/esm](https://github.com/facebookresearch/esm) for more information about the ESMFold algorithm.
 
 The ESMFold citation is
@@ -210,6 +220,8 @@ The ESMFold citation is
 ```
 
 ### 4.7. ProteinMPNN
+
+Commit [be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9](https://github.com/dauparas/ProteinMPNN/commit/be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9) from March 24, 2023.
 
 Please visit [https://github.com/dauparas/ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for more information about the ProteinMPNN algorithm.
 
@@ -230,6 +242,8 @@ The ProteinMPNN citation is
 
 ### 4.8. DiffDock
 
+Commit [3c3c728cf2e444cf8df45b58067604d982159471](https://github.com/gcorso/DiffDock/commit/3c3c728cf2e444cf8df45b58067604d982159471) from March 27, 2023.
+
 Please visit [https://github.com/gcorso/DiffDock](https://github.com/gcorso/DiffDock) for more information about the DiffDock algorithm.
 
 The DiffDock citation is
@@ -244,6 +258,8 @@ The DiffDock citation is
 ```
 
 ### 4.9. RFDiffusion
+
+Commit [5606075d45bd23aa60785024b203ed6b0f6d2cd0](https://github.com/RosettaCommons/RFdiffusion/commit/5606075d45bd23aa60785024b203ed6b0f6d2cd0) from June 28, 2023.
 
 Please visit [https://github.com/RosettaCommons/RFdiffusion](https://github.com/RosettaCommons/RFdiffusion) for more information about the RFDiffusion algorithm.
 

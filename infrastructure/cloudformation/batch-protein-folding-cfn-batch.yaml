@@ -211,9 +211,9 @@ Resources:
          AllocationStrategy: BEST_FIT_PROGRESSIVE
          InstanceRole: !Ref InstanceProfile
          InstanceTypes:
-           - m5
-           - r5
-           - c5
+           - m6i
+           - r6i
+           - c6i
          LaunchTemplate:
            LaunchTemplateId: !Ref InstanceLaunchTemplate
            Version: $Latest
@@ -243,6 +243,9 @@ Resources:
           - m6g
           - r6g
           - c6g
+          - m7g
+          - r7g
+          - c7g
         LaunchTemplate:
           LaunchTemplateId:
             Ref: InstanceLaunchTemplate
@@ -276,6 +279,9 @@ Resources:
           - m6g
           - r6g
           - c6g
+          - m7g
+          - r7g
+          - c7g          
         LaunchTemplate:
           LaunchTemplateId: !Ref InstanceLaunchTemplate
           Version: $Latest

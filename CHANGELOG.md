@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.0] - 2023-07-06
+
+### 1.11.0 Added
+
+- Support for running AlphaFold jobs on non-accelerated instance types by setting `gpu=0` and submitting job to the CPUOnDemandJobQueue.
+- Support for passing a dictionary of environment variables to AlphaFold jobs.
+- Support for c/m/r6i instance types in the CPU on-demand compute environment.
+- Support for c/m/r7g instance types on the Graviton on-demand and spot compute environments.
+- Added model version information to README.
+
+---
+
 ## [1.10.4] - 2023-06-12
 
 ### 1.10.4 Changed

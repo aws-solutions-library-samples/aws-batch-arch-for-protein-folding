@@ -67,9 +67,9 @@ def test_jackhmmer_db_error(batch_environment):
         _ = JackhmmerJob(
             boto_session = boto_session,
             job_name = job_name,
-            target_id = "T1084",
-            fasta_s3_uri = f"s3://{bucket}/T1084/fasta/T1084.fasta",
-            output_s3_uri = f"s3://{bucket}/T1084/outputs/",
+            target_id = "7FCC",
+            fasta_s3_uri = f"s3://{bucket}/7FCC/fasta/7FCC.fasta",
+            output_s3_uri = f"s3://{bucket}/7FCC/outputs/",
             bfd_database_path = "test/tiny.fasta",
             db_preset = "other",
             cpu = 4

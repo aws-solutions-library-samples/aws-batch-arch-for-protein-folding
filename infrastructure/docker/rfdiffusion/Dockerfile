@@ -13,7 +13,10 @@ RUN apt-get -q update \
   && rm -rf /var/lib/apt/lists/* \
   && apt-get autoremove -y \
   && apt-get clean \
-  && git clone --depth=1 https://github.com/RosettaCommons/RFdiffusion.git /app/RFdiffusion \
+  && git clone https://github.com/RosettaCommons/RFdiffusion.git /app/RFdiffusion \
+  && pushd /app/RFdiffusion \
+  && git checkout 5606075d45bd23aa60785024b203ed6b0f6d2cd0 \
+  && popd \
   && pip install -q --no-cache-dir \
   dgl==1.0.2+cu116 -f https://data.dgl.ai/wheels/cu116/repo.html \
   torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 \
