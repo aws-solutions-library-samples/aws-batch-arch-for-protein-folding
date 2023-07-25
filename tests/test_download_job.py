@@ -29,7 +29,7 @@ def test_download_job_init():
 
 def test_download_job_submission(batch_environment):
     job_name = "DownloadJob" + datetime.now().strftime("%Y%m%d%s")
-    job_queue_name = "GravitonSpotJobQueue"
+    job_queue_name = "CPUSpotJobQueue"
     new_job = DownloadJob(
         boto_session = boto_session,
         job_name = job_name, 

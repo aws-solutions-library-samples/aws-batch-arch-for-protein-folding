@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.0] - 2023-07-19
+
+### 1.12.0 Fixed
+
+- Due to a lack of ARM in the HMMER package, reverting all non-accelerated jobs back to x86 architecture.
+
+---
+
 ## [1.11.0] - 2023-07-06
 
 ### 1.11.0 Added

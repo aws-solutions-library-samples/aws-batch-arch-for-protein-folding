@@ -60,7 +60,7 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/omegafold
-        Image: aws/codebuild/standard:4.0
+        Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER

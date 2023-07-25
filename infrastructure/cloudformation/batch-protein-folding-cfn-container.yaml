@@ -407,7 +407,7 @@ Resources:
       Description: Build Download Docker container
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -419,10 +419,10 @@ Resources:
             Value: infrastructure/docker/download        
           - Name: WAIT_CONDITION_HANDLE
             Value: !Ref CodeBuildWaitHandle                     
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: ARM_CONTAINER
+        Type: LINUX_CONTAINER
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:

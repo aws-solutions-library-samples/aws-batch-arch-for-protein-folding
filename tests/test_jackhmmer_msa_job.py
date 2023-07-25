@@ -35,7 +35,7 @@ def test_jackhmmer_job_init():
 
 def test_jackhmmer_job_submission(batch_environment):
     job_name = "JackhmmerJob" + datetime.now().strftime("%Y%m%d%s")
-    job_queue_name = "GravitonOnDemandJobQueue"
+    job_queue_name = "CPUOnDemandJobQueue"
     bucket = os.getenv("TEST_BUCKET")
     new_job = JackhmmerJob(
         boto_session = boto_session,

@@ -251,7 +251,7 @@ Resources:
         ApplicationName:
           Ref: ApplicationName
         DownloadJobQueue:
-          "Fn::GetAtt": BatchEnvironment.Outputs.GravitonOnDemandJobQueue
+          "Fn::GetAtt": BatchEnvironment.Outputs.CPUOnDemandJobQueue
         JobDefinition:
           "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
         LambdaSubnet:

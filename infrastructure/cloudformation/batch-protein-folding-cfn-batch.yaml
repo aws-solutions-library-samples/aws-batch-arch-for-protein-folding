@@ -232,7 +232,7 @@ Resources:
          Application: !Ref ApplicationName
          StackId: !Ref "AWS::StackId"
 
-  GravitonComputeEnvironmentSpot:
+  CPUComputeEnvironmentSpot:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
       ComputeResources:
@@ -240,12 +240,9 @@ Resources:
         BidPercentage: 100
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - m6g
-          - r6g
-          - c6g
-          - m7g
-          - r7g
-          - c7g
+          - m6i
+          - r6i
+          - c6i
         LaunchTemplate:
           LaunchTemplateId:
             Ref: InstanceLaunchTemplate
@@ -258,39 +255,6 @@ Resources:
           "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
         Subnets: !Ref Subnets
         Type: SPOT
-        Tags:
-          Application: !Ref ApplicationName
-          StackId: !Ref "AWS::StackId"
-          SolutionId: SO9164
-      State: ENABLED
-      Type: MANAGED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
-
-  GravitonComputeEnvironmentOnDemand:
-    Type: AWS::Batch::ComputeEnvironment
-    Properties:
-      ComputeResources:
-        AllocationStrategy: BEST_FIT_PROGRESSIVE
-        InstanceRole: !Ref InstanceProfile
-        InstanceTypes:
-          - m6g
-          - r6g
-          - c6g
-          - m7g
-          - r7g
-          - c7g          
-        LaunchTemplate:
-          LaunchTemplateId: !Ref InstanceLaunchTemplate
-          Version: $Latest
-        MaxvCpus: 256
-        MinvCpus: 0
-        SecurityGroupIds:
-          - !Ref DefaultSecurityGroupID
-        Subnets: !Ref Subnets
-        Type: EC2
         Tags:
           Application: !Ref ApplicationName
           StackId: !Ref "AWS::StackId"
@@ -375,24 +339,11 @@ Resources:
          Application: !Ref ApplicationName
          StackId: !Ref "AWS::StackId"
 
-  GravitonOnDemandJobQueue:
+  CPUSpotJobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref GravitonComputeEnvironmentOnDemand
-          Order: 1
-      Priority: 10
-      State: ENABLED
-      Tags:
-        Application: !Ref ApplicationName
-        StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
-
-  GravitonSpotJobQueue:
-    Type: AWS::Batch::JobQueue
-    Properties:
-      ComputeEnvironmentOrder:
-        - ComputeEnvironment: !Ref GravitonComputeEnvironmentSpot
+        - ComputeEnvironment: !Ref CPUComputeEnvironmentSpot
           Order: 1
       Priority: 10
       State: ENABLED
@@ -470,6 +421,10 @@ Outputs:
      Description: Job queue for on-demand CPU instances.
      Value:
        Ref: CPUOnDemandJobQueue
+  CPUSpotJobQueue:
+    Description: Job queue for spot CPU instances.
+    Value:
+      Ref: CPUSpotJobQueue       
   G4dnJobQueue:
     Description: Job queue for on-demand GPU instances.
     Value:
@@ -479,14 +434,6 @@ Outputs:
     Description: Job queue for on-demand G5 instances.
     Value:
       Ref: G5JobQueue
-  GravitonSpotJobQueue:
-    Description: Job queue for spot Graviton instances.
-    Value:
-      Ref: GravitonSpotJobQueue
-  GravitonOnDemandJobQueue:
-    Description: Job queue for On-Demand Graviton instances.
-    Value:
-      Ref: GravitonOnDemandJobQueue
   DownloadJobDefinition:
     Description: Job definition for downloading reference data.
     Value:

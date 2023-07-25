@@ -50,7 +50,7 @@ Resources:
       Description: Build Docker container for Jackhmmer algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
           - Name: IMAGE_TAG
             Value: latest
@@ -60,10 +60,10 @@ Resources:
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
             Value: infrastructure/docker/jackhmmer  
-        Image: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+        Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
-        Type: ARM_CONTAINER
+        Type: LINUX_CONTAINER
       ResourceAccessRole: !Ref CodeBuildRoleArn
       ServiceRole: !Ref CodeBuildRoleArn
       Source:
