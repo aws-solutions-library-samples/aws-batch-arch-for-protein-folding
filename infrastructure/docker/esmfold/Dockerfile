@@ -46,7 +46,9 @@ RUN wget -q -P /tmp -O /tmp/miniconda.sh \
 # Install OpenFold
 RUN git clone https://github.com/aqlaboratory/openfold.git /opt/openfold \
   && cd /opt/openfold \
-  && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
+  # && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
+  && git checkout 1d878a1203e6d662a209a95f71b90083d5fc079c
+
 WORKDIR /opt/openfold
 COPY setup.py .
 RUN python setup.py install

@@ -38,17 +38,18 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN git clone https://github.com/aqlaboratory/openfold.git /opt/openfold \
   && cd /opt/openfold \
-  && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
+  && git checkout 1d878a1203e6d662a209a95f71b90083d5fc079c
+# && git checkout 109442b14e6184fbee45e2696f21b052eb3fb1e5
 
 # installing into the base environment since the docker container wont do anything other than run openfold
-RUN conda install -qy conda==4.13.0 \
-  && conda env update -n base --file /opt/openfold/environment.yml \
+# RUN conda install -qy conda==4.13.0 \
+RUN conda env update -n base --file /opt/openfold/environment.yml \
   && conda clean --all --force-pkgs-dirs --yes
 
 RUN wget -q -P /opt/openfold/openfold/resources \
   https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 
-RUN patch -p0 -d /opt/conda/lib/python3.7/site-packages/ < /opt/openfold/lib/openmm.patch
+RUN patch -p0 -d /opt/conda/lib/python3.9/site-packages/ < /opt/openfold/lib/openmm.patch
 
 WORKDIR /opt/openfold
 COPY . /opt/openfold/
