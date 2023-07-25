@@ -30,7 +30,7 @@ COPY esmfold_inference.py /opt/esmfold/scripts/
 RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87 \
   && sed '/^Version/d' /tmp/D42D0685.pub > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA \
   && echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict - \
-  && amazon-linux-extras install python3.8 \
+  && amazon-linux-extras install python3.8 awscli1 -y \
   && yum upgrade -y \
   && yum install -y \
   cuda-cudart-11-6-11.6.55-1 \
