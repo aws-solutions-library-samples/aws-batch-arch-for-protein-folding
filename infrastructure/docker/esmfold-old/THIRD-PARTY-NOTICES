@@ -1,8 +1,3 @@
-Files modified from 3rd-party versions:
-
-- openfold/setup.py
-- esmfold/scripts/esmfold_inference.py
-
 Once built, the aws-openfold container image includes the following third-party software/licensing:
 
 pip               mit-0 https://github.com/pypa/pip/blob/main/LICENSE.txt
