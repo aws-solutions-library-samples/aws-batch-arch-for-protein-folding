@@ -10,7 +10,7 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
 
 RUN apt-get update \ 
-    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \  
+  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \  
   wget \
   libxml2 \
   cuda-minimal-build-11-3 \
@@ -23,10 +23,16 @@ RUN apt-get update \
   && apt-get autoremove -y \  
   && apt-get clean 
 
-RUN wget -P /tmp \
-    "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh" \
-    && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
-    && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+# RUN wget -P /tmp -o miniconda.sh \
+#   # "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh" \
+#   # "https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-Linux-x86_64.sh" \
+#   && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+#   && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+
+RUN wget -q -P /tmp -O /tmp/miniconda.sh \
+  "https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-$(uname -m).sh" \
+  && bash /tmp/miniconda.sh -b -p /opt/conda \
+  && rm /tmp/miniconda.sh
 
 ENV PATH /opt/conda/bin:$PATH
 
@@ -40,7 +46,7 @@ RUN conda install -qy conda==4.13.0 \
   && conda clean --all --force-pkgs-dirs --yes
 
 RUN wget -q -P /opt/openfold/openfold/resources \
-    https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
+  https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 
 RUN patch -p0 -d /opt/conda/lib/python3.7/site-packages/ < /opt/openfold/lib/openmm.patch
 

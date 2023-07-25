@@ -38,15 +38,14 @@ RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$(unam
 ENV PATH="/opt/conda/bin:$PATH"
 
 
-RUN wget -q -P /tmp \
-  https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-$(uname -m).sh \ 
-  && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
-  && rm /tmp/Miniconda3-latest-Linux-x86_64.sh \
+RUN wget -q -P /tmp -O /tmp/miniconda.sh \
+  "https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-$(uname -m).sh" \
+  && bash /tmp/miniconda.sh -b -p /opt/conda \
+  && rm /tmp/miniconda.sh \
   && conda update -n base -c conda-forge conda \
   && conda config --set ssl_verify no \
   && conda init bash \
   && conda clean --all --yes
-
 
 RUN cd /usr/bin && wget -qO- https://get.nextflow.io | bash #install nextflow
 
