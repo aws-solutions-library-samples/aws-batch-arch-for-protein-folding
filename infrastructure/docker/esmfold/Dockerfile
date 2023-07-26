@@ -24,8 +24,6 @@ COPY NGC-DL-CONTAINER-LICENSE /
 COPY openfold /opt/openfold
 COPY esm /opt/esm
 COPY D42D0685.pub /tmp
-COPY run.sh /opt/esmfold/
-COPY esmfold_inference.py /opt/esmfold/scripts/
 
 RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87 \
   && sed '/^Version/d' /tmp/D42D0685.pub > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA \
@@ -76,5 +74,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /opt/esmfold
 
+COPY run.sh /opt/esmfold/
 RUN chmod 755 run.sh
 ENTRYPOINT ["bash", "run.sh"]

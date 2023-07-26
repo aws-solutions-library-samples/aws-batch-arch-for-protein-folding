@@ -14,7 +14,6 @@ class ESMFoldJob(BatchFoldJob):
     output_s3_uri: str = ""
     target_id: str = datetime.now().strftime("%Y%m%d%s")
     num_recycles: int = 4
-    max_tokens_per_batch: int = 1024
     chunk_size: int = None
     cpu_only: bool = False
     cpu_offload: bool = False
@@ -34,7 +33,6 @@ class ESMFoldJob(BatchFoldJob):
             f"--fasta=input/{self.target_id}.fasta",
             f"--pdb=output",
             f"--num-recycles={self.num_recycles}",
-            f"--max-tokens-per-batch={self.max_tokens_per_batch}",
             f"--model-dir={self.model_dir}",
         ])
 
