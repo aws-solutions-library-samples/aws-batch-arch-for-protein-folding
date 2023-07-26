@@ -72,8 +72,7 @@ RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3
 ENV VIRTUAL_ENV="/opt/venv"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-WORKDIR /opt/esmfold
-
-COPY run.sh /opt/esmfold/
+WORKDIR /opt/esm
+COPY run.sh /opt/esm
 RUN chmod 755 run.sh
 ENTRYPOINT ["bash", "run.sh"]
