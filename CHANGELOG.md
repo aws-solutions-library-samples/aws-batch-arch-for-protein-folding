@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.1] - 2023-07-26
+
+### 1.12.1 Fixed
+
+- Fixed bug in miniconda version for OpenFold, ESMFold, and NextFlow container images.
+
+### 1.12.1 Changed
+
+- Updated ESMFold container to match Amazon HealthOmics implementation and improve run outputs.
+
+---
+
 ## [1.12.0] - 2023-07-19
 
 ### 1.12.0 Fixed
