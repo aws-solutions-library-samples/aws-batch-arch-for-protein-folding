@@ -40,6 +40,11 @@ Parameters:
     Description: Create the AWSServiceRoleForEC2SpotFleet service-linked role
     Type: String
     Default: "N"
+  CreateP4dComputeEnvironment:
+    Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]        
 
 Conditions:
   CreateG5ComputeEnvironment:
@@ -50,6 +55,9 @@ Conditions:
 
   CreateAWSServiceRoleForEC2SpotFleet:
     "Fn::Equals": [Ref: "CreateAWSServiceRoleForEC2SpotFleet", "Y"]
+
+  CreateP4dComputeEnvironment:
+    "Fn::Equals": [Ref: "CreateP4dComputeEnvironment", "Y"]    
 
 Resources:
   ##################################################
@@ -323,6 +331,35 @@ Resources:
         StackId: !Ref "AWS::StackId"
         SolutionId: SO9164
 
+  P4dComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Condition: CreateP4dComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: BEST_FIT_PROGRESSIVE
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - p4d
+        LaunchTemplate:
+          LaunchTemplateId: !Ref InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 192
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        Subnets: !Ref Subnets
+        Type: EC2
+        Tags:
+          Application: !Ref ApplicationName
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164        
+
   ####################################################################################################
   # Batch Job Queues
   ####################################################################################################
@@ -379,6 +416,20 @@ Resources:
         StackId: !Ref "AWS::StackId"
         SolutionId: SO9164
 
+  P4dJobQueue:
+    Type: AWS::Batch::JobQueue
+    Condition: CreateP4dComputeEnvironment
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref P4dComputeEnvironment
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164        
+
   DownloadJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
@@ -434,6 +485,11 @@ Outputs:
     Description: Job queue for on-demand G5 instances.
     Value:
       Ref: G5JobQueue
+  P4dJobQueue:
+    Condition: CreateP4dComputeEnvironment
+    Description: Job queue for on-demand P4d instances.
+    Value:
+      Ref: P4dJobQueue      
   DownloadJobDefinition:
     Description: Job definition for downloading reference data.
     Value:

@@ -49,6 +49,19 @@ Parameters:
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
+  CreateP4dComputeEnvironment:
+    Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]     
+  CodeRepoS3BucketName:
+    Description: S3 Bucket Name to retrieve code .zip
+    Type: String    
+    Default: "aws-batch-architecture-for-alphafold-public-artifacts"
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999    
 
 Conditions:
   CreateFileSystem:
@@ -179,6 +192,10 @@ Resources:
           Ref: DownloadFsxData
         S3BucketARN:
           "Fn::GetAtt": BatchFoldS3Bucket.Arn        
+        CodeRepoS3BucketName:
+          !Ref CodeRepoS3BucketName
+        Timestamp:
+          !Ref Timestamp
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -187,6 +204,8 @@ Resources:
       Parameters:
         CreateG5ComputeEnvironment:
           Ref: CreateG5ComputeEnvironment
+        CreateP4dComputeEnvironment:
+          Ref: CreateP4dComputeEnvironment          
         ApplicationName:
           Ref: ApplicationName
         Subnets:
@@ -397,6 +416,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+        Timestamp:
+          Ref: Timestamp
 
   ModuleOpenFold:
     Type: "AWS::CloudFormation::Stack"
@@ -415,6 +436,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn          
+        Timestamp:
+          Ref: Timestamp
 
   ModuleJackhmmer:
     Type: "AWS::CloudFormation::Stack"
@@ -433,6 +456,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
+        Timestamp:
+          Ref: Timestamp
 
   ModuleOmegaFold:
     Type: "AWS::CloudFormation::Stack"
@@ -451,6 +476,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+        Timestamp:
+          Ref: Timestamp
 
   ModuleRFDesign:
     Type: "AWS::CloudFormation::Stack"
@@ -469,6 +496,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+        Timestamp:
+          Ref: Timestamp
 
   ModuleESMFold:
     Type: "AWS::CloudFormation::Stack"
@@ -487,6 +516,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+        Timestamp:
+          Ref: Timestamp
 
   ModuleProteinMPNN:
     Type: "AWS::CloudFormation::Stack"
@@ -505,6 +536,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+        Timestamp:
+          Ref: Timestamp
 
   ModuleNextflow:
     Type: "AWS::CloudFormation::Stack"
@@ -523,6 +556,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+        Timestamp:
+          Ref: Timestamp
 
   ModuleDiffDock:
     Type: "AWS::CloudFormation::Stack"
@@ -541,6 +576,8 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn                   
+        Timestamp:
+          Ref: Timestamp
 
   ModuleRFDiffusion:
     Type: "AWS::CloudFormation::Stack"
@@ -559,7 +596,9 @@ Resources:
             "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
         DeleteContainerRepoLambdaArn:
             "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-
+        Timestamp:
+          Ref: Timestamp
+          
 Outputs:
   ApplicationName:
     Description: Name of the application

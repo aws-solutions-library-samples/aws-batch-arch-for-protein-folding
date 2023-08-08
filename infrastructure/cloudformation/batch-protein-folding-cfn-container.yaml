@@ -27,9 +27,17 @@ Parameters:
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
+  CodeRepoS3BucketName:
+    Description: S3 Bucket Name to retrieve code zip
+    Type: String    
+    Default: "aws-batch-architecture-for-alphafold-public-artifacts"
   S3BucketARN:
     Description: S3 Bucket ARN
     Type: String
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999
 
 Conditions:
   DownloadFsxDataCondition:
@@ -46,7 +54,7 @@ Resources:
       Code:
         BranchName: "main"
         S3:
-          Bucket: "aws-batch-architecture-for-alphafold-public-artifacts"
+          Bucket: !Ref CodeRepoS3BucketName
           Key: !Sub "${Environment}/batch-protein-folding.zip"
       RepositoryDescription: Code for running batch protein folding on AWS
       RepositoryName:
@@ -124,7 +132,7 @@ Resources:
                       ["arn:aws:s3:::codepipeline", !Ref "AWS::Region", "*"],
                     ]
                   - !Sub "${S3BucketARN}*"
-                  - "arn:aws:s3:::aws-batch-architecture-for-alphafold-public-artifacts/*"
+                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}/*"
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -132,7 +140,7 @@ Resources:
                   - s3:GetBucketAcl
                   - s3:GetBucketLocation
                 Resource:
-                  - "arn:aws:s3:::aws-batch-architecture-for-alphafold-public-artifacts*"                  
+                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}*"                  
               - Effect: Allow
                 Action:
                   - codecommit:GitPull
@@ -282,6 +290,9 @@ Resources:
                       cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource creation successful!"})
                   elif event['RequestType'] == 'Update':
                       LOGGER.info('UPDATE!')
+                      client = boto3.client('codebuild')
+                      project_name = event['ResourceProperties']['ProjectName']
+                      response = client.start_build(projectName=project_name)                      
                       cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
                   elif event['RequestType'] == 'Delete':
                       LOGGER.info('DELETE!')
@@ -446,6 +457,8 @@ Resources:
         Fn::GetAtt: StartCodeBuildLambda.Arn
       ProjectName:
         Ref: CodeBuildProjectDownload
+      Timestamp:
+        Ref: Timestamp
 
   CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle

@@ -24,6 +24,10 @@ Parameters:
   DeleteContainerRepoLambdaArn:
     Description: Lambda function for deleting container repos
     Type: String
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999    
 
 Resources:
 
@@ -87,7 +91,9 @@ Resources:
         Ref: StartCodeBuildLambdaArn
       ProjectName:
         Ref: CodeBuildProjectRFDesign  
-
+      Timestamp:
+        Ref: Timestamp
+        
   RFDesignJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
@@ -140,3 +146,7 @@ Outputs:
     Description: ECR URI for RFDesign container image.
     Value:
       Ref: RFDesignContainerRegistry
+  CodeBuildProject:
+    Description: CodeBuildProject
+    Value:
+      Ref: CodeBuildProjectRFDesign      

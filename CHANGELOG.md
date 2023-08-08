@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.2] - 2023-08-7
+
+### 1.12.2 Added
+
+- Optional p4d compute environment and job queue
+- Deployment script for updating existing stacks
+
+### 1.12.2 Changed
+
+- Updating the cfn stack will now restart the CodeBuild jobs for all module containers
+
+---
+
 ## [1.12.1] - 2023-07-26
 
 ### 1.12.1 Fixed
