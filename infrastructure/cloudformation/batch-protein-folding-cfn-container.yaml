@@ -16,12 +16,6 @@ Parameters:
     AllowedValues:
       - main
       - dev     
-  LambdaSubnet:
-    Description: Subnet ID for Lambda function deployment
-    Type: AWS::EC2::Subnet::Id
-  LambdaSecurityGroupId:
-    Description: Security group for Lambda function deployment
-    Type: AWS::EC2::SecurityGroup::Id
   DownloadFsxData:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
@@ -260,17 +254,11 @@ Resources:
                 Resource: "*"          
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
   StartCodeBuildLambda:
     Type: AWS::Lambda::Function
     Properties:
       ReservedConcurrentExecutions: 10
-      VpcConfig:
-        SecurityGroupIds: 
-          - !Ref LambdaSecurityGroupId
-        SubnetIds: 
-          - !Ref LambdaSubnet
       Code:
         ZipFile: |
           import logging          
@@ -308,7 +296,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildLambdaExecutionRole.Arn
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 10
       Tags:
         - Key: Application
@@ -350,11 +338,6 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       ReservedConcurrentExecutions: 10
-      VpcConfig:
-        SecurityGroupIds: 
-          - !Ref LambdaSecurityGroupId
-        SubnetIds: 
-          - !Ref LambdaSubnet
       Code:
         ZipFile: |
           import logging          
@@ -396,7 +379,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 10     
       Tags:
         - Key: Application
@@ -510,7 +493,3 @@ Outputs:
     Description: Name of the download container repository
     Value:
       Ref: DownloadContainerRegistry        
-  # s3Bucket:
-  #   Description: S3 bucket for CodePipeline
-  #   Value:
-  #     Ref: BatchFoldS3Bucket

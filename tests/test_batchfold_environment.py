@@ -43,7 +43,7 @@ def test_get_job_definition_names(batch_environment):
     assert "JackhmmerJobDefinition" in job_def_names
 
 def test_get_job_queue_objects(batch_environment):
-    assert len(batch_environment.queues) in [4,5]
+    assert len(batch_environment.queues) in [3,4]
     assert batch_environment.queues["CPUOnDemandJobQueue"].name == "CPUOnDemandJobQueue"
 
 def test_get_default_bucket(batch_environment):

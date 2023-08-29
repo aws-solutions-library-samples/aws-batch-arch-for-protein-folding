@@ -177,17 +177,7 @@ Resources:
       TemplateURL: batch-protein-folding-cfn-container.yaml
       Parameters:
         ApplicationName:
-          Ref: ApplicationName
-        LambdaSubnet:
-          "Fn::If":
-            - CreateNetwork
-            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
-            - Ref: Subnet
-        LambdaSecurityGroupId:
-          "Fn::If":
-            - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
-            - Ref: DefaultSecurityGroup        
+          Ref: ApplicationName     
         DownloadFsxData:
           Ref: DownloadFsxData
         S3BucketARN:
@@ -272,17 +262,7 @@ Resources:
         DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.CPUOnDemandJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
-        LambdaSubnet:
-          "Fn::If":
-            - CreateNetwork
-            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
-            - Ref: Subnet
-        LambdaSecurityGroupId:
-          "Fn::If":
-            - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
-            - Ref: DefaultSecurityGroup             
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition       
 
   ####################################################################################################
   # Custom Resources
@@ -312,23 +292,11 @@ Resources:
                 - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
   GetServiceRoleLambda:
     Type: AWS::Lambda::Function
     Properties:
       ReservedConcurrentExecutions: 2
-      VpcConfig:
-        SecurityGroupIds:
-          - "Fn::If":
-            - CreateNetwork
-            - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
-            - Ref: DefaultSecurityGroup
-        SubnetIds: 
-          - "Fn::If":
-            - CreateNetwork
-            - !Select [0, !Split [",", !GetAtt Network.Outputs.PrivateSubnets]]
-            - Ref: Subnet
       Code:
         ZipFile: |
           import logging          
@@ -371,7 +339,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: GetServiceRoleRole.Arn
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 10     
       Tags:
         - Key: Application

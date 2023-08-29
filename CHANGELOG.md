@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.4] - 2023-08-29
+
+### 1.12.4 Changed
+
+- Removed VPC configuration for Lambda-based custom resources to better support bring-you-own-VPC
+
+---
+
+## [1.12.3] - 2023-08-8
+
+### 1.12.3 Fixed
+
+- Updated scipy version in JackHMMER container in response to Dependabot alert.
+
+---
+
 ## [1.12.2] - 2023-08-7
 
 ### 1.12.2 Added
