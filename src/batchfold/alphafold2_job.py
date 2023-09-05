@@ -35,7 +35,7 @@ class AlphaFold2Job(BatchFoldJob):
     db_preset: str = "full_dbs"
     model_preset: str = "monomer_ptm"
     benchmark: bool = False
-    run_relax: bool = True
+    models_to_relax: str = "best"
     use_gpu_relax: bool = False
     num_multimer_predictions_per_model: int = 1
     job_name: str = field(default="AlphaFoldJob" + datetime.now().strftime("%Y%m%d%s"))
@@ -72,8 +72,7 @@ class AlphaFold2Job(BatchFoldJob):
             f"--model_preset={self.model_preset}",
             f"--use_precomputed_msas={self.use_precomputed_msas}",
             f"--benchmark={self.benchmark}",
-            f"--run_relax={self.run_relax}",
-            # f"--use_gpu_relax={self.use_gpu_relax}",
+            f"--models_to_relax={self.models_to_relax}",
         ])
         if self.db_preset == "full_dbs":
             command_list.extend(

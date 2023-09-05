@@ -104,7 +104,7 @@ Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRiva
 
 ### 4.2. AlphaFold
 
-[Version 2.3.1](https://github.com/deepmind/alphafold/releases/tag/v2.3.1) from 1/12/2023.
+[Version 2.3.2](https://github.com/deepmind/alphafold/releases/tag/v2.3.2) from 4/5/2023.
 
 Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
 

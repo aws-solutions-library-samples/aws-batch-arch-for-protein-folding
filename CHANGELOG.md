@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.5] - 2023-09-05
+
+### 1.12.5 Changed
+
+- Update AlphaFold to version v2.3.2
+
+---
+
 ## [1.12.4] - 2023-08-29
 
 ### 1.12.4 Changed
