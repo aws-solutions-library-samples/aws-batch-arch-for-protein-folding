@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='batchfold',
-    version='1.12.5',
+    version='1.12.6',
     description='A modular architecture for running protein structure analysis on AWS Batch.',
     author='Brian Loyal',
     author_email='bloyal@amazon.com',

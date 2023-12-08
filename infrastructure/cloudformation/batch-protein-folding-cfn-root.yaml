@@ -100,7 +100,6 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      AccessControl: Private
       LoggingConfiguration:
         LogFilePrefix: code-pipeline-logs
       Tags:

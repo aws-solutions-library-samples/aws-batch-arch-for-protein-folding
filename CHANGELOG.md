@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.6] - 2023-12-08
+
+### 1.12.6 Changed
+
+- Remove jax from notebook requirements
+
+---
+
 ## [1.12.5] - 2023-09-05
 
 ### 1.12.5 Changed
