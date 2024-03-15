@@ -4,7 +4,7 @@
 project:
   name: batch-protein-folding
   package_lambda: false
-  s3_bucket: aws-batch-architecture-for-alphafold-public-artifacts
+  s3_bucket: guidance-for-protein-folding-cicd
   regions:
     - us-east-1
     - us-east-2

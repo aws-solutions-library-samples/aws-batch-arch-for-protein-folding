@@ -35,7 +35,7 @@ DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/bfd"
 # Copy of:
 # https://bfd.mmseqs.com/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz.
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
+SOURCE_URL="s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"

@@ -21,7 +21,7 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/omegafold_params"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/omegafold_params.tar.gz"
+SOURCE_URL="s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/omegafold_params.tar.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir -p "${ROOT_DIR}"

@@ -70,7 +70,7 @@ done
 [ -z "$CREATE_G5_COMPUTE_ENVIRONMENT" ] && { CREATE_G5_COMPUTE_ENVIRONMENT="N"; }
 [ -z "$MULTI_AZ" ] && { MULTI_AZ="Y"; }
 [ -z "$CREATE_P4D_COMPUTE_ENVIRONMENT" ] && { CREATE_P4D_COMPUTE_ENVIRONMENT="N"; }
-[ -z "$CODE_REPO_S3_BUCKET_NAME" ] && { CODE_REPO_S3_BUCKET_NAME="aws-batch-architecture-for-alphafold-public-artifacts"; }
+[ -z "$CODE_REPO_S3_BUCKET_NAME" ] && { CODE_REPO_S3_BUCKET_NAME="aws-hcls-ml"; }
 
 zip -r code.zip * -x .\*/\* -x random_commands.sh -x analysis\* -x build\*
 aws s3 cp code.zip s3://$BUCKET_NAME/main/batch-protein-folding.zip

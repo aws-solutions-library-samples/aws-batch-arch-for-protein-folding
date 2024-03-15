@@ -31,7 +31,7 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/small_bfd"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/bfd-first_non_consensus_sequences.fasta.gz"
+SOURCE_URL="s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/bfd-first_non_consensus_sequences.fasta.gz"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"

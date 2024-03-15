@@ -24,7 +24,7 @@ Parameters:
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code zip
     Type: String    
-    Default: "aws-batch-architecture-for-alphafold-public-artifacts"
+    Default: "aws-hcls-ml"
   S3BucketARN:
     Description: S3 Bucket ARN
     Type: String

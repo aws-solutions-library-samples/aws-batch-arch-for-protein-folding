@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.7] - 2024-03-14
+
+### 1.12.7 Fixed
+
+- Updated S3 location for reference data
+
+---
+
 ## [1.12.6] - 2023-12-08
 
 ### 1.12.6 Changed

@@ -21,7 +21,7 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/esmfold_params/hub/checkpoints"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/esmfold_parameters_221230.tar"
+SOURCE_URL="s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_parameters_221230.tar"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir -p "${ROOT_DIR}"

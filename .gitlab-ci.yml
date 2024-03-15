@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 variables:
   AWS_DEFAULT_REGION: us-east-1
-  DEPLOYMENT_BUCKET_NAME: aws-batch-architecture-for-alphafold-public-artifacts
+  DEPLOYMENT_BUCKET_NAME: aws-hcls-ml
   DEV_BUCKET_PREFIX: dev
   MAIN_BUCKET_PREFIX: main
 

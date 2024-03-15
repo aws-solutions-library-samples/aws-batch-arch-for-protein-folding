@@ -32,7 +32,7 @@ fi
 
 DOWNLOAD_DIR="$1"
 ROOT_DIR="${DOWNLOAD_DIR}/params"
-SOURCE_URL="s3://aws-batch-architecture-for-alphafold-public-artifacts/compressed/alphafold_params_2022-12-06.tar"
+SOURCE_URL="s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/alphafold_params_2022-12-06.tar"
 BASENAME=$(basename "${SOURCE_URL}")
 
 mkdir --parents "${ROOT_DIR}"

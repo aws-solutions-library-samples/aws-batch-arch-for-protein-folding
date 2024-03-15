@@ -19,3 +19,4 @@ analysis/
 test.sh
 tests/data/
 data/*
+.scratch

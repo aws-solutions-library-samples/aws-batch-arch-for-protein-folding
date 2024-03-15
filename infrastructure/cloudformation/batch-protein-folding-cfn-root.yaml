@@ -57,7 +57,7 @@ Parameters:
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code .zip
     Type: String    
-    Default: "aws-batch-architecture-for-alphafold-public-artifacts"
+    Default: "aws-hcls-ml"
   Timestamp:
     Description: Timestamp for the cfn deployment
     Type: Number
