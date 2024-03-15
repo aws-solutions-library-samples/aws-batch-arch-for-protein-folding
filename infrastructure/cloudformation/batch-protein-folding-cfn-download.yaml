@@ -70,6 +70,7 @@ Resources:
                       download_scripts = [
                           "/scripts/download_alphafold_params.sh",
                           "/scripts/download_bfd.sh",
+                          "/scripts/download_esmfold_params.sh",
                           "/scripts/download_mgnify.sh",
                           "/scripts/download_openfold_params.sh",
                           "/scripts/download_pdb_mmcif.sh",
