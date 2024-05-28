@@ -37,7 +37,7 @@ Parameters:
   DownloadFsxData:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
-    Default: "Y"
+    Default: "N"
     AllowedValues: [Y, N]
   CreateG5ComputeEnvironment:
     Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
@@ -47,7 +47,7 @@ Parameters:
   MultiAZ:
     Description: Use multiple availability zones?
     Type: String
-    Default: "Y"
+    Default: "N"
     AllowedValues: [Y, N]
   CreateP4dComputeEnvironment:
     Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
@@ -57,7 +57,7 @@ Parameters:
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code .zip
     Type: String    
-    Default: "aws-hcls-ml"
+    Default: "archon-iac"
   Timestamp:
     Description: Timestamp for the cfn deployment
     Type: Number
@@ -107,8 +107,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   S3BucketPolicy:
     Type: "AWS::S3::BucketPolicy"
@@ -160,8 +158,8 @@ Resources:
             - CreateNetwork
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup
-        FSXForLustreStorageCapacity: 2400
-        FSxForLustreThroughput: 500
+        FSXForLustreStorageCapacity: 1200
+        FSxForLustreThroughput: 125
         Subnet:
           "Fn::If":
             - CreateNetwork
@@ -295,7 +293,8 @@ Resources:
   GetServiceRoleLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 2
+#      ReservedConcurrentExecutions: 2
+#      ReservedConcurrentExecutions: 0
       Code:
         ZipFile: |
           import logging          
@@ -386,105 +385,105 @@ Resources:
         Timestamp:
           Ref: Timestamp
 
-  ModuleOpenFold:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-openfold.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn          
-        Timestamp:
-          Ref: Timestamp
+  # ModuleOpenFold:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-openfold.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn          
+  #       Timestamp:
+  #         Ref: Timestamp
 
-  ModuleJackhmmer:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-jackhmmer.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
-        Timestamp:
-          Ref: Timestamp
+  # ModuleJackhmmer:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-jackhmmer.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
+  #       Timestamp:
+  #         Ref: Timestamp
 
-  ModuleOmegaFold:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-omegafold.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-        Timestamp:
-          Ref: Timestamp
+  # ModuleOmegaFold:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-omegafold.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+  #       Timestamp:
+  #         Ref: Timestamp
 
-  ModuleRFDesign:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-rfdesign.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-        Timestamp:
-          Ref: Timestamp
+  # ModuleRFDesign:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-rfdesign.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+  #       Timestamp:
+  #         Ref: Timestamp
 
-  ModuleESMFold:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-esmfold.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-        Timestamp:
-          Ref: Timestamp
+  # ModuleESMFold:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-esmfold.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+  #       Timestamp:
+  #         Ref: Timestamp
 
   ModuleProteinMPNN:
     Type: "AWS::CloudFormation::Stack"
@@ -506,45 +505,45 @@ Resources:
         Timestamp:
           Ref: Timestamp
 
-  ModuleNextflow:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-nextflow.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-        Timestamp:
-          Ref: Timestamp
+  # ModuleNextflow:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-nextflow.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+  #       Timestamp:
+  #         Ref: Timestamp
 
-  ModuleDiffDock:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-diffdock.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn                   
-        Timestamp:
-          Ref: Timestamp
+  # ModuleDiffDock:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: batch-protein-folding-cfn-module-diffdock.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       CodeRepositoryUrl:
+  #           "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+  #       CodeBuildEncryptionKey:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+  #       CodeBuildRoleArn:
+  #           "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+  #       StartCodeBuildLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+  #       DeleteContainerRepoLambdaArn:
+  #           "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn                   
+  #       Timestamp:
+  #         Ref: Timestamp
 
   ModuleRFDiffusion:
     Type: "AWS::CloudFormation::Stack"
@@ -575,32 +574,32 @@ Outputs:
     Description: ECR URI for AlphaFold2 container image.
     Value:
       "Fn::GetAtt": ModuleAlphaFold2.Outputs.AlphaFold2ContainerURI
-  DiffDockContainerURI:
-    Description: ECR URI for DiffDock container image.
-    Value:
-      "Fn::GetAtt": ModuleDiffDock.Outputs.DiffDockContainerURI
-  ESMFoldContainerURI:
-    Description: ECR URI for ESMFold container image.
-    Value:
-      "Fn::GetAtt": ModuleESMFold.Outputs.ESMFoldContainerURI
-  JackhmmerContainerURI:
-    Description: ECR URI for Jackhmmer container image.
-    Value:
-      "Fn::GetAtt": ModuleJackhmmer.Outputs.JackhmmerContainerURI
-  OmegaFoldContainerURI:
-    Description: ECR URI for OmegaFold container image.
-    Value:
-      "Fn::GetAtt": ModuleOmegaFold.Outputs.OmegaFoldContainerURI
+  # DiffDockContainerURI:
+  #   Description: ECR URI for DiffDock container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleDiffDock.Outputs.DiffDockContainerURI
+  # ESMFoldContainerURI:
+  #   Description: ECR URI for ESMFold container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleESMFold.Outputs.ESMFoldContainerURI
+  # JackhmmerContainerURI:
+  #   Description: ECR URI for Jackhmmer container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleJackhmmer.Outputs.JackhmmerContainerURI
+  # OmegaFoldContainerURI:
+  #   Description: ECR URI for OmegaFold container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleOmegaFold.Outputs.OmegaFoldContainerURI
   ProteinMPNNContainerURI:
     Description: ECR URI for ProteinMPNN container image.
     Value:
       "Fn::GetAtt": ModuleProteinMPNN.Outputs.ProteinMPNNContainerURI
-  RFDesignContainerURI:
-    Description: ECR URI for RFDesign container image.
-    Value:
-      "Fn::GetAtt": ModuleRFDesign.Outputs.RFDesignContainerURI
-  OpenFoldContainerURI:
-    Description: ECR URI for OpenFold container image.
-    Value:
-      "Fn::GetAtt": ModuleOpenFold.Outputs.OpenFoldContainerURI
+  # RFDesignContainerURI:
+  #   Description: ECR URI for RFDesign container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleRFDesign.Outputs.RFDesignContainerURI
+  # OpenFoldContainerURI:
+  #   Description: ECR URI for OpenFold container image.
+  #   Value:
+  #     "Fn::GetAtt": ModuleOpenFold.Outputs.OpenFoldContainerURI
   

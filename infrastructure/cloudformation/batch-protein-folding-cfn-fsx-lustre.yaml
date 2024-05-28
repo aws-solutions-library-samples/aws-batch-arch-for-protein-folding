@@ -29,7 +29,7 @@ Parameters:
       - 250
       - 500
       - 1000
-    Default: 500
+    Default: 125
   Subnet:
     Description: Subnet ID for the file system.
     Type: String
@@ -65,9 +65,7 @@ Resources:
             Ref: ApplicationName
         - Key: StackId
           Value:
-            Ref: AWS::StackId
-        - Key: SolutionId
-          Value: SO9164            
+            Ref: AWS::StackId      
 
   DataRepoAssociation:
     Type: AWS::FSx::DataRepositoryAssociation

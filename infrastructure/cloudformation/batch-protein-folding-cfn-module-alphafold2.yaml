@@ -44,8 +44,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"       
-        - Key: SolutionId
-          Value: SO9164  
 
   CodeBuildProjectAlphaFold2:
     Type: AWS::CodeBuild::Project
@@ -82,8 +80,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"           
-        - Key: SolutionId
-          Value: SO9164  
 
   StartAlphaFold2ContainerBuild:
     Type: Custom::ResourceForBuildingContainer
@@ -132,7 +128,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164  
       Type: container    
 
   DeleteAlphaFold2ContainerRepo:
