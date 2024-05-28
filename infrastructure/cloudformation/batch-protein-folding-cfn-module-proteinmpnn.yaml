@@ -43,8 +43,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId" 
-        - Key: SolutionId
-          Value: SO9164  
 
   CodeBuildProjectProteinMPNN:
     Type: AWS::CodeBuild::Project
@@ -81,8 +79,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"   
-        - Key: SolutionId
-          Value: SO9164  
 
   StartProteinMPNNContainerBuild:
     Type: Custom::ResourceForBuildingContainer

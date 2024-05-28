@@ -35,11 +35,11 @@ Parameters:
   CreateAWSServiceRoleForEC2Spot:
     Description: Create the AWSServiceRoleForEC2Spot service-linked role
     Type: String
-    Default: "N"
+    Default: "Y"
   CreateAWSServiceRoleForEC2SpotFleet:
     Description: Create the AWSServiceRoleForEC2SpotFleet service-linked role
     Type: String
-    Default: "N"
+    Default: "Y"
   CreateP4dComputeEnvironment:
     Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
     Type: String
@@ -136,8 +136,6 @@ Resources:
                 Value: !Ref ApplicationName
               - Key: StackId
                 Value: !Ref AWS::StackId
-              - Key: SolutionId
-                Value: SO9164
         UserData:
           Fn::Base64:
             Fn::Join:
@@ -189,8 +187,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   AWSServiceRoleForEC2SpotServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
@@ -387,7 +383,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
 
   G4dnJobQueue:
     Type: AWS::Batch::JobQueue
@@ -400,7 +395,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
 
   G5JobQueue:
     Type: AWS::Batch::JobQueue
@@ -414,7 +408,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
 
   P4dJobQueue:
     Type: AWS::Batch::JobQueue
@@ -460,7 +453,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
       Type: container
 
 Outputs:
