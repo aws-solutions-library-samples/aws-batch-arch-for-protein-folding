@@ -3,10 +3,12 @@ FROM ubuntu:latest
 # Set up the environment
 ENV PATH=$PATH:/usr/local/cuda/bin
 
+RUN apt-get update \ 
+    && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    awscli \
+
 # Install dependencies
 RUN apt-get update && \
-    unzip \
-    awscli \
     apt-get install -y libx11-6 libxau6 libxext6 g++ wget tar git build-essential && \
     rm /bin/sh && ln -s /bin/bash /bin/sh
 
