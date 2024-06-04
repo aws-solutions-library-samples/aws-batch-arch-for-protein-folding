@@ -5,6 +5,7 @@ ENV PATH=$PATH:/usr/local/cuda/bin
 
 # Install dependencies
 RUN apt-get update && \
+    unzip \
     apt-get install -y libx11-6 libxau6 libxext6 g++ wget tar git build-essential && \
     rm /bin/sh && ln -s /bin/bash /bin/sh \
     && wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
