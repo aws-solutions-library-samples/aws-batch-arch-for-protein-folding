@@ -6,12 +6,9 @@ ENV PATH=$PATH:/usr/local/cuda/bin
 # Install dependencies
 RUN apt-get update && \
     unzip \
+    awscli \
     apt-get install -y libx11-6 libxau6 libxext6 g++ wget tar git build-essential && \
-    rm /bin/sh && ln -s /bin/bash /bin/sh \
-    && wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install \
-    && rm awscliv2.zip
+    rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Download and install Miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda.sh && \
