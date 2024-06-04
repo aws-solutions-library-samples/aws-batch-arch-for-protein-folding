@@ -6,7 +6,11 @@ ENV PATH=$PATH:/usr/local/cuda/bin
 # Install dependencies
 RUN apt-get update && \
     apt-get install -y libx11-6 libxau6 libxext6 g++ wget tar git build-essential && \
-    rm /bin/sh && ln -s /bin/bash /bin/sh
+    rm /bin/sh && ln -s /bin/bash /bin/sh \
+    && wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm awscliv2.zip
 
 # Download and install Miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda.sh && \
@@ -84,10 +88,6 @@ RUN git clone https://github.com/rdkibler/superfold.git /opt/superfold && \
 
 # Set environment variable USER
 ENV USER=ec2-user
-
-
-# Write location of alphafold_params into /opt/superfold/alphafold_params.pth
-RUN echo {FileSystem} > /opt/superfold/alphafold_params.pth
 
 # Copy run.sh to /opt/superfold
 COPY info_collection.py /opt/superfold
