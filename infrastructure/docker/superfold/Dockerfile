@@ -1,105 +1,103 @@
-# Copyright 2021 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+FROM ubuntu:latest
 
-ARG CUDA=11.0
-FROM nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
-# FROM directive resets ARGS, so we specify again (the value is retained if
-# previously set).
-ARG CUDA
+# Set up the environment
+ENV PATH=$PATH:/usr/local/cuda/bin
 
-# Use bash to support string substitution.
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y libx11-6 libxau6 libxext6 g++ wget tar git build-essential && \
+    rm /bin/sh && ln -s /bin/bash /bin/sh
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essential \
-      cmake \
-      cuda-command-line-tools-${CUDA/./-} \
-      git \
-      hmmer \
-      kalign \
-      tzdata \
-      wget \
-      unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Download and install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda.sh && \
+    bash /opt/miniconda.sh -b -u -p /usr && \
+    conda update -n base -c defaults conda && \
+    rm /opt/miniconda.sh && \
+    rm -rf /usr/lib/terminfo && \
+    conda install -p /usr -c conda-forge python=3.8 pip=20.2.4
 
-# Compile HHsuite from source.
-RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
-    && mkdir /tmp/hh-suite/build \
-    && pushd /tmp/hh-suite/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
-    && make -j 4 && make install \
-    && ln -s /opt/hhsuite/bin/* /usr/bin \
-    && popd \
-    && rm -rf /tmp/hh-suite
+# Install JAX with CUDA support
+RUN pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
-# Install Miniconda package manager.
-RUN wget -q -P /tmp \
-  https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
-    && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+# Install additional dependencies via conda
+RUN conda install -p /usr \
+    -c pyg \
+    -c pytorch \
+    -c conda-forge \
+    -c bioconda \
+    -c nvidia \
+    cudatoolkit \
+    cudnn \
+    cuda-nvcc && \
+    conda install -p /usr \
+    -c pyg \
+    -c pytorch \
+    -c conda-forge \
+    -c bioconda \
+    -c nvidia \
+    attrs \
+    biopython==1.81 \
+    blas \
+    blosc \
+    bokeh \
+    cryptography \
+    dataclasses \
+    decorator \
+    distributed \
+    h5py \
+    idna \
+    ipykernel \
+    ipython \
+    ipython_genutils \
+    matplotlib \
+    mock \
+    more-itertools \
+    numpy=1.23.5 \
+    pandas \
+    pandoc \
+    pip \
+    psutil \
+    setuptools \
+    tqdm \
+    typing \
+    typing-extensions \
+    wheel \
+    zict \
+    python-dateutil \
+    pyrsistent
 
-# Install conda packages.
-ENV PATH="/opt/conda/bin:$PATH"
-RUN conda update -qy conda \
-    && conda install -y -c conda-forge \
-      openmm=7.5.1 \
-      cudatoolkit==${CUDA_VERSION} \
-      pdbfixer \
-      pip \
-      python=3.7
+# Install additional Python packages via pip
+RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow ml-collections opt_einsum biopython==1.81
 
-# Clone the repository from the correct URL
-RUN git clone https://github.com/rdkibler/superfold.git /app/superfold \
-    && pushd /app/superfold \
-    && git checkout f6e265e31739c50137b9c6102f3d0318cfea32e9 \
-    && popd
+# Download and set up superfold
+RUN git clone https://github.com/rdkibler/superfold.git /opt/superfold && \
+    cd /opt/superfold/mmalign && \
+    g++ -static -O3 -ffast-math -lm -o MMalign MMalign.cpp && \
+    cd /
 
-# Copy the required file to the container
-RUN wget -q -P /app/superfold/alphafold/common/ \
-  https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
+# Download and set up alphafold weights
+#RUN mkdir -p /opt/weights /opt/weights/params && \
+#    wget https://storage.googleapis.com/alphafold/alphafold_params_2022-12-06.tar -P /opt/weights/ && \
+#    tar -xvf /opt/weights/alphafold_params_2022-12-06.tar -C /opt/weights/params/ && \
+#    rm /opt/weights/alphafold_params_2022-12-06.tar && \
+#    echo /opt/weights/ > /opt/superfold/alphafold_weights.pth
 
-# Install pip packages.
-RUN pip3 install --upgrade pip \
-    && pip3 install -r /app/superfold/requirements.txt \
-    && pip3 install --upgrade jax jaxlib==0.1.69+cuda${CUDA/./} -f \
-      https://storage.googleapis.com/jax-releases/jax_releases.html
+# Set environment variable USER
+ENV USER=ec2-user
 
-# Apply OpenMM patch.
-WORKDIR /opt/conda/lib/python3.7/site-packages
-RUN patch -p0 < /app/superfold/docker/openmm.patch
 
-# Install AWS CLI
-RUN wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install \
-    && rm awscliv2.zip
+# Write location of alphafold_params into /opt/superfold/alphafold_params.pth
+RUN echo {FileSystem} > /opt/superfold/alphafold_params.pth
 
-COPY run.sh setup.py /app/superfold/
-WORKDIR /app/superfold
-RUN pip install --no-cache-dir --no-deps . \
-    && mkdir -p inputs outputs
+# Copy run.sh to /opt/superfold
+COPY info_collection.py /opt/superfold
+COPY run_superfold.py /opt/superfold
+COPY run.sh /opt/superfold
 
-# We need to run `ldconfig` first to ensure GPUs are visible, due to some quirk
-# with Debian. See https://github.com/NVIDIA/nvidia-docker/issues/1399 for
-# details.
-# ENTRYPOINT does not support easily running multiple commands, so instead we
-# write a shell script to wrap them up.
-RUN echo $'#!/bin/bash\n\
-ldconfig\n\
-python /app/superfold/run_superfold.py "$@"' > /app/run_superfold.sh \
-  && chmod +x /app/run_superfold.sh
+# Clean up
+RUN apt-get clean && \
+    conda clean -a -y && \
+    pip cache purge
 
-ENV DGLBACKEND="pytorch"
-
-ENTRYPOINT ["bash", "run.sh"]
+# Run script
+ENTRYPOINT ["bash", "opt/superfold/run.sh"]

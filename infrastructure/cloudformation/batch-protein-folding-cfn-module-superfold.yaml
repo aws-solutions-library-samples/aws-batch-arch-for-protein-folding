@@ -43,8 +43,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId" 
-        - Key: SolutionId
-          Value: SO9164  
 
   CodeBuildProjectSuperfold:
     Type: AWS::CodeBuild::Project
