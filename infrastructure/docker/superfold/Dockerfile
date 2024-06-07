@@ -98,6 +98,7 @@ ENV USER=ec2-user
 COPY info_collection.py /opt/superfold
 COPY run_superfold.py /opt/superfold
 COPY run.sh /opt/superfold
+COPY config.json /opt/superfold/info_collection/config.json
 
 # Clean up
 RUN apt-get clean && \

@@ -60,15 +60,15 @@ parser.add_argument(
 parser.add_argument(
     "--info_collector_path",
     type=str,
-    default="/net/scratch/db/af2/data", #TODO where should this be?
-    help="Path where InfoCollector will drop off data. Default = '/net/scratch/db/af2/data'.",
+    default="/opt/superfold/info_collection", #TODO where should this be?
+    help="Path where InfoCollector will drop off data. Default = '/opt/superfold/info_collection/'.",
 )
 
 parser.add_argument(
     "--info_collector_config",
     type=str,
-    default="/net/scratch/db/af2/config.json", #TODO where should this be?
-    help="Path to the InfoCollector configuration file. Default = '/net/scratch/db/af2/config.json'.",
+    default="/opt/superfold/info_collection/config.json", #TODO where should this be?
+    help="Path to the InfoCollector configuration file. Default = '/opt/superfold/info_collection/config.json'.",
 )
 
 # could try using a type here (like input files) to assert that the value is greater than 1. Instead right now we assert below.
