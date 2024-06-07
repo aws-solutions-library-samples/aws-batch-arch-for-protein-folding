@@ -229,7 +229,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-ALPHAFOLD_DATADIR = args.alphafold_datadir
+ALPHAFOLD_DATADIR = args.alphafold_weights
 assert os.path.exists(ALPHAFOLD_DATADIR), f"AlphaFold data directory does not exist: {ALPHAFOLD_DATADIR}"
 
 
