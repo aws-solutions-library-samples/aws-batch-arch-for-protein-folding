@@ -1531,7 +1531,7 @@ with tqdm.tqdm(total=len(query_targets)) as pbar1:
                 for num, model_name in enumerate(model_names):
 
 
-                    info_recorder = InfoCollector(args.info_collector_path, args.info_collector_config)
+                    info_recorder = InfoCollector(dropoff_dir=args.info_collector_path, collect_data_file=args.info_collector_config)
                     info_recorder['sequence'] = target.seq
                     info_recorder['padded-length'] = max_length
                     info_recorder['seed'] = seed
