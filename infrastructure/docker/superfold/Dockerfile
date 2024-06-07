@@ -29,7 +29,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
 RUN pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 # Install additional dependencies via conda
-RUN conda install -p /usr \
+RUN conda install -p /usr -y \
     -c pyg \
     -c pytorch \
     -c conda-forge \
