@@ -76,7 +76,7 @@ RUN conda install -p /usr -y \
     pyrsistent
 
 # Install additional Python packages via pip
-RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow-gpu ml-collections opt_einsum biopython==1.81
+RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow ml-collections opt_einsum biopython==1.81
 
 # Download and set up superfold
 RUN git clone https://github.com/rdkibler/superfold.git /opt/superfold && \
