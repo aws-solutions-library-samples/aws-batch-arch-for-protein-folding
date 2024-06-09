@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.0-cudnn8-runtime-ubuntu20.04
+FROM ubuntu:latest
 
 # Set up the environment
 ENV PATH=$PATH:/usr/local/cuda/bin
@@ -75,12 +75,8 @@ RUN conda install -p /usr -y \
     python-dateutil \
     pyrsistent
 
-# Update pip and setuptools
-RUN pip install --upgrade pip setuptools
-
 # Install additional Python packages via pip
 RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow ml-collections opt_einsum biopython==1.81
-RUN pip install tensorflow-gpu==2.12
 
 # Set environment variables for CUDA and cuDNN
 ENV CUDA_HOME=/usr/local/cuda
