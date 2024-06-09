@@ -98,7 +98,7 @@ ENV USER=ec2-user
 COPY info_collection.py /opt/superfold/
 COPY run_superfold.py /opt/superfold/
 COPY run.sh /opt/superfold/
-RUN chmod +x /path/to/run.sh
+RUN chmod +x /opt/superfold/run.sh
 COPY config.json /opt/superfold/info_collection/config.json
 
 # Clean up
