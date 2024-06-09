@@ -37,8 +37,9 @@ RUN conda install -p /usr -y \
     -c nvidia \
     cudatoolkit \
     cudnn \
-    cuda-nvcc && \
-    conda install -p /usr \
+    cuda-nvcc
+
+RUN conda install -p /usr \
     -c pyg \
     -c pytorch \
     -c conda-forge \
