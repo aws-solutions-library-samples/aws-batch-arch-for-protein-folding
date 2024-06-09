@@ -3,7 +3,7 @@ FROM ubuntu:latest
 # Set up the environment
 ENV PATH=$PATH:/usr/local/cuda/bin
 
-RUN apt-get -q update \
+RUN apt-get -q update \ 
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
   wget \
   unzip \
@@ -76,18 +76,20 @@ RUN conda install -p /usr -y \
     pyrsistent
 
 # Install additional Python packages via pip
-RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow ml-collections opt_einsum biopython==1.81
-
-# Set environment variables for CUDA and cuDNN
-ENV CUDA_HOME=/usr/local/cuda
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
-ENV PATH=/usr/local/cuda/bin:$PATH
+RUN pip install dm-haiku==0.0.4 absl-py dm-tree tensorflow-gpu ml-collections opt_einsum biopython==1.81
 
 # Download and set up superfold
 RUN git clone https://github.com/rdkibler/superfold.git /opt/superfold && \
     cd /opt/superfold/mmalign && \
     g++ -static -O3 -ffast-math -lm -o MMalign MMalign.cpp && \
     cd /
+
+# Download and set up alphafold weights
+#RUN mkdir -p /opt/weights /opt/weights/params && \
+#    wget https://storage.googleapis.com/alphafold/alphafold_params_2022-12-06.tar -P /opt/weights/ && \
+#    tar -xvf /opt/weights/alphafold_params_2022-12-06.tar -C /opt/weights/params/ && \
+#    rm /opt/weights/alphafold_params_2022-12-06.tar && \
+#    echo /opt/weights/ > /opt/superfold/alphafold_weights.pth
 
 # Set environment variable USER
 ENV USER=ec2-user
