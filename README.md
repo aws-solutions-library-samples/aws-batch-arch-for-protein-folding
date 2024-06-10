@@ -1,328 +1,614 @@
-# AWS Batch Architecture for Protein Folding and Design
+## Documentation for Archon Protein Modeling Infrastructure (AWS)
 
-## Contents
+### **Todo**
 
-1. [Overview](#1-overview)  
-2. [Quick Start](#2-quick-start)  
-3. [Advanced Configuration](#3-advanced-configuration)  
-    3.1. [Optional CloudFormation Parameters](#31-optional-cloudformation-parameters)  
-    3.2. [Manual Data Download](#32-manual-data-download)  
-    3.3. [Clean Up](#33-clean-up)  
-4. [Module Information](#4-module-information)  
-    4.1. [JackHMMER](#41-jackhmmer)  
-    4.2. [AlphaFold](#42-alphafold)  
-    4.3. [OpenFold](#43-openfold)  
-    4.4. [OmegaFold](#44-omegafold)  
-    4.5. [RFDesign](#45-rfdesign)  
-    4.6. [ESMFold](#46-esmfold)  
-    4.7. [ProteinMPNN](#47-proteinmpnn)  
-    4.8. [DiffDock](#48-diffdock)  
-    4.9. [RFDiffusion](#49-rfdiffusion)  
-    4.10. [NextFlow](#410-nextflow)  
-5. [Architecture Details](#5-architecture-details)  
-    5.1. [Stack Creation Details](#51-stack-creation-details)  
-    5.2. [Cost](#52-cost)  
-6. [FAQ](#6-faq)
-7. [Security](#7-security)
-8. [License](#8-license)
+[x] Cloud formation templates and documented deployment strategy
+[x] Configure infrastructure prototype on AWS
+[x] Docker containers built on suitable EC2
+[x] Initial testing and validation
 
------
+[ ] Deploy G5 and P4d environments (if desired)
+[ ] G4dnSpotQueue
 
-## 1. Overview
+[ ] Documentation and operational handoff to Archon's team
+   [ ] Train Archon on infrastructure
+   [ ] Check code in to Archon Github
+   [ ] Transfer Archon.pem to team
 
-Proteins are large biomolecules that play an important role in the body. Knowing the physical structure of proteins is key to understanding their function. However, it can be difficult and expensive to determine the structure of many proteins experimentally. One alternative is to predict these structures using machine learning algorithms. Several high-profile research teams have released such algorithms, including [OpenFold](https://github.com/aqlaboratory/openfold), [AlphaFold 2](https://deepmind.com/blog/article/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology), [RoseTTAFold](https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/) ]and others. Their work was important enough for Science magazine to name it the ["2021 Breakthrough of the Year"](https://www.science.org/content/article/breakthrough-2021).
 
-Many AI-driven folding algorithms use a multi-track transformer architecture trained on known protein templates to predict the structure of unknown peptide sequences. These predictions are heavily GPU-dependent and take anywhere from minutes to days to complete. The input features for these predictions include multiple sequence alignment (MSA) data. MSA algorithms are CPU-dependent and can themselves require several hours of processing time.
+### **Infrastructure Setup**
 
-Running both the MSA and structure prediction steps in the same computing environment can be cost inefficient, because the expensive GPU resources required for the prediction sit unused while the MSA step runs. Instead, using a high-performance computing (HPC) service like [AWS Batch](https://aws.amazon.com/batch/) allows us to run each step as a containerized job with the best fit of CPU, memory, and GPU resources.
+AWS Batch Architecture for Protein Folding and Design
 
-This repository includes the CloudFormation template, Jupyter Notebook, and supporting code to run protein analysis algorithms on AWS Batch.
+Infrastructure forked from https://github.com/aws-solutions-library-samples/aws-batch-arch-for-protein-folding
 
------
+AWS Batch for protein folding uses CloudFormation to create scalable infrastructure, run containerized jobs, and handle GPU/CPU resources efficiently, integrating tools like AlphaFold, RFDiffusion, and Superfold for protein analysis.
 
-## 2. Quick Start
+#### AWS Batch Configuration
+- **Compute Environments**
+  - Setup managed compute environments tailored for protein modeling tasks.
+  - Configure instance types and scaling policies for optimal performance.
+  - Use instance types like P4 and G4dn families for GPU-intensive tasks.
+  - G4dnComputeEnvironment: On-demand GPU compute environment using g4dn instance types.
+  - [Optional] G5ComputeEnvironment: On-demand GPU compute environment using g5 instance types.
+  - [Optional] P4dComputeEnvironment: On-demand GPU compute environment using p4d instance types.
 
-1. Choose **Launch Stack** and (if prompted) log into your AWS account:
 
-    [![Launch Stack](imgs/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml)  
-2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
-    ![Provide a stack name](imgs/name.png)  
-3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
-4. Choose **Create stack**.  
-    ![Choose Create Stack](imgs/create_stack.png)  
-5. Wait 20 minutes for AWS CloudFormation to create the necessary infrastructure stack and module containers.  
-6. Wait an additional 5 hours for AWS Batch to download the necessary reference data to the Amazon FSx for Lustre file system.  
-7. Navigate to [SageMaker](https://console.aws.amazon.com/sagemaker).  
-8. Select **Notebook** > **Notebook instances**.  
-    ![Select Notebooks](imgs/notebook.png)  
-9. Select the **BatchFoldNotebookInstance** instance and then **Actions** > **Open JupyterLab**.
-    ![Open BatchFoldNotebookInstance Notebook Instance ](imgs/notebook_instance.png)  
-10. Open the quick start notebook at `notebooks/quick-start-protein-folding.ipynb`.  
-    ![Open Quick Start Notebook](imgs/open_notebook.png)  
-11. Select the **conda_python_3** kernel.  
-    ![Open Quick Start Notebook](imgs/select_kernel.png)  
-12. Run the notebook cells to create and analyze several protein folding jobs.  
-13. (Optional) To delete all provisioned resources from from your account, navigate to [Cloud Formation](https://console.aws.amazon.com/cloudformation), select your stack, and then **Delete**.
+- **Job Queues**
+  - Create multiple job queues to manage priorities and segregate different types of computational tasks (e.g., backbone generation and protein folding).
+  - CPUOnDemandJobQueue: Job queue for on-demand CPU instances.
+  - CPUSpotJobQueue: Job queue for spot CPU instances.
+  - G4dnJobQueue: Job queue for on-demand GPU instances. Single GPU instances.
+  - [Optional] G5JobQueue: Job queue for on-demand G5 GPU instances.
+  - [Optional] P4dJobQueue: Job queue for on-demand P4d GPU instances.
 
------
+- **Job Definitions**
+  - Define job specifications, including Docker images, vCPUs, memory requirements, and command overrides for different protein modeling tasks.
+  - LaunchTemplate: Reference to the instance launch template.
+  - CPUOnDemandJobQueue: Reference to the CPU on-demand job queue.
+  - CPUSpotJobQueue: Reference to the CPU spot job queue.
+  - G4dnJobQueue: Reference to the GPU on-demand job queue.
+  - [Optional] G5JobQueue: Reference to the GPU G5 job queue.
+  - [Optional] P4dJobQueue: Reference to the GPU P4d job queue.
+  - DownloadJobDefinition: Reference to the download job definition.
+  
+![alt text](imgs/archon_batch.png)
 
-## 3. Advanced Configuration
+#### EC2 Instances and AMIs
+- **Instance Selection**
+  - Select G4dn instances for low-resource jobs (single GPU, 16GB VRAM).
+  - For resource intense jobs select P4d or G5 job queues.
+  - Configure and use GPU-optimized AMIs that include necessary drivers and frameworks (e.g., CUDA, cuDNN) for running protein modeling applications.
 
-### 3.1. Optional CloudFormation Parameters
+   AMI ID and Source:
 
-- Select "N" for **LaunchSageMakerNotebook** if you do not want to launch a managed sagemaker notebook instance to quickly run the provided Jupyter notebook. This option will avoid the [charges associated with running that notebook instance](https://aws.amazon.com/sagemaker/pricing/).
-- Select "N" for **MultiAZ** if you want to limit your Batch jobs to a single availability zone and avoid cross-AZ data transfer charges. Note that this may impact the availability of certain accelerated or other high-demand instance types.
-- Provide values for the **VPC**, **Subnet**, and **DefaultSecurityGroup** parameters to use existing network resources. If one or more of those parameters are left empty, CloudFormation will create a new VPC and FSx for Lustre instance for the stack.
-- Provide values for the **FileSystemId** and **FileSystemMountName** parameters to use an existing FSx for Lustre file system. If one or more of these parameters are left empty, CloudFormation will create a new file system for the stack.
-- Select "Y" for **DownloadFsxData** to automatically populate the FSx for Lustre file system with common sequence databases.
-- Select "Y" for **CreateG5ComputeEnvironment** to create an additional job queue with support for G5 family instances. Note that G5 instances are currently not available in all AWS regions.
+   AMI ID: ami-027492973b111510a
+   Source AMI name: amzn2-ami-minimal-hvm-2.0.20240521.0-x86_64-ebs
+   GPU Specifications and Versions:
 
-### 3.2. Manual Data Download
+   AMI name: amzn2-ami-ecs-kernel-5.10-gpu-hvm-2.0.20240528-x86_64-ebs
+   Kernel: 5.10
+   ECS Agent version: 1.82.4
+   Docker version: 20.10.25
+   Containerd version: 1.7.11
+   Runc version: 1.1.11
+   NVIDIA driver version: 535.161.07
+   CUDA version: 12.2.2
 
-If you set the **DownloadFsxData** parameter to **Y**, CloudFormation will automatically start a series of Batch jobs to populate the FSx for Lustre instance with a number of common sequence databases. If you set this parameter to **N** you will instead need to manually populate the file system. Once the CloudFormation stack is in a CREATE_COMPLETE status, you can begin populating the FSx for Lustre file system with the necessary sequence databases. To do this automatically, open a terminal in your notebooks environment and run the following commands from the **batch-protein-folding** directory:
+   EC2 Instance named Troubleshoot (i-069d2226dae5299b8) was created to manually build and test the Superfold docker container.
 
-```python
-pip install .
-python prep_databases.py
+![alt text](imgs/archon_ec2.png)
+
+#### Amazon FSx for Lustre
+- **Provisioning**
+  - Provision an FSx for Lustre (or EFS) file system for high-performance storage.
+  - Ensure the file system is accessible by the compute resources running batch jobs.
+
+   File System ID: fs-0b5172e0b7c210f96
+   Type: Lustre
+   Status: Available
+   Deployment Type: Persistent 2
+   Storage Type: SSD (Solid State Drive)
+   Storage Capacity: 1,200 GiB (Gibibytes)
+   Throughput: 150 MB/s (Megabytes per second)
+   Creation Date: 2024-06-04T16:20:00-07:00 (Timestamp in ISO 8601 format with time zone offset)
+   This FSx for Lustre file system is currently available and is configured for high-performance, persistent storage using SSDs, providing a capacity of 1,200 GiB and a throughput of 150 MB/s.
+
+![alt text](imgs/archon_fsx.png)
+
+#### IAM Roles and Security
+- **Role Creation**
+  - Create specific IAM roles for AWS Batch, EC2, and FS services adhering to the principle of least privilege.
+- **Networking Setup**
+  - Setup VPC, subnets, and security groups to ensure secure networking configurations that isolate compute resources and control traffic flow.
+
+   VPC ID: vpc-080fba25683e7cb56
+   Subnets:
+   subnet-06609bf1ffe76b9df (us-west-2a)
+   subnet-0ed0125caee6c8dec (us-west-2a)
+
+![alt text](imgs/archon_vpc.png)
+
+### **Docker Container Creation**
+
+#### Container Preparation
+- **Base Configuration**
+  - Use the existing protein modeling processes and Docker configurations from AWS repositories (e.g., aws-batch-arch-for-protein-folding) as a base.
+  - Prepare Docker containers encapsulating all necessary dependencies and configurations to run the jobs.
+
+Download Container Registry:
+
+   Repository URI: 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-container-tgsv1rb9sfr7-downloadcontainerregistry-pvq5odfsi3fj
+   Creation Date: June 04, 2024, 16:12:14 (UTC-07)
+   Scan on Push: Disabled
+   Encryption: AES-256
+   AlphaFold2 Container Registry:
+
+   Repository URI: 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-modulealphafold2-fl5yy6858gux-alphafold2containerregistry-5s6spibvqbez
+   Creation Date: June 04, 2024, 16:13:16 (UTC-07)
+   Scan on Push: Disabled
+   Encryption: AES-256
+   ProteinMPNN Container Registry:
+
+   Repository URI: 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-moduleproteinmpnn-1n58soknq55sx-proteinmpnncontainerregistry-iburwj6jvxqs
+   Creation Date: June 04, 2024, 16:13:16 (UTC-07)
+   Scan on Push: Disabled
+   Encryption: AES-256
+   RFdiffusion Container Registry:
+
+   Repository URI: 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-modulerfdiffusion-10t89ixalo5g4-rfdiffusioncontainerregistry-qhnrnqtiwgz0
+   Creation Date: June 04, 2024, 16:13:15 (UTC-07)
+   Scan on Push: Disabled
+   Encryption: AES-256
+   SuperFold Container Registry:
+
+   Repository URI: 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-modulesuperfold-b13zzvj25esh-superfoldcontainerregistry-jpwpn0sf2w7l
+   Creation Date: June 04, 2024, 16:13:16 (UTC-07)
+   Scan on Push: Disabled
+   Encryption: AES-256
+
+![alt text](imgs/archon_ecr.png)
+
+### New Features
+- **SuperFold Container**
+  - Develop and integrate a new Docker container, "SuperFold," optimized for enhanced protein folding tasks.
+  - Ensure the container includes the latest software versions and performance optimizations.
+
+### Instructions for Building and Pushing the SuperFold Docker Container
+
+#### Prerequisites
+- Ensure that you have the latest version of the AWS CLI and Docker installed.
+- For more information, see Getting Started with Amazon ECR.
+
+   EC2 Instance named Troubleshoot (i-069d2226dae5299b8) was created to manually build and test the Superfold docker container.
+
+   Access (when running) via EC2 Connect or SSH using 'ssh -i ~/.ssh/Archon.pem ec2-user@44.236.154.209'
+
+#### Steps
+
+1. **Authenticate Docker to AWS ECR**
+
+   **Generic Command:**
+   ```
+   aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
+   ```
+
+   **Specific Example:**
+   ```
+   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 767398120215.dkr.ecr.us-west-2.amazonaws.com
+   ```
+
+2. **Build the Docker Image**
+
+   **Generic Command:**
+   ```
+   docker build -t <repository_name> .
+   ```
+
+   **Specific Example:**
+   ```
+   docker build -t archon-iac-nebula-modulesuperfold-b13zzvj25esh-superfoldcontainerregistry-jpwpn0sf2w7l .
+   ```
+
+3. **Tag the Docker Image**
+
+   **Generic Command:**
+   ```
+   docker tag <repository_name>:latest <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository_name>:latest
+   ```
+
+   **Specific Example:**
+   ```
+   docker tag archon-iac-nebula-modulesuperfold-b13zzvj25esh-superfoldcontainerregistry-jpwpn0sf2w7l:latest 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-modulesuperfold-b13zzvj25esh-superfoldcontainerregistry-jpwpn0sf2w7l:latest
+   ```
+
+4. **Push the Docker Image to AWS ECR**
+
+   **Generic Command:**
+   ```
+   docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository_name>:latest
+   ```
+
+   **Specific Example:**
+   ```
+   docker push 767398120215.dkr.ecr.us-west-2.amazonaws.com/archon-iac-nebula-modulesuperfold-b13zzvj25esh-superfoldcontainerregistry-jpwpn0sf2w7l:latest
+   ```
+
+![alt text](imgs/archon_superfold_ecr.png)
+
+### Superfold Docker Container and Module
+
+1. **Building Docker Based Apptainer Spec:**
+   - The Docker container was built from Dockerfile using the provided apptainer spec as a starting point to ensure compatibility with the Superfold application.
+
+2. **Modifications to `info_collection.py`:**
+   - Modified to accept parameters for the data directory and `config.json`, enhancing flexibility in specifying runtime configurations.
+
+3. **Modifications to `run_superfold.py`:**
+   - Removed testing print statements to clean up the output.
+   - Added `alphafold_weights` as a parameter to be passed at runtime.
+   - Passed the data directory and `config.json` to the `info_collection.py` script, ensuring the necessary data is accessible.
+
+4. **Wrapping `run_superfold.py` in a `run.sh` Script:**
+   - Created a `run.sh` script to standardize the execution process, similar to other modules.
+   - The `run.sh` script manages data ingress and egress to/from S3 and handles the commands passed to the container by the SageMaker script for launching jobs.
+
+### Dockerfile Overview
+
+- **Base Image:**
+  - Used `ubuntu:latest` as the base image.
+
+- **Environment Setup:**
+  - Set up the environment variables and installed necessary dependencies including AWS CLI, Miniconda, JAX with CUDA support, and other Python packages.
+
+- **Superfold Setup:**
+  - Cloned the Superfold repository and set up the necessary dependencies.
+
+- **Copy Scripts and Clean Up:**
+  - Copied modified scripts (`info_collection.py`, `run_superfold.py`, and `run.sh`) into the container.
+  - Cleaned up unnecessary files to reduce the image size.
+
+- **Entry Point:**
+  - Set `run.sh` as the entry point for the Docker container.
+
+### `run.sh` Script
+
+- **Purpose:**
+  - The `run.sh` script downloads necessary files from S3, runs the specified command, and uploads the results back to S3.
+
+- **Usage:**
+  - The script accepts input and output paths in the format `-i s3://<bucket>/<key>:<local path>` and `-o <local path>:s3://<bucket>/<key>`, respectively.
+  - It handles recursive copying if the path ends with a `/`.
+
+### **Deployment Strategy**
+
+#### Cloud Formation Templates
+
+**Infrastructure as Code**: Infrastructure as Code (IaC) automates cloud resource management using scripts. AWS CloudFormation templates deploy and manage infrastructure consistently, reducing manual errors, enhancing scalability, and speeding up deployments.
+
+- **batch-protein-folding-cfn-root**: Sets up AWS resources for protein folding, including Batch environments, FSx for Lustre, S3, and optional SageMaker Notebook, supporting multiple protein analysis modules. This is the entrypoint for creating the infrastructure (stack) and references the other templates.
+
+- **batch-protein-folding-cfn-batch**: Creates autoscaling compute (AWS Batch) environments with various compute instances (CPU, GPU) and job queues, utilizing FSx for Lustre and S3 for data handling, supporting protein folding tasks.
+
+- **batch-protein-folding-cfn-container**: Sets up AWS resources for container building and hosting, including CodeCommit, ECR, CodeBuild, and Lambda functions for managing container repositories, supporting automated builds and deletions.
+
+- **batch-protein-folding-download**: Sets up resources to download data to FSx for Lustre using AWS Batch jobs triggered by a Lambda function, automating the data population process.
+
+- **batch-protein-folding-cfn-fsx-lustre**: Creates an FSx for Lustre file system with specified storage capacity and throughput, associates it with an S3 bucket for data import/export, and configures necessary security settings.
+
+- **batch-protein-folding-cfn-module-xxxx**: Sets up resources to build, store, and manage Docker containers for xxxx module on AWS, including ECR, CodeBuild projects, Batch job definitions, and associated IAM roles and policies.
+
+- **batch-protein-folding-cfn-network**: Creates a VPC with multiple subnets, both public and private, optionally across multiple availability zones, along with necessary networking components such as internet gateways, NAT gateways, and route tables.
+
+- **batch-protein-folding-cfn-notebook**: Creates an AWS SageMaker notebook instance, including necessary IAM roles, encryption keys, and network configurations, for running and managing protein folding computations.
+
+### Infrastructure as Code (IaC) with AWS CloudFormation
+
+**Why Deploy via CLI:**
+- **Efficiency:** Automated deployment saves time and reduces manual errors.
+- **Consistency:** Ensures uniform configuration across environments.
+- **Scalability:** Easily replicate setups for multiple instances or projects.
+
+**Steps:**
+1. **Create S3 Bucket:**
+
+   ```sh
+   aws s3 mb s3://<your-bucket-name> --profile <aws-profile>
+   ```
+
+2. **Package and Deploy Stack:**
+
+   ```sh
+   aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --s3-bucket <your-bucket-name> --s3-prefix main --output-template-file ../protein-folding.cfn.yaml
+
+   aws cloudformation create-stack --stack-name <stack-name> --template-body file://protein-folding.cfn.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --output json
+   ```
+
+#### Generic Example of AWS CLI Commands
+
+**Package Command:**
+
+```sh
+aws cloudformation package --template-file <template-file-path> --s3-bucket <s3-bucket-name> --s3-prefix <s3-prefix> --output-template-file <output-template-file-path> --profile <aws-profile>
 ```
 
-It will take around 5 hours to populate the file system, depending on your location. You can track its progress by navigating to the file system in the FSx for Lustre console.
+**Create Stack Command:**
 
-### 3.3. Clean Up
-
-To remove the stack and stop further charges, first slect the root stack from the CloudFormation console and then the **Delete** button. This will remove all resources EXCEPT for the S3 bucket containing job data and the FSx for Lustre backup. You can associate this bucket as a data repository for a future FSx for Lustre file system to quickly repopulate the reference data.
-
-To remove all remaining data, browse to the S3 console and delete the S3 bucket associated with the stack.
-
------
-
-## 4. Module Information
-
-### 4.1. JackHMMER
-
-Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRivasLab/hmmer) for more information about the JackHMMER algorithm.
-
-### 4.2. AlphaFold
-
-[Version 2.3.2](https://github.com/deepmind/alphafold/releases/tag/v2.3.2) from 4/5/2023.
-
-Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
-
-The original AlphaFold 2 citation is
-
-```text
-@Article{AlphaFold2021,
-  author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and Green, Tim and Figurnov, Michael and Ronneberger, Olaf and Tunyasuvunakool, Kathryn and Bates, Russ and {\v{Z}}{\'\i}dek, Augustin and Potapenko, Anna and Bridgland, Alex and Meyer, Clemens and Kohl, Simon A A and Ballard, Andrew J and Cowie, Andrew and Romera-Paredes, Bernardino and Nikolov, Stanislav and Jain, Rishub and Adler, Jonas and Back, Trevor and Petersen, Stig and Reiman, David and Clancy, Ellen and Zielinski, Michal and Steinegger, Martin and Pacholska, Michalina and Berghammer, Tamas and Bodenstein, Sebastian and Silver, David and Vinyals, Oriol and Senior, Andrew W and Kavukcuoglu, Koray and Kohli, Pushmeet and Hassabis, Demis},
-  journal = {Nature},
-  title   = {Highly accurate protein structure prediction with {AlphaFold}},
-  year    = {2021},
-  volume  = {596},
-  number  = {7873},
-  pages   = {583--589},
-  doi     = {10.1038/s41586-021-03819-2}
-}
+```sh
+aws cloudformation create-stack --stack-name <stack-name> --template-body file://<output-template-file-path> --capabilities CAPABILITY_NAMED_IAM --profile <aws-profile> --disable-rollback --output json
 ```
 
-The AlphaFold-Multimer citation is
+#### Specific Example of AWS CLI Commands
 
-```text
-@article {AlphaFold-Multimer2021,
-  author       = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v{Z}}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
-  journal      = {bioRxiv}
-  title        = {Protein complex prediction with AlphaFold-Multimer},
-  year         = {2021},
-  elocation-id = {2021.10.04.463034},
-  doi          = {10.1101/2021.10.04.463034},
-  URL          = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034},
-  eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
-}
+**Package Command:**
+
+```sh
+aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --s3-bucket archon-iac --s3-prefix main --output-template-file ../protein-folding.cfn.yaml --profile archon
 ```
 
-### 4.3. OpenFold
+**Create Stack Command:**
 
-Commit [109442b14e6184fbee45e2696f21b052eb3fb1e5](https://github.com/aqlaboratory/openfold/commit/109442b14e6184fbee45e2696f21b052eb3fb1e5) from November 23, 2022.
-
-Please visit [https://github.com/aqlaboratory/openfold](https://github.com/aqlaboratory/openfold) for more information about the OpenFold algorithm.
-
-The OpenFold citation is
-
-```text
-@software{Ahdritz_OpenFold_2021,
-  author = {Ahdritz, Gustaf and Bouatta, Nazim and Kadyan, Sachin and Xia, Qinghui and Gerecke, William and AlQuraishi, Mohammed},
-  doi = {10.5281/zenodo.5709539},
-  month = {11},
-  title = {{OpenFold}},
-  url = {https://github.com/aqlaboratory/openfold},
-  year = {2021}
-}
+```sh
+aws cloudformation create-stack --stack-name archon-iac-nebula --template-body file://protein-folding.cfn.yaml --capabilities CAPABILITY_NAMED_IAM --profile archon --disable-rollback --output json
 ```
 
-### 4.4. OmegaFold
+### Setting Up AWS CLI
 
-Commit [313c873ad190b64506a497c926649e15fcd88fcd](https://github.com/HeliXonProtein/OmegaFold/commit/313c873ad190b64506a497c926649e15fcd88fcd) from December 12, 2022.
+1. **Install AWS CLI:**
+   - Download and install the AWS CLI from the [AWS CLI Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html).
 
-Please visit [https://github.com/HeliXonProtein/OmegaFold](https://github.com/HeliXonProtein/OmegaFold) for more information about the OmegaFold algorithm.
+2. **Configure AWS CLI:**
+   - Open your terminal or command prompt.
+   - Run the following command to configure AWS CLI with your access key, secret key, region, and output format:
 
-The OmegaFold citation is
+   ```sh
+   aws configure
+   ```
 
-```text
-@article{OmegaFold,
-  author = {Wu, Ruidong and Ding, Fan and Wang, Rui and Shen, Rui and Zhang, Xiwen and Luo, Shitong and Su, Chenpeng and Wu, Zuofan and Xie, Qi and Berger, Bonnie and Ma, Jianzhu and Peng, Jian},
-  title = {High-resolution de novo structure prediction from primary sequence},
-  elocation-id = {2022.07.21.500999},
-  year = {2022},
-  doi = {10.1101/2022.07.21.500999},
-  publisher = {Cold Spring Harbor Laboratory},
-  URL = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999},
-  eprint = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999.full.pdf},
-  journal = {bioRxiv}
-}
+   - Enter your AWS Access Key ID, AWS Secret Access Key, Default region name, and Default output format when prompted.
+
+### Example:
+
+```sh
+aws configure
+AWS Access Key ID [None]: <your-access-key-id>
+AWS Secret Access Key [None]: <your-secret-access-key>
+Default region name [None]: us-west-2
+Default output format [None]: json
 ```
 
-### 4.5. RFDesign
+### Running the Commands
 
-Commit [bba6992283de63faba6ff727bb4bc68327a5356c](https://github.com/RosettaCommons/RFDesign/commit/bba6992283de63faba6ff727bb4bc68327a5356c) from November 21, 2022.
+1. **Package the CloudFormation Template:**
 
-Please visit [https://github.com/RosettaCommons/RFDesign](https://github.com/RosettaCommons/RFDesign) for more information about the RFDesign hallucinate and inpainting algorithms.
+   ```sh
+   aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --s3-bucket archon-iac --s3-prefix main --output-template-file ../protein-folding.cfn.yaml
+   ```
 
-The RFDesign citation is
+2. **Create the CloudFormation Stack:**
 
-```text
-@article{RFDesign,
-  author = {Jue Wang, Sidney Lisanza, David Juergens, Doug Tischer, Ivan Anishchenko, Minkyung Baek, Joseph L. Watson, Jung Ho Chun, Lukas F. Milles, Justas Dauparas, Marc Expòsit, Wei Yang, Amijai Saragovi, Sergey Ovchinnikov, and David Baker},
-  title = {Deep learning methods for designing proteins scaffolding functional sites},
-  elocation-id = {2021.11.10.468128},
-  year = {2022},
-  doi = {10.1101/2021.11.10.468128},
-  publisher = {bioRxiv},
-  URL = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999},
-  eprint = {https://www.biorxiv.org/content/10.1101/2021.11.10.468128v2.full.pdf},
-  journal = {bioRxiv}
-}
-```
+   ```sh
+   aws cloudformation create-stack --stack-name archon-iac-nebula --template-body file://protein-folding.cfn.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --output json
+   ```
 
-### 4.6. ESMFold
+### Troubleshooting and Managing the Stack
 
-Commit [74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3](https://github.com/facebookresearch/esm/commit/74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3) from November 26, 2023.
+1. **Check Stack Status:**
 
-Please visit [https://github.com/facebookresearch/esm](https://github.com/facebookresearch/esm) for more information about the ESMFold algorithm.
+   ```sh
+   aws cloudformation describe-stacks --stack-name <stack-name>
+   ```
 
-The ESMFold citation is
+   **Example:**
 
-```text
-@article{lin2022language,
-  title={Language models of protein sequences at the scale of evolution enable accurate structure prediction},
-  author={Lin, Zeming and Akin, Halil and Rao, Roshan and Hie, Brian and Zhu, Zhongkai and Lu, Wenting and Smetanin, Nikita and dos Santos Costa, Allan and Fazel-Zarandi, Maryam and Sercu, Tom and Candido, Sal and others},
-  journal={bioRxiv},
-  year={2022},
-  publisher={Cold Spring Harbor Laboratory}
-}
-```
+   ```sh
+   aws cloudformation describe-stacks --stack-name archon-iac-nebula
+   ```
 
-### 4.7. ProteinMPNN
+2. **Update the Stack:**
 
-Commit [be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9](https://github.com/dauparas/ProteinMPNN/commit/be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9) from March 24, 2023.
+   - Modify your CloudFormation template as needed.
+   - Package the updated template:
 
-Please visit [https://github.com/dauparas/ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for more information about the ProteinMPNN algorithm.
+     ```sh
+     aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --s3-bucket archon-iac --s3-prefix main --output-template-file ../protein-folding.cfn.yaml
+     ```
 
-The ProteinMPNN citation is
+   - Update the stack:
 
-```text
-@article{dauparas2022robust,
-  title={Robust deep learning--based protein sequence design using ProteinMPNN},
-  author={Dauparas, Justas and Anishchenko, Ivan and Bennett, Nathaniel and Bai, Hua and Ragotte, Robert J and Milles, Lukas F and Wicky, Basile IM and Courbet, Alexis and de Haas, Rob J and Bethel, Neville and others},
-  journal={Science},
-  volume={378},
-  number={6615},  
-  pages={49--56},
-  year={2022},
-  publisher={American Association for the Advancement of Science}
-}
-```
+     ```sh
+     aws cloudformation update-stack --stack-name <stack-name> --template-body file://<output-template-file-path> --capabilities CAPABILITY_NAMED_IAM--output json
+     ```
 
-### 4.8. DiffDock
+   **Example:**
 
-Commit [3c3c728cf2e444cf8df45b58067604d982159471](https://github.com/gcorso/DiffDock/commit/3c3c728cf2e444cf8df45b58067604d982159471) from March 27, 2023.
+   ```sh
+   aws cloudformation update-stack --stack-name archon-iac-nebula --template-body file://protein-folding.cfn.yaml --capabilities CAPABILITY_NAMED_IAM --output json
+   ```
 
-Please visit [https://github.com/gcorso/DiffDock](https://github.com/gcorso/DiffDock) for more information about the DiffDock algorithm.
+3. **Delete the Stack:**
 
-The DiffDock citation is
+   ```sh
+   aws cloudformation delete-stack --stack-name <stack-name>
+   ```
 
-```text
-@article{corso2023diffdock,
-      title={DiffDock: Diffusion Steps, Twists, and Turns for Molecular Docking}, 
-      author = {Corso, Gabriele and Stärk, Hannes and Jing, Bowen and Barzilay, Regina and Jaakkola, Tommi},
-      journal={International Conference on Learning Representations (ICLR)},
-      year={2023}
-}
-```
+   **Example:**
 
-### 4.9. RFDiffusion
+   ```sh
+   aws cloudformation delete-stack --stack-name archon-iac-nebula
+   ```
 
-Commit [5606075d45bd23aa60785024b203ed6b0f6d2cd0](https://github.com/RosettaCommons/RFdiffusion/commit/5606075d45bd23aa60785024b203ed6b0f6d2cd0) from June 28, 2023.
+### **User Instructions**
 
-Please visit [https://github.com/RosettaCommons/RFdiffusion](https://github.com/RosettaCommons/RFdiffusion) for more information about the RFDiffusion algorithm.
+#### Submitting a Superfold Job
 
-The RFDiffusion citation is
+#### Infrastructure Overview:
+- **AWS Batch**: Manages and schedules the execution of Superfold jobs on a compute environment.
+- **S3**: Stores input and output data for the Superfold jobs.
+- **SageMaker Notebook**: Used for running the orchestration script to submit jobs.
+- **EC2 Instances**: Utilized by AWS Batch for compute resources, specifically G4dn instances for GPU capabilities.
 
-```text
-@article{joseph_l_watson_broadly_2022,
-  title = {Broadly applicable and accurate protein design by integrating structure prediction networks and diffusion generative models},
-  url = {http://biorxiv.org/content/early/2022/12/14/2022.12.09.519842.abstract},
-  doi = {10.1101/2022.12.09.519842},
-  journal = {bioRxiv},
-  author = {{Joseph L. Watson} and {David Juergens} and {Nathaniel R. Bennett} and {Brian L. Trippe} and {Jason Yim} and {Helen E. Eisenach} and {Woody Ahern} and {Andrew J. Borst} and {Robert J. Ragotte} and {Lukas F. Milles} and {Basile I. M. Wicky} and {Nikita Hanikel} and {Samuel J. Pellock} and {Alexis Courbet} and {William Sheffler} and {Jue Wang} and {Preetham Venkatesh} and {Isaac Sappington} and {Susana Vázquez Torres} and {Anna Lauko} and {Valentin De Bortoli} and {Emile Mathieu} and {Regina Barzilay} and {Tommi S. Jaakkola} and {Frank DiMaio} and {Minkyung Baek} and {David Baker}},
-  year = {2022}
-}
-```
+#### Components:
+1. **IAM Roles and Permissions**: Ensure the notebook, Lambda functions, and Batch jobs have the necessary permissions.
+2. **Batch Compute Environments and Job Queues**: Set up to manage the execution of Superfold jobs.
+3. **S3 Buckets**: Store input files and receive output data.
+4. **SageMaker Notebook**: Runs the script to submit and manage Batch jobs.
 
-### 4.10. NextFlow
+#### Process of Submitting a Superfold Job:
+Access SageMaker notebooks via AWS Console by navigating to SageMaker > Notebook instances. Start your notebook instance, then click Open Jupyter or Open JupyterLab from the Actions menu.
 
-Please visit [https://www.nextflow.io](https://www.nextflow.io) for more information about the RFDiffusion algorithm. For a fully-managed NextFlow solution, you may also be interested in [Amazon Omics Workflows](https://docs.aws.amazon.com/omics/latest/dev/workflows.html).
+1. **Install Required Packages**:
+   ```python
+   %pip install -q -U -r notebook-requirements.txt
+   ```
 
------
+2. **Define the Superfold Job Class**:
+   - Inherit from `BatchFoldJob`.
+   - Specify attributes such as `input_s3_uri`, `output_s3_uri`, `params`, `weights_dir`, `output_dir`, `job_name`, `job_definition_name`, `cpu`, `memory`, and `gpu`.
+   - Override the `__attrs_post_init__` method to set up the job command.
 
-## 5. Architecture Details
+3. **Initialize AWS Services**:
+   ```python
+   import boto3
+   from batchfold.batchfold_environment import BatchFoldEnvironment
 
-![AWS Batch Architecture for Protein Folding](imgs/batch-protein-folding-arch.png)
+   boto_session = boto3.session.Session()
+   s3 = boto_session.client("s3")
+   batch_environment = BatchFoldEnvironment(boto_session=boto_session)
+   ```
 
-### 5.1. Stack Creation Details
+4. **Set S3 Path and Job Queue**:
+   - Define the S3 bucket and prefix for storing input/output files.
+   - Set the job queue for submitting the job.
+   ```python
+   S3_BUCKET = batch_environment.default_bucket
+   S3_PREFIX = "superfold-experiment-" + datetime.now().strftime("%Y%m%d%s")
+   S3_PATH = os.path.join("s3://", S3_BUCKET, S3_PREFIX)
+   JOB_QUEUE = "G4dnJobQueue"
+   ```
 
-This architecture uses a nested CloudFormation template to create various resources in a particular sequence:
+5. **Specify Job Parameters**:
+   - Define the parameters for the Superfold job.
+   ```python
+   MODELS = 4
+   MAX_RECYCLES = 5
+   params = {
+       "--models": MODELS,
+       "--max_recycles": MAX_RECYCLES
+   }
+   ```
 
-1. (Optional) If existing resources are not provided as template parameters, create a VPC, subnets, NAT gateway, elastic IP, routes, and S3 endpoint.
-1. (Optional) If existing resources are not provided as template parameters, create a FSx for Lustre file system.
-1. Download several container images from a public ECR repository and push them to a new, private repository in your account. Also download a .zip file with the example notebooks and other code into a CodeCommit repository.
-1. Create the launch template, compute environments, job queues, and job definitions needed to submit jobs to AWS Batch.
-1. (Optional) If requested via a template parameter, create and run a Amazon Lambda-backed custom resource to download several open source proteomic data sets to the FSx Lustre instance.
+6. **Create and Submit the Superfold Job**:
+   - Instantiate a `SuperfoldJob` object with the specified parameters.
+   - Submit the job to the AWS Batch environment.
+   ```python
+   superfold_job_name = "SuperfoldJob" + datetime.now().strftime("%Y%m%d%s")
+   superfold_job = SuperfoldJob(
+       boto_session=boto_session,
+       job_name=superfold_job_name,
+       input_s3_uri= S3_PATH + input_filename,
+       output_s3_uri=S3_PATH + "/" + superfold_job_name,
+       params=params,
+   )
+   superfold_submission = batch_environment.submit_job(superfold_job, job_queue_name=JOB_QUEUE)
+   ```
 
-### 5.2. Cost
+7. **Monitor Job Execution**:
+   - Wait for the job to complete.
+   ```python
+   superfold_submission.wait()
+   ```
 
-There are two types of cost associated with this stack:
+#### Managing AWS Resources
+- **Scaling and Monitoring**
+  - Adjust scaling policies in AWS Batch to manage resource utilization.
+  - Monitor performance and adjust instance types as needed for optimal performance.
 
-- Ongoing charges for data storage, networking, and (optional) SageMaker Notebook Instance usage.
-- Per-job charges for EC2 usage and data transfer.
+#### Data Handling
+- **Data Storage**
+  - Store input and output data in S3 buckets.
+  - Utilize FSx for Lustre for high-performance data handling during computation.
 
-Here are the estimated costs for using the default stack to run [100](https://calculator.aws/#/estimate?id=b1f0310e7266ad45644d3aefaa16f00e11ac1af6) and [5,000](https://calculator.aws/#/estimate?id=8237529417cf8fb38468e6aa8fcf1e6ba9bca527) jobs per month.
+---
 
-To minimize costs, set the `MultiAZ` and `LaunchSageMakerNotebook` options to **N** when creating the stack. This will eliminate the intra-region data transfer costs between FSx for Lustre and EC2 as well as the SageMaker Notebook hosting costs.
+This implementation documentation provides detailed steps and instructions for setting up, deploying, and utilizing the AWS infrastructure for protein modeling, including the creation and usage of the SuperFold Docker container.
 
------
+### Documentation Content
 
-## 6. FAQ
+#### Implementation Steps
+1. **Initial Setup**
+   - Configure AWS Batch, EC2 instances, FSx for Lustre, IAM roles, and networking.
+   - Deploy the infrastructure stack and mount the FSx file system to EC2 instances automatically.
 
-Q: When deploying the CloudFormation template, I get an error `Embedded stack arn:aws:cloudformation...  was not successfully created: The following resource(s) failed to create: [AWSServiceRoleForEC2SpotFleetServiceLinkedRole]`. How can I fix this?
+2. **Docker Container Creation**
+   - Integrate the SuperFold container and other relevant containers.
+   - Ensure all dependencies are encapsulated within the containers.
 
-This can happen if the service role has already been created in a previous deployment. Try deleting the `AWSServiceRoleForEC2SpotFleetServiceLinkedRole` in the IAM console and redeploy the Cloud Formation template.
+3. **Data Preparation**
+   - Run `prep_databases.py` to download necessary parameters and databases to the `/database` directory on FSx for Lustre.
+   - Use the `download_rfdiffusion_params.sh` script to download RFDiffusion parameters from the specified S3 source.
 
------
+### Instructions for Executing Download Scripts from within SageMaker Notebook
 
-## 7. Security
+1. **Install Required Packages:**
+   - Open your SageMaker notebook.
+   - Ensure you have the required packages installed by running:
+     ```
+     %pip install -q -U -r notebook-requirements.txt
+     ```
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+2. **Prepare the Download Environment:**
+   - Import necessary modules and create a batch environment within the notebook:
+     ```python
+     import boto3
+     from batchfold.batchfold_environment import BatchFoldEnvironment
+     from batchfold.download_job import DownloadJob
+     from datetime import datetime
+     
+     boto_session = boto3.session.Session()
+     batch_environment = BatchFoldEnvironment(boto_session=boto_session)
+     job_queue_name = "CPUOnDemandJobQueue"
+     ```
 
------
+3. **Define Download Parameters:**
+   - List the scripts required to download the AlphaFold and RFdiffusion parameters.
+   - The scripts will fetch parameter files from specified S3 URLs and extract them to the designated '/database' directory on FSx.
 
-## 8. License
+4. **Submit Download Jobs:**
+   - Submit the download jobs to the batch environment:
+     ```python
+     download_scripts = [
+         "download_alphafold_params",
+         "download_rfdiffusion_params"
+     ]
 
-This project is licensed under the Apache-2.0 License.
+     responses = []
+     for script in download_scripts:
+         job_name = script + datetime.now().strftime("%Y%m%dT%H%M%S")
+         download_job = DownloadJob(job_name=job_name, script=f"./scripts/{script}.sh")
+         response = batch_environment.submit_job(download_job, job_queue_name=job_queue_name)
+         responses.append(response)
+     ```
+
+5. **Monitor Job Status:**
+   - Check the status of the submitted jobs to ensure they complete successfully.
+
+### Actions Performed by the Scripts
+
+- **AlphaFold Parameters Script:**
+  - Downloads AlphaFold parameters from an S3 bucket (`s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/alphafold_params_2022-12-06.tar`).
+  - Extracts the downloaded tar file to a specified directory.
+
+- **RFdiffusion Parameters Script:**
+  - Downloads RFdiffusion parameters from an S3 bucket (`s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/rfdiffusion_parameters_220407.tar.gz`).
+  - Extracts the downloaded gzip tar file to a specified directory.
+
+- **Job Submission and Execution**
+   - Submit jobs via the SageMaker Jupyter Notebook using the provided scripts.
+   - Monitor job status and resource utilization.
+
+### FAQ
+
+1. **Why are my jobs in the RUNNABLE state?**
+   - The current setup supports up to 8 cores (one GPU) per queue/cluster. A quota request to increase to 256 cores (32 GPUs) has been submitted.
+
+2. **Why did my jobs fail?**
+   - Ensure the I/O format for submission functions is correct. Verify that all necessary parameters and dependencies are downloaded and correctly configured.
+
+3. **Where is the `/database` directory located?**
+   - The `/database` directory is located in the FSx for Lustre file system created as part of the infrastructure stack.
+
+4. **Where are the RFDiffusion parameters downloaded from?**
+   - Parameters are downloaded from the specified S3 source: `s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/rfdiffusion_parameters_220407.tar.gz`.
+
+5. **Will there be a stable database location for parameters?**
+   - Yes, once the `/database` directory is set up, it will remain a stable location for the lifecycle of the infrastructure.
+
+6. **How do I run the SuperFold container?**
+   - Use the provided command and arguments to run protein folding jobs with the SuperFold container. Monitor job status via the AWS Batch console.
+
+7. **What modifications are needed for `run_superfold.py`?**
+   - Comment out lines 1324, 1325, and 1330 to remove unnecessary debugging outputs and avoid errors.
+
+8. **How do I ensure my local setup matches the AWS setup?**
+   - Follow the example commands and scripts provided in the documentation to ensure consistency between local and AWS environments.
