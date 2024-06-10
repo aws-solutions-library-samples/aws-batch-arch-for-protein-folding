@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.0.1-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu20.04
 
 # Set up the environment
 ENV PATH=$PATH:/usr/local/cuda/bin
