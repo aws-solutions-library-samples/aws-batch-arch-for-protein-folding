@@ -1,21 +1,5 @@
 ## Documentation for Archon Protein Modeling Infrastructure (AWS)
 
-### **Todo**
-
-[x] Cloud formation templates and documented deployment strategy
-[x] Configure infrastructure prototype on AWS
-[x] Docker containers built on suitable EC2
-[x] Initial testing and validation
-
-[ ] Deploy G5 and P4d environments (if desired)
-[ ] G4dnSpotQueue
-
-[ ] Documentation and operational handoff to Archon's team
-   [ ] Train Archon on infrastructure
-   [ ] Check code in to Archon Github
-   [ ] Transfer Archon.pem to team
-
-
 ### **Infrastructure Setup**
 
 AWS Batch Architecture for Protein Folding and Design
