@@ -20,3 +20,4 @@ test.sh
 tests/data/
 data/*
 .scratch
+aws-batch-arch-for-protein-folding.code-workspace

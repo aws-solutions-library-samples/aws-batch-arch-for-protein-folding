@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  batch-protein-folding-cfn-module-alphafold2.yaml: Implement AlphaFold2 module.
+  batch-protein-folding-cfn-module-superfold.yaml: Implement Superfold module.
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -20,7 +20,7 @@ Parameters:
     Type: String
   StartCodeBuildLambdaArn:
     Description: Lambda function for building container repos
-    Type: String  
+    Type: String      
   DeleteContainerRepoLambdaArn:
     Description: Lambda function for deleting container repos
     Type: String
@@ -29,10 +29,9 @@ Parameters:
     Type: Number
     Default: 9999999999    
 
-
 Resources:
 
-  AlphaFold2ContainerRegistry:
+  SuperfoldContainerRegistry:
     Type: AWS::ECR::Repository
     Properties:
       EncryptionConfiguration:
@@ -43,14 +42,14 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"       
+          Value: !Ref "AWS::StackId" 
 
-  CodeBuildProjectAlphaFold2:
+  CodeBuildProjectSuperfold:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: Build Docker container for AlphaFold 2 algorithm on AWS Batch
+      Description: Build Docker container for Superfold algorithm on AWS Batch
       EncryptionKey: !Ref CodeBuildEncryptionKey
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
@@ -58,11 +57,11 @@ Resources:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref AlphaFold2ContainerRegistry
+            Value: !Ref SuperfoldContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/alphafold2  
+            Value: infrastructure/docker/superfold
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -79,47 +78,42 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"           
+          Value: !Ref "AWS::StackId"   
 
-  StartAlphaFold2ContainerBuild:
+  StartSuperfoldContainerBuild:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
         Ref: StartCodeBuildLambdaArn
       ProjectName:
-        Ref: CodeBuildProjectAlphaFold2                
+        Ref: CodeBuildProjectSuperfold 
       Timestamp:
         Ref: Timestamp
-
-  AlphaFold2JobDefinition:
+        
+  SuperfoldJobDefinition:
     Type: AWS::Batch::JobDefinition
     Properties:
       ContainerProperties:
         Command:
           - "nvidia-smi"
-        # Environment:
-        #   - Name: TF_FORCE_UNIFIED_MEMORY
-        #     Value: 1
-        #   - Name: XLA_PYTHON_CLIENT_MEM_FRACTION
-        #     Value: 4.0
-        Image: !Sub "${AlphaFold2ContainerRegistry.RepositoryUri}:latest"
+        Image: !Sub "${SuperfoldContainerRegistry.RepositoryUri}:latest"
         LogConfiguration:
           LogDriver: awslogs
         MountPoints:
           - ContainerPath: /database
-            ReadOnly: True
-            SourceVolume: database
+            ReadOnly: False
+            SourceVolume: database          
         ResourceRequirements:
           - Type: VCPU
             Value: 8
           - Type: MEMORY
             Value: 16000
-          # - Type: GPU
-          #   Value: 1
+          - Type: GPU
+            Value: 1
         Volumes:
           - Name: database
             Host:
-              SourcePath: /fsx
+              SourcePath: /fsx            
       PlatformCapabilities:
         - EC2
       PropagateTags: true
@@ -128,26 +122,26 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-      Type: container    
+      Type: container
 
-  DeleteAlphaFold2ContainerRepo:
+  DeleteSuperfoldContainerRepo:
     Type: Custom::ResourceForDeletingECR
     Properties:
       ServiceToken:
         Ref: DeleteContainerRepoLambdaArn
       ContainerRepo:
-        Ref: AlphaFold2ContainerRegistry
+        Ref: SuperfoldContainerRegistry
 
 Outputs:
-  AlphaFold2JobDefinition:
-    Description: Job definition for running AlphaFold2 jobs on GPU instances.
+  SuperfoldJobDefinition:
+    Description: Job definition for running Superfold jobs on GPU instances.
     Value:
-      Ref: AlphaFold2JobDefinition
-  AlphaFold2ContainerURI:
-    Description: ECR URI for AlphaFold2 container image.
+      Ref: SuperfoldJobDefinition
+  SuperfoldContainerURI:
+    Description: ECR URI for Superfold container image.
     Value:
-      Ref: AlphaFold2ContainerRegistry
+      Ref: SuperfoldContainerRegistry      
   CodeBuildProject:
     Description: CodeBuildProject
     Value:
-      Ref: CodeBuildProjectAlphaFold2
+      Ref: CodeBuildProjectSuperfold      
