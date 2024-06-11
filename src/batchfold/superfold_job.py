@@ -9,8 +9,8 @@ import os
 
 
 @define(kw_only=True)
-class RFDiffusionJob(BatchFoldJob):
-    """Define RFDesign Hallucinate Job"""
+class SuperfoldJob(BatchFoldJob):
+    """Define Superfold Job"""
 
     input_s3_uri: str
     output_s3_uri: str
