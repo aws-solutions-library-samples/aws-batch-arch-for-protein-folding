@@ -19,12 +19,12 @@ Parameters:
   DownloadFsxData:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
-    Default: "Y"
+    Default: "N"
     AllowedValues: [Y, N]
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code zip
     Type: String    
-    Default: "aws-hcls-ml"
+    Default: "archon-iac"
   S3BucketARN:
     Description: S3 Bucket ARN
     Type: String
@@ -68,8 +68,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   DownloadContainerRegistry:
     Type: AWS::ECR::Repository
@@ -83,8 +81,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"    
-        - Key: SolutionId
-          Value: SO9164 
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -163,8 +159,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
-        - Key: SolutionId
-          Value: SO9164
 
   EncryptionKey:
     Type: "AWS::KMS::Key"
@@ -228,8 +222,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
-        - Key: SolutionId
-          Value: SO9164
 
   CodeBuildLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -258,7 +250,8 @@ Resources:
   StartCodeBuildLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 10
+#      ReservedConcurrentExecutions: 10
+#      ReservedConcurrentExecutions: 0
       Code:
         ZipFile: |
           import logging          
@@ -302,9 +295,7 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"
-        - Key: SolutionId
-          Value: SO9164      
+          Value: !Ref "AWS::StackId"  
 
   ##################################################
   # Delete container repo on stack deletion
@@ -337,7 +328,8 @@ Resources:
   DeleteContainerRepoLambda:
     Type: AWS::Lambda::Function
     Properties:
-      ReservedConcurrentExecutions: 10
+#      ReservedConcurrentExecutions: 10
+#      ReservedConcurrentExecutions: 0
       Code:
         ZipFile: |
           import logging          
@@ -386,8 +378,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref "AWS::StackId"
-        - Key: SolutionId
-          Value: SO9164
 
 ##################################################
 # Create Download Container
@@ -429,9 +419,7 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"        
-        - Key: SolutionId
-          Value: SO9164                  
+          Value: !Ref "AWS::StackId"                     
 
   StartDownloadContainerBuild:
     Type: Custom::ResourceForBuildingContainer

@@ -35,11 +35,11 @@ Parameters:
   CreateAWSServiceRoleForEC2Spot:
     Description: Create the AWSServiceRoleForEC2Spot service-linked role
     Type: String
-    Default: "N"
+    Default: "Y"
   CreateAWSServiceRoleForEC2SpotFleet:
     Description: Create the AWSServiceRoleForEC2SpotFleet service-linked role
     Type: String
-    Default: "N"
+    Default: "Y"
   CreateP4dComputeEnvironment:
     Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
     Type: String
@@ -136,8 +136,6 @@ Resources:
                 Value: !Ref ApplicationName
               - Key: StackId
                 Value: !Ref AWS::StackId
-              - Key: SolutionId
-                Value: SO9164
         UserData:
           Fn::Base64:
             Fn::Join:
@@ -189,8 +187,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   AWSServiceRoleForEC2SpotServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
@@ -302,6 +298,38 @@ Resources:
         StackId: !Ref "AWS::StackId"
         SolutionId: SO9164
 
+  G4dnSpotComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeResources:
+        AllocationStrategy: SPOT_CAPACITY_OPTIMIZED
+        BidPercentage: 100
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - g4dn
+        LaunchTemplate:
+          LaunchTemplateId:
+            Ref: InstanceLaunchTemplate
+          Version: $Latest
+        MaxvCpus: 256
+        MinvCpus: 0
+        SecurityGroupIds:
+          - Ref: DefaultSecurityGroupID
+        SpotIamFleetRole:
+          "Fn::GetAtt": AmazonEC2SpotFleetTaggingRole.Arn
+        Subnets: !Ref Subnets
+        Type: SPOT
+        Tags:
+          Application: !Ref ApplicationName
+          StackId: !Ref "AWS::StackId"
+          SolutionId: SO9164
+      State: ENABLED
+      Type: MANAGED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
+        SolutionId: SO9164
+
   G5ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
     Condition: CreateG5ComputeEnvironment
@@ -387,7 +415,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
 
   G4dnJobQueue:
     Type: AWS::Batch::JobQueue
@@ -400,7 +427,18 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
+
+  G4dnSpotJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - ComputeEnvironment: !Ref G4dnSpotComputeEnvironment
+          Order: 1
+      Priority: 10
+      State: ENABLED
+      Tags:
+        Application: !Ref ApplicationName
+        StackId: !Ref "AWS::StackId"
 
   G5JobQueue:
     Type: AWS::Batch::JobQueue
@@ -414,7 +452,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
 
   P4dJobQueue:
     Type: AWS::Batch::JobQueue
@@ -460,7 +497,6 @@ Resources:
       Tags:
         Application: !Ref ApplicationName
         StackId: !Ref "AWS::StackId"
-        SolutionId: SO9164
       Type: container
 
 Outputs:
@@ -480,6 +516,10 @@ Outputs:
     Description: Job queue for on-demand GPU instances.
     Value:
       Ref: G4dnJobQueue
+  G4dnSpotJobQueue:
+    Description: Job queue for on-demand GPU instances.
+    Value:
+      Ref: G4dnSpotJobQueue
   G5JobQueue:
     Condition: CreateG5ComputeEnvironment
     Description: Job queue for on-demand G5 instances.

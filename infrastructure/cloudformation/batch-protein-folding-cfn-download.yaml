@@ -69,20 +69,20 @@ Resources:
 
                       download_scripts = [
                           "/scripts/download_alphafold_params.sh",
-                          "/scripts/download_bfd.sh",
-                          "/scripts/download_esmfold_params.sh",
-                          "/scripts/download_mgnify.sh",
-                          "/scripts/download_openfold_params.sh",
-                          "/scripts/download_pdb_mmcif.sh",
-                          "/scripts/download_pdb_seqres.sh",
-                          "/scripts/download_pdb70.sh",
-                          "/scripts/download_small_bfd.sh",
-                          "/scripts/download_uniref30.sh",
-                          "/scripts/download_uniprot.sh",                          
-                          "/scripts/download_uniref90.sh",
-                          "/scripts/download_omegafold_params.sh",
-                          "/scripts/download_rfdesign_params.sh",
-                          "/scripts/download_diffdock_params.sh",
+                          # "/scripts/download_bfd.sh",
+                          # "/scripts/download_esmfold_params.sh",
+                          # "/scripts/download_mgnify.sh",
+                          # "/scripts/download_openfold_params.sh",
+                          # "/scripts/download_pdb_mmcif.sh",
+                          # "/scripts/download_pdb_seqres.sh",
+                          # "/scripts/download_pdb70.sh",
+                          # "/scripts/download_small_bfd.sh",
+                          # "/scripts/download_uniref30.sh",
+                          # "/scripts/download_uniprot.sh",                          
+                          # "/scripts/download_uniref90.sh",
+                          # "/scripts/download_omegafold_params.sh",
+                          # "/scripts/download_rfdesign_params.sh",
+                          # "/scripts/download_diffdock_params.sh",
                           "/scripts/download_rfdiffusion_params.sh"
                       ]
                       
@@ -188,8 +188,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164      
 
   DownloadFsxData:
     Type: Custom::ResourceForDownloadingData
