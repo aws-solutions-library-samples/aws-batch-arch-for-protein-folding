@@ -2,8 +2,8 @@
 #set -e 
 
 echo "checking solution id $1"
-echo "grep -nr --exclude-dir='.github' "$1" ./.."
-result=$(grep -nr --exclude-dir='.github' "$1" ./..)
+echo "grep -nr --exclude-dir='.github' "$1" ."
+result=$(grep -nr --exclude-dir='.github' "$1" .)
 if [ $? -eq 0 ]
 then
   echo "Solution ID $1 found\n"
