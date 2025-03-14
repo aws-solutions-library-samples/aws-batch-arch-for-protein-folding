@@ -9,13 +9,6 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: "Unknown"
-  Environment:
-    Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
-    Type: String
-    Default: main
-    AllowedValues:
-      - main
-      - dev     
   DownloadFsxData:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
@@ -23,7 +16,7 @@ Parameters:
     AllowedValues: [Y, N]
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code zip
-    Type: String    
+    Type: String
     Default: "aws-hcls-ml"
   S3BucketARN:
     Description: S3 Bucket ARN
@@ -35,41 +28,12 @@ Parameters:
 
 Conditions:
   DownloadFsxDataCondition:
-    "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
+    "Fn::Equals": [Ref: "DownloadFsxData", "Y"]
 
 Resources:
-
   ##################################################
   # Container Services
   ##################################################
-  CodeRepository:
-    Type: AWS::CodeCommit::Repository
-    Properties:
-      Code:
-        BranchName: "main"
-        S3:
-          Bucket: !Ref CodeRepoS3BucketName
-          Key: !Sub "${Environment}/batch-protein-folding.zip"
-      RepositoryDescription: Code for running batch protein folding on AWS
-      RepositoryName:
-        !Join [
-          "-",
-          [
-            "batch-protein-folding",
-            "code-repo",
-            !Select [
-              4,
-              !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
-            ],
-          ],
-        ]
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref AWS::StackId
-        - Key: SolutionId
-          Value: SO9164
 
   DownloadContainerRegistry:
     Type: AWS::ECR::Repository
@@ -82,9 +46,9 @@ Resources:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"    
+          Value: !Ref "AWS::StackId"
         - Key: SolutionId
-          Value: SO9164 
+          Value: SO9164
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -126,29 +90,18 @@ Resources:
                       ["arn:aws:s3:::codepipeline", !Ref "AWS::Region", "*"],
                     ]
                   - !Sub "${S3BucketARN}*"
-                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}/*"
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:GetObjectVersion
                   - s3:GetBucketAcl
                   - s3:GetBucketLocation
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
                 Resource:
-                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}*"                  
-              - Effect: Allow
-                Action:
-                  - codecommit:GitPull
-                Resource:
-                  - Fn::Join:
-                      [
-                        ":",
-                        [
-                          "arn:aws:codecommit",
-                          !Ref "AWS::Region",
-                          !Ref "AWS::AccountId",
-                          !GetAtt CodeRepository.Name,
-                        ],
-                      ]
+                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}"
+                  - !Sub "arn:aws:s3:::${CodeRepoS3BucketName}/*"
+
               - Effect: Allow
                 Action:
                   - codebuild:CreateReportGroup
@@ -251,7 +204,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codebuild:StartBuild
-                Resource: "*"          
+                Resource: "*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -304,11 +257,11 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
         - Key: SolutionId
-          Value: SO9164      
+          Value: SO9164
 
   ##################################################
   # Delete container repo on stack deletion
-  ##################################################  
+  ##################################################
   DeleteContainerRepoLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -326,10 +279,10 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-            - Effect: Allow
-              Action:
-                - ecr:DeleteRepository
-              Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecr:DeleteRepository
+                Resource: "*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
@@ -380,7 +333,7 @@ Resources:
       Role:
         Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
       Runtime: python3.10
-      Timeout: 10     
+      Timeout: 10
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -389,9 +342,9 @@ Resources:
         - Key: SolutionId
           Value: SO9164
 
-##################################################
-# Create Download Container
-##################################################  
+  ##################################################
+  # Create Download Container
+  ##################################################
 
   CodeBuildProjectDownload:
     Type: AWS::CodeBuild::Project
@@ -406,13 +359,13 @@ Resources:
           - Name: IMAGE_TAG
             Value: latest
           - Name: IMAGE_REPO_NAME
-            Value: !Ref DownloadContainerRegistry            
+            Value: !Ref DownloadContainerRegistry
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
           - Name: BUILD_CONTEXT
-            Value: infrastructure/docker/download        
+            Value: infrastructure/docker/download
           - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildWaitHandle                     
+            Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -420,18 +373,16 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/download/buildspec_with_wait.yaml        
-        GitCloneDepth: 1
-        Location: !GetAtt CodeRepository.CloneUrlHttp
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
+        BuildSpec: infrastructure/docker/buildspec.yaml
+        Location: !Sub "${CodeRepoS3BucketName}/main/batch-protein-folding.zip"
+        Type: S3
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackId
-          Value: !Ref "AWS::StackId"        
+          Value: !Ref "AWS::StackId"
         - Key: SolutionId
-          Value: SO9164                  
+          Value: SO9164
 
   StartDownloadContainerBuild:
     Type: Custom::ResourceForBuildingContainer
@@ -449,7 +400,7 @@ Resources:
   CodeBuildWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
     Condition: DownloadFsxDataCondition
-    DependsOn: 
+    DependsOn:
       - CodeBuildProjectDownload
     Properties:
       Handle: !Ref CodeBuildWaitHandle
@@ -462,13 +413,9 @@ Resources:
       ServiceToken:
         Fn::GetAtt: DeleteContainerRepoLambda.Arn
       ContainerRepo:
-        Ref: DownloadContainerRegistry           
+        Ref: DownloadContainerRegistry
 
 Outputs:
-  CodeRepositoryURI:
-    Description: Code repository URI
-    Value:
-      Fn::GetAtt: CodeRepository.CloneUrlHttp
   CodeBuildEncryptionKey:
     Description: Encryption key for CodeBuild jobs
     Value:
@@ -480,16 +427,16 @@ Outputs:
   StartCodeBuildLambdaArn:
     Description: Lambda function for building container repos
     Value:
-      Fn::GetAtt: StartCodeBuildLambda.Arn      
+      Fn::GetAtt: StartCodeBuildLambda.Arn
   DeleteContainerRepoLambdaArn:
     Description: Lambda function for deleting container repos
     Value:
-      Fn::GetAtt: DeleteContainerRepoLambda.Arn      
+      Fn::GetAtt: DeleteContainerRepoLambda.Arn
   DownloadContainerRegistryURI:
     Description: URI of the download container
     Value:
-      Fn::GetAtt: DownloadContainerRegistry.RepositoryUri   
+      Fn::GetAtt: DownloadContainerRegistry.RepositoryUri
   DownloadContainerRegistryName:
     Description: Name of the download container repository
     Value:
-      Ref: DownloadContainerRegistry        
+      Ref: DownloadContainerRegistry

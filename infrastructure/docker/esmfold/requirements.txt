@@ -1,0 +1,8 @@
+accelerate==0.34.2
+bitsandbytes==0.44.1
+datasets==3.0.1
+jsonlines
+matplotlib==3.9.2
+transformers>=4.48.0
+pyfastx==2.1.0
+xformers>=0.0.28

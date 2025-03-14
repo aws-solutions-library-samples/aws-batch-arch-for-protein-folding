@@ -18,6 +18,7 @@ Parameters:
   CodeRepositoryURI:
     Description: Code repository URI
     Type: String
+    Default: "https://github.com/aws-solutions-library-samples/aws-batch-arch-for-protein-folding.git"
   S3BucketName:
     Description: Optional S3 Bucket Name
     Type: String
@@ -83,7 +84,6 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSageMakerFullAccess"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCodeCommitReadOnly"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
       Policies:
         - PolicyName: SubmitJob
@@ -95,7 +95,7 @@ Resources:
                   - batch:SubmitJob
                   - batch:DescribeJobs
                   - batch:ListJobs
-                  - batch:TerminateJobs
+                  - batch:TerminateJob
                 Resource: "*"
         - PolicyName: S3RWPolicy
           PolicyDocument:

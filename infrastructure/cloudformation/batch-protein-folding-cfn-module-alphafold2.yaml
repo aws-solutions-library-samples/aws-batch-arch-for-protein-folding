@@ -9,9 +9,10 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: "Unknown"
-  CodeRepositoryUrl:
-    Description: Clone URL for the CodeCommit repository
+  CodeRepoS3BucketName:
+    Description: S3 Bucket Name to retrieve code zip
     Type: String
+    Default: "aws-hcls-ml"
   CodeBuildEncryptionKey:
     Description: Encryption key for CodeBuild jobs  
     Type: String
@@ -73,10 +74,8 @@ Resources:
       ServiceRole: !Ref CodeBuildRoleArn
       Source:
         BuildSpec: infrastructure/docker/buildspec.yaml
-        GitCloneDepth: 1
-        Location: !Ref CodeRepositoryUrl
-        Type: CODECOMMIT
-      SourceVersion: refs/heads/main
+        Location: !Sub "${CodeRepoS3BucketName}/main/batch-protein-folding.zip"
+        Type: S3
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
