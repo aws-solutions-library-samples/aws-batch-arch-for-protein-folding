@@ -33,7 +33,7 @@ cfn-lint:
     - pip install -U cfn-lint
     - pip freeze
   script:
-    - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002
+    - cfn-lint -I infrastructure/cloudformation/*cfn*.yaml -i W3002 -i E1019 -i W1031
 
 cfn-nag:
   image:

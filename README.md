@@ -13,12 +13,10 @@
     4.2. [AlphaFold](#42-alphafold)  
     4.3. [OpenFold](#43-openfold)  
     4.4. [OmegaFold](#44-omegafold)  
-    4.5. [RFDesign](#45-rfdesign)  
-    4.6. [ESMFold](#46-esmfold)  
-    4.7. [ProteinMPNN](#47-proteinmpnn)  
-    4.8. [DiffDock](#48-diffdock)  
-    4.9. [RFDiffusion](#49-rfdiffusion)  
-    4.10. [NextFlow](#410-nextflow)  
+    4.5. [ESMFold](#46-esmfold)  
+    4.6. [ProteinMPNN](#47-proteinmpnn)  
+    4.7. [DiffDock](#48-diffdock)  
+    4.8. [RFDiffusion](#49-rfdiffusion)  
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
     5.2. [Cost](#52-cost)  
@@ -179,29 +177,7 @@ The OmegaFold citation is
 }
 ```
 
-### 4.5. RFDesign
-
-Commit [bba6992283de63faba6ff727bb4bc68327a5356c](https://github.com/RosettaCommons/RFDesign/commit/bba6992283de63faba6ff727bb4bc68327a5356c) from November 21, 2022.
-
-Please visit [https://github.com/RosettaCommons/RFDesign](https://github.com/RosettaCommons/RFDesign) for more information about the RFDesign hallucinate and inpainting algorithms.
-
-The RFDesign citation is
-
-```text
-@article{RFDesign,
-  author = {Jue Wang, Sidney Lisanza, David Juergens, Doug Tischer, Ivan Anishchenko, Minkyung Baek, Joseph L. Watson, Jung Ho Chun, Lukas F. Milles, Justas Dauparas, Marc Expòsit, Wei Yang, Amijai Saragovi, Sergey Ovchinnikov, and David Baker},
-  title = {Deep learning methods for designing proteins scaffolding functional sites},
-  elocation-id = {2021.11.10.468128},
-  year = {2022},
-  doi = {10.1101/2021.11.10.468128},
-  publisher = {bioRxiv},
-  URL = {https://www.biorxiv.org/content/early/2022/07/22/2022.07.21.500999},
-  eprint = {https://www.biorxiv.org/content/10.1101/2021.11.10.468128v2.full.pdf},
-  journal = {bioRxiv}
-}
-```
-
-### 4.6. ESMFold
+### 4.5. ESMFold
 
 Commit [74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3](https://github.com/facebookresearch/esm/commit/74d25cba46a7fd9a9f557ff41ed1d8e9f131aac3) from November 26, 2023.
 
@@ -219,7 +195,7 @@ The ESMFold citation is
 }
 ```
 
-### 4.7. ProteinMPNN
+### 4.6. ProteinMPNN
 
 Commit [be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9](https://github.com/dauparas/ProteinMPNN/commit/be1d37b6699dcd2283ab5b6fc8cc88774e2c80e9) from March 24, 2023.
 
@@ -240,7 +216,7 @@ The ProteinMPNN citation is
 }
 ```
 
-### 4.8. DiffDock
+### 4.7. DiffDock
 
 Commit [3c3c728cf2e444cf8df45b58067604d982159471](https://github.com/gcorso/DiffDock/commit/3c3c728cf2e444cf8df45b58067604d982159471) from March 27, 2023.
 
@@ -257,7 +233,7 @@ The DiffDock citation is
 }
 ```
 
-### 4.9. RFDiffusion
+### 4.8. RFDiffusion
 
 Commit [5606075d45bd23aa60785024b203ed6b0f6d2cd0](https://github.com/RosettaCommons/RFdiffusion/commit/5606075d45bd23aa60785024b203ed6b0f6d2cd0) from June 28, 2023.
 
@@ -275,10 +251,6 @@ The RFDiffusion citation is
   year = {2022}
 }
 ```
-
-### 4.10. NextFlow
-
-Please visit [https://www.nextflow.io](https://www.nextflow.io) for more information about the RFDiffusion algorithm. For a fully-managed NextFlow solution, you may also be interested in [Amazon Omics Workflows](https://docs.aws.amazon.com/omics/latest/dev/workflows.html).
 
 -----
 

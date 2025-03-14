@@ -13,15 +13,15 @@ Parameters:
     Type: String
     Default: Y
     Description: Create a SageMaker Notebook Instance.
-    AllowedValues: [Y, N]          
+    AllowedValues: [Y, N]
   VPC:
     Description: (Optional) ID of VPC to use. If left empty, a new VPC will be created.
     Type: String
-    Default: ""     
+    Default: ""
   Subnet:
     Description: (Optional) ID of private subnet to use. If left empty, a new VPC will be created.
     Type: String
-    Default: ""     
+    Default: ""
   DefaultSecurityGroup:
     Description: (Optional) ID of security group to use. If left empty, a new VPC will be created.
     Type: String
@@ -33,7 +33,7 @@ Parameters:
   FileSystemMountName:
     Description: (Optional) Mount name of FSX for Lustre to use. If left empty, a new FSx for Lustre instance will be created.
     Type: String
-    Default: ""    
+    Default: ""
   DownloadFsxData:
     Description: Automatically populate FSx for Lustre file system with model parameters and sequence databases?
     Type: String
@@ -43,7 +43,7 @@ Parameters:
     Description: Create a compute environment for G5 instance types? Note that availabilty is region-specific
     Type: String
     Default: "N"
-    AllowedValues: [Y, N]    
+    AllowedValues: [Y, N]
   MultiAZ:
     Description: Use multiple availability zones?
     Type: String
@@ -53,15 +53,19 @@ Parameters:
     Description: Create a compute environment for p4d.24xlarge instance types? Note that availabilty is region-specific
     Type: String
     Default: "N"
-    AllowedValues: [Y, N]     
+    AllowedValues: [Y, N]
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code .zip
-    Type: String    
+    Type: String
     Default: "aws-hcls-ml"
+  CodeRepositoryURI:
+    Description: GitHub repository to load into SageMaker notebook instance
+    Type: String
+    Default: "https://github.com/aws-solutions-library-samples/aws-batch-arch-for-protein-folding.git"
   Timestamp:
     Description: Timestamp for the cfn deployment
     Type: Number
-    Default: 9999999999    
+    Default: 9999999999
 
 Conditions:
   CreateFileSystem:
@@ -83,10 +87,9 @@ Conditions:
   CreateSageMakerNotebook:
     "Fn::Equals": [Ref: "LaunchSageMakerNotebook", "Y"]
   DownloadFsxDataCondition:
-    "Fn::Equals": [Ref: "DownloadFsxData", "Y"] 
+    "Fn::Equals": [Ref: "DownloadFsxData", "Y"]
 
 Resources:
-
   ##################################################
   # S3
   ##################################################
@@ -176,15 +179,13 @@ Resources:
       TemplateURL: batch-protein-folding-cfn-container.yaml
       Parameters:
         ApplicationName:
-          Ref: ApplicationName     
+          Ref: ApplicationName
         DownloadFsxData:
           Ref: DownloadFsxData
         S3BucketARN:
-          "Fn::GetAtt": BatchFoldS3Bucket.Arn        
-        CodeRepoS3BucketName:
-          !Ref CodeRepoS3BucketName
-        Timestamp:
-          !Ref Timestamp
+          "Fn::GetAtt": BatchFoldS3Bucket.Arn
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
+        Timestamp: !Ref Timestamp
 
   BatchEnvironment:
     Type: "AWS::CloudFormation::Stack"
@@ -194,7 +195,7 @@ Resources:
         CreateG5ComputeEnvironment:
           Ref: CreateG5ComputeEnvironment
         CreateP4dComputeEnvironment:
-          Ref: CreateP4dComputeEnvironment          
+          Ref: CreateP4dComputeEnvironment
         ApplicationName:
           Ref: ApplicationName
         Subnets:
@@ -220,10 +221,9 @@ Resources:
         DownloadContainerRegistryURI:
           "Fn::GetAtt": Container.Outputs.DownloadContainerRegistryURI
         S3BucketName:
-          Ref: BatchFoldS3Bucket    
+          Ref: BatchFoldS3Bucket
         CreateAWSServiceRoleForEC2Spot: GetAWSServiceRoleForEC2Spot.role_exists
         CreateAWSServiceRoleForEC2SpotFleet: GetAWSServiceRoleForEC2SpotFleet.role_exists
-
 
   Notebook:
     Type: "AWS::CloudFormation::Stack"
@@ -244,14 +244,12 @@ Resources:
             - "Fn::GetAtt": Network.Outputs.DefaultSecurityGroup
             - Ref: DefaultSecurityGroup
         CodeRepositoryURI:
-          "Fn::GetAtt": Container.Outputs.CodeRepositoryURI    
+          Ref: CodeRepositoryURI
         S3BucketName:
           Ref: BatchFoldS3Bucket
 
   DownloadData:
     Type: "AWS::CloudFormation::Stack"
-    DependsOn:
-      - BatchEnvironment
     Condition: DownloadFsxDataCondition
     Properties:
       TemplateURL: batch-protein-folding-cfn-download.yaml
@@ -261,7 +259,7 @@ Resources:
         DownloadJobQueue:
           "Fn::GetAtt": BatchEnvironment.Outputs.CPUOnDemandJobQueue
         JobDefinition:
-          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition       
+          "Fn::GetAtt": BatchEnvironment.Outputs.DownloadJobDefinition
 
   ####################################################################################################
   # Custom Resources
@@ -284,11 +282,11 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-            - Effect: Allow
-              Action:
-                - iam:GetRole
-              Resource: 
-                - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                Resource:
+                  - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -339,7 +337,7 @@ Resources:
       Role:
         Fn::GetAtt: GetServiceRoleRole.Arn
       Runtime: python3.10
-      Timeout: 10     
+      Timeout: 10
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -360,11 +358,11 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: GetServiceRoleLambda.Arn
-      RoleName: "AWSServiceRoleForEC2SpotFleet"            
+      RoleName: "AWSServiceRoleForEC2SpotFleet"
 
-#################################################################################
-# Modules
-#################################################################################
+  #################################################################################
+  # Modules
+  #################################################################################
 
   ModuleAlphaFold2:
     Type: "AWS::CloudFormation::Stack"
@@ -373,16 +371,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -393,16 +390,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn          
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -413,16 +409,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn      
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -433,36 +428,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
-        Timestamp:
-          Ref: Timestamp
-
-  ModuleRFDesign:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-rfdesign.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -473,16 +447,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -493,36 +466,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
-        Timestamp:
-          Ref: Timestamp
-
-  ModuleNextflow:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: batch-protein-folding-cfn-module-nextflow.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
-        CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
-        CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
-        StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
-        DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -533,16 +485,15 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn                   
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
 
@@ -553,19 +504,18 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepositoryUrl:
-            "Fn::GetAtt": Container.Outputs.CodeRepositoryURI          
+        CodeRepoS3BucketName: !Ref CodeRepoS3BucketName
         CodeBuildEncryptionKey:
-            "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey      
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
-            "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
         StartCodeBuildLambdaArn:
-            "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn            
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
         DeleteContainerRepoLambdaArn:
-            "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn   
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
         Timestamp:
           Ref: Timestamp
-          
+
 Outputs:
   ApplicationName:
     Description: Name of the application
@@ -595,12 +545,7 @@ Outputs:
     Description: ECR URI for ProteinMPNN container image.
     Value:
       "Fn::GetAtt": ModuleProteinMPNN.Outputs.ProteinMPNNContainerURI
-  RFDesignContainerURI:
-    Description: ECR URI for RFDesign container image.
-    Value:
-      "Fn::GetAtt": ModuleRFDesign.Outputs.RFDesignContainerURI
   OpenFoldContainerURI:
     Description: ECR URI for OpenFold container image.
     Value:
       "Fn::GetAtt": ModuleOpenFold.Outputs.OpenFoldContainerURI
-  

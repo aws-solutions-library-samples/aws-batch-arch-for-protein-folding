@@ -33,7 +33,6 @@ def main():
         "download_pdb_mmcif",
         "download_pdb_seqres",
         "download_pdb70",
-        "download_rfdesign_params",
         "download_small_bfd",
         "download_test",
         "download_uniprot",

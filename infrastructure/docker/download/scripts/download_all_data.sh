@@ -60,9 +60,6 @@ bash "${SCRIPT_DIR}/download_omegafold_params.sh.sh" "${DOWNLOAD_DIR}"
 echo "Downloading OpenFold parameters..."
 bash "${SCRIPT_DIR}/download_openfold_params.sh.sh" "${DOWNLOAD_DIR}"
 
-echo "Downloading RFDesign parameters..."
-bash "${SCRIPT_DIR}/download_rfdesign_params.sh.sh" "${DOWNLOAD_DIR}"
-
 
 if [[ "${DOWNLOAD_MODE}" = reduced_dbs ]] ; then
   echo "Downloading Small BFD..."
