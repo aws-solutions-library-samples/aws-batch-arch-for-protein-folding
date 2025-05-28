@@ -373,7 +373,8 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildRole.Arn
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
-        BuildSpec: infrastructure/docker/buildspec.yaml
+        # BuildSpec: infrastructure/docker/buildspec.yaml
+        BuildSpec: infrastructure/docker/download/buildspec_with_wait.yaml
         Location: !Sub "${CodeRepoS3BucketName}/main/batch-protein-folding.zip"
         Type: S3
       Tags:
