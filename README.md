@@ -40,8 +40,9 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ## 2. Quick Start
 
-1. Choose **Launch Stack** and (if prompted) log into your AWS account:
+NOTE: This procedure only supports the following AWS regions: eu-west-1, eu-west-2, eu-central-1, ap-southwest-1, us-east-1, and us-east-2
 
+1. Choose **Launch Stack** and (if prompted) log into your AWS account:
     [![Launch Stack](imgs/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml)  
 2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
     ![Provide a stack name](imgs/name.png)  
