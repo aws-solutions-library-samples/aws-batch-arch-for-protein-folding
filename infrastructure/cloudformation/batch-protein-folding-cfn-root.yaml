@@ -184,7 +184,7 @@ Resources:
           Ref: DownloadFsxData
         S3BucketARN:
           "Fn::GetAtt": BatchFoldS3Bucket.Arn
-        CodeRepoS3BucketName: !Sub "CodeRepoS3BucketName-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
         Timestamp: !Ref Timestamp
 
   BatchEnvironment:
