@@ -70,7 +70,7 @@ done
 [ -z "$CREATE_G5_COMPUTE_ENVIRONMENT" ] && { CREATE_G5_COMPUTE_ENVIRONMENT="N"; }
 [ -z "$MULTI_AZ" ] && { MULTI_AZ="Y"; }
 [ -z "$CREATE_P4D_COMPUTE_ENVIRONMENT" ] && { CREATE_P4D_COMPUTE_ENVIRONMENT="N"; }
-[ -z "$CODE_REPO_S3_BUCKET_NAME" ] && { CODE_REPO_S3_BUCKET_NAME="aws-hcls-ml"; }
+[ -z "$CODE_REPO_S3_BUCKET_NAME" ] && { CODE_REPO_S3_BUCKET_NAME="5d1a4b76751b4c8a994ce96bafd91ec9"; }
 
 zip -r code.zip * -x .\*/\* -x random_commands.sh -x analysis\* -x build\*
 aws s3 cp code.zip s3://$BUCKET_NAME/main/batch-protein-folding.zip
@@ -79,5 +79,6 @@ rm code.zip
 aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --region $REGION --s3-bucket $BUCKET_NAME --s3-prefix cfn 
 aws cloudformation deploy --template-file infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --capabilities CAPABILITY_IAM --stack-name $STACK_NAME --region $REGION --parameter-overrides S3Bucket=$BUCKET_NAME \
   LaunchSageMakerNotebook=$LAUNCH_SAGEMAKER_NOTEBOOK VPC=$VPC Subnet=$SUBNET DefaultSecurityGroup=$DEFAULT_SECURITY_GROUP FileSystemId=$FILE_SYSTEM_ID FileSystemMountName=$FILE_SYSTEM_MOUNT_NAME \
-  DownloadFsxData=$DOWNLOAD_FSX_DATA CreateG5ComputeEnvironment=$CREATE_G5_COMPUTE_ENVIRONMENT MultiAZ=$MULTI_AZ CreateP4dComputeEnvironment=$CREATE_P4D_COMPUTE_ENVIRONMENT CodeRepoS3BucketName=$CODE_REPO_S3_BUCKET_NAME Timestamp=$TIMESTAMP
+  DownloadFsxData=$DOWNLOAD_FSX_DATA CreateG5ComputeEnvironment=$CREATE_G5_COMPUTE_ENVIRONMENT MultiAZ=$MULTI_AZ CreateP4dComputeEnvironment=$CREATE_P4D_COMPUTE_ENVIRONMENT CodeRepoS3BucketName=$CODE_REPO_S3_BUCKET_NAME Timestamp=$TIMESTAMP \
+  --disable-rollback
 rm infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml
