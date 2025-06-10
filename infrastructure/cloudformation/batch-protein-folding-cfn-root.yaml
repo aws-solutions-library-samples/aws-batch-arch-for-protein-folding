@@ -184,7 +184,7 @@ Resources:
           Ref: DownloadFsxData
         S3BucketARN:
           "Fn::GetAtt": BatchFoldS3Bucket.Arn
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         Timestamp: !Ref Timestamp
 
   BatchEnvironment:
@@ -371,7 +371,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -390,7 +390,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -409,7 +409,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -428,7 +428,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -447,7 +447,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -466,7 +466,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -485,7 +485,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -504,7 +504,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "{CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
