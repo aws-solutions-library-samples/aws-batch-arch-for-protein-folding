@@ -1,5 +1,11 @@
 # AWS Batch Architecture for Protein Folding and Design
 
+> [!IMPORTANT]
+> The examples provided in this repository are for experimental and educational purposes only. They demonstrate concepts and techniques but are not intended for direct use in production environments.
+
+> [!IMPORTANT]
+> The CloudFormation templates included in this repository only support deployment to the us-east-1 region. For additional options, please refer to the [Drug Discovery Workflows for AWS HealthOmics](https://github.com/aws-samples/drug-discovery-workflows) project.
+
 ## Contents
 
 1. [Overview](#1-overview)  
