@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.2] - 2025-06-10
+
+### 1.13.2 Fixed
+
+- Updated build artifact location
+
+---
+
 ## [1.13.1] - 2025-05-28
 
 ### 1.13.1 Fixed
