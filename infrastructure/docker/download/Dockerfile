@@ -11,4 +11,6 @@ RUN amazon-linux-extras install epel -y \
   && ./aws/install \
   && chmod -R 755 /scripts
 
+WORKDIR /home/scripts
+
 ENTRYPOINT ["bash", "-c"]

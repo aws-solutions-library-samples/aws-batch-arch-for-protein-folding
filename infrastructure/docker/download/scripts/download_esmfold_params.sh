@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Original Copyright 2022 AlQuraishi Laboratory
-# Modifications Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Modifications Copyright 2025 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Downloads and unzips the ESMFold parameters.
@@ -19,9 +19,9 @@ ROOT_DIR="${DOWNLOAD_DIR}/esmfold_params/hub"
 SOURCE_URL="facebook/esmfold_v1"
 
 git lfs install
-echo "Downloading ${SOURCE_URI} from Hugging Face Hub"
+echo "Downloading ${SOURCE_URL} from Hugging Face Hub"
 mkdir tmp
-git clone https://huggingface.co/$SOURCE_URI tmp --depth=1
+git clone https://huggingface.co/$SOURCE_URL tmp --depth=1
 rm -rf tmp/.git
 mv -n tmp/* $ROOT_DIR
 rm -rf tmp
