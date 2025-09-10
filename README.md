@@ -4,7 +4,7 @@
 > The examples provided in this repository are for experimental and educational purposes only. They demonstrate concepts and techniques but are not intended for direct use in production environments.
 
 > [!IMPORTANT]
-> The CloudFormation templates included in this repository only support deployment to the us-east-1 region. For additional options, please refer to the [Drug Discovery Workflows for AWS HealthOmics](https://github.com/aws-samples/drug-discovery-workflows) project.
+> The CloudFormation templates included in this repository only support deployment to the us-east-1, and us-east-2, eu-west-1, eu-west-2, eu-central-1, and ap-southwest-1 regions. For additional options, please refer to the [Drug Discovery Workflows for AWS HealthOmics](https://github.com/aws-samples/drug-discovery-workflows) project.
 
 ## Contents
 
