@@ -5,7 +5,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2
 COPY scripts /scripts
 RUN amazon-linux-extras install epel -y \
   && yum update -y \
-  && yum install aria2 tar rsync unzip -y \
+  && yum install aria2 tar rsync unzip git -y \
   && curl  "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" \
   && unzip awscliv2.zip \
   && ./aws/install \
