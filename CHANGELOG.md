@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.2] - 2025-09-10
+
+### 1.13.2 Fixed
+
+- Fix issue limiting deployment to us-east-1 only
+- Update SageMaker notebook platform ID
+- Fix issue downloading ESMFold parameters
+
+---
+
 ## [1.13.1] - 2025-05-28
 
 ### 1.13.1 Fixed
