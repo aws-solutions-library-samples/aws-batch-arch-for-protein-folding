@@ -23,5 +23,6 @@ echo "Downloading ${SOURCE_URL} from Hugging Face Hub"
 mkdir tmp
 git clone https://huggingface.co/$SOURCE_URL tmp --depth=1
 rm -rf tmp/.git
+mkdir -p $ROOT_DIR
 mv -n tmp/* $ROOT_DIR
 rm -rf tmp
