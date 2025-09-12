@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 1.13.2 Fixed
 
+- Updated build artifact location
 - Fix issue limiting deployment to us-east-1 only
 - Update SageMaker notebook platform ID
 - Fix issue downloading ESMFold parameters
 - Fix multiple issues with ESMFold inference script
 - Fix issue with version of numpy in RFDiffusion ontainer
+
 
 ---
 
