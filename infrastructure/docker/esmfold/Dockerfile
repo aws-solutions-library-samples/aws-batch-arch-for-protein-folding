@@ -3,7 +3,7 @@ FROM nvcr.io/nvidia/cuda:12.6.3-runtime-amzn2023 as base
 WORKDIR /home
 
 RUN dnf update -y \
-    && dnf install -y 'python3.11' unzip \
+    && dnf install -y 'python3.11' unzip which \
     && dnf clean all \
     && rm -rf /var/cache/dnf/*
 
