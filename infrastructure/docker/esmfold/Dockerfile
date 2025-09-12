@@ -3,9 +3,16 @@ FROM nvcr.io/nvidia/cuda:12.6.3-runtime-amzn2023 as base
 WORKDIR /home
 
 RUN dnf update -y \
-    && dnf install -y 'python3.11' \
+    && dnf install -y 'python3.11' unzip which \
     && dnf clean all \
     && rm -rf /var/cache/dnf/*
+
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \ 
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf aws \
+    && rm awscliv2.zip
 
 ENV VIRTUAL_ENV='/opt/venv'
 ENV PATH="${VIRTUAL_ENV}/bin:$PATH"

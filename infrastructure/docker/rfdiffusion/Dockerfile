@@ -26,6 +26,7 @@ RUN apt-get -q update \
   hydra-core==1.3.2 \
   pyrsistent==0.19.3 \
   icecream==2.1.3 \
+  numpy==1.26.4 \
   /app/RFdiffusion/env/SE3Transformer \
   && wget -O "awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   && unzip awscliv2.zip \

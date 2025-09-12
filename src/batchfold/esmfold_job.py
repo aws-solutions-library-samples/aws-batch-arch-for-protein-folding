@@ -29,11 +29,11 @@ class ESMFoldJob(BatchFoldJob):
         command_list = [f"-i {self.fasta_s3_uri}:input/{self.target_id}.fasta"]
         command_list.extend([f"-o output/:{self.output_s3_uri}"])
         command_list.extend([
-            "python scripts/esmfold_inference.py",
-            f"--fasta=input/{self.target_id}.fasta",
+            "python esmfold_inference.py",
             f"--pdb=output",
             f"--num-recycles={self.num_recycles}",
             f"--model-dir={self.model_dir}",
+            f"input/{self.target_id}.fasta",
         ])
 
         if self.chunk_size:

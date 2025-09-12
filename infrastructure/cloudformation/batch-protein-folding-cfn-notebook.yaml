@@ -123,7 +123,7 @@ Resources:
       InstanceType: ml.t3.medium
       DefaultCodeRepository: !Ref CodeRepositoryURI
       KmsKeyId: !GetAtt EncryptionKey.Arn
-      PlatformIdentifier: "notebook-al2-v2"
+      PlatformIdentifier: "notebook-al2-v3"
       RoleArn: !GetAtt SageMakerNotebookExecutionRole.Arn
       SubnetId: !Ref Subnet
       SecurityGroupIds:

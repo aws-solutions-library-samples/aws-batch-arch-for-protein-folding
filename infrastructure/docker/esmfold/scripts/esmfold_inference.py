@@ -66,7 +66,7 @@ def predict_structures(
 
         output = {key: value.cpu() for key, value in outputs.items()}
         pdb_string = model.output_to_pdb(output)[0]
-        output_dir = os.path.join(args.output_dir, str(n))
+        output_dir = os.path.join(output_dir, str(n))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
