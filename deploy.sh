@@ -73,7 +73,7 @@ done
 [ -z "$CODE_REPO_S3_BUCKET_NAME" ] && { CODE_REPO_S3_BUCKET_NAME="5d1a4b76751b4c8a994ce96bafd91ec9"; }
 
 zip -r code.zip * -x .\*/\* -x random_commands.sh -x analysis\* -x build\*
-aws s3 cp code.zip s3://$BUCKET_NAME/main/batch-protein-folding.zip
+aws s3 cp code.zip s3://${BUCKET_NAME}-${REGION}/main/batch-protein-folding.zip
 rm code.zip
 
 aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --region $REGION --s3-bucket $BUCKET_NAME --s3-prefix cfn 
