@@ -109,9 +109,9 @@ Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRiva
 
 ### 4.2. AlphaFold
 
-[Version 2.3.2](https://github.com/deepmind/alphafold/releases/tag/v2.3.2) from 4/5/2023.
-
 Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
+
+Due to updates to the OpenMM module, GPU-accelerated relaxation is no longer available. All alphafold jobs now default to `use_gpu_relax=False`.
 
 The original AlphaFold 2 citation is
 
