@@ -17,7 +17,7 @@ Parameters:
   CodeRepoS3BucketName:
     Description: S3 Bucket Name to retrieve code zip
     Type: String
-    Default: "aws-hcls-ml"
+    Default: "5d1a4b76751b4c8a994ce96bafd91ec9-us-east-1"
   S3BucketARN:
     Description: S3 Bucket ARN
     Type: String

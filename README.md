@@ -46,10 +46,17 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ## 2. Quick Start
 
-NOTE: This procedure only supports the following AWS regions: eu-west-1, eu-west-2, eu-central-1, ap-southwest-1, us-east-1, and us-east-2
-
 1. Choose **Launch Stack** and (if prompted) log into your AWS account:
-    [![Launch Stack](imgs/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml)  
+
+    | Region | Launch URL |
+    | ------ | ---------- |
+    | eu-west-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | eu-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | eu-central-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-central-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | ap-southeast-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-ap-southeast-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | us-east-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-east-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | us-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+
 2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
     ![Provide a stack name](imgs/name.png)  
 3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
