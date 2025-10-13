@@ -31,7 +31,8 @@ RUN apt-get update --quiet \
 RUN git clone --branch v3.3.0 --single-branch https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
   && mkdir /tmp/hh-suite/build \
   && pushd /tmp/hh-suite/build \
-  && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
+  # && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
+  && cmake -DHAVE_AVX2=1 -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
   && make -j && make install \
   && ln -s /opt/hhsuite/bin/* /usr/bin \
   && popd \
