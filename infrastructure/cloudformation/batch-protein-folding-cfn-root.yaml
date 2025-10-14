@@ -7,8 +7,13 @@ Description: >-
 
 Parameters:
   ApplicationName:
+    Description: Name for your application stack
     Type: String
     Default: BatchProteinFolding
+  DeploymentRegion:
+    Description: AWS region name for deployment. If deploying using the AWS console, this should match the region currently selected in the header menu.
+    Type: String
+    AllowedValues: ["ap-southeast-1", "eu-central-1", "eu-west-1", "eu-west-2", "us-east-1", "us-west-2"]
   LaunchSageMakerNotebook:
     Type: String
     Default: Y
@@ -54,8 +59,8 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
-  CodeRepoS3BucketName:
-    Description: S3 Bucket Name to retrieve code .zip
+  CodeRepoS3BucketRootName:
+    Description: S3 Bucket root name. This will be appended with the region name and used to retrieve the code .zip archive for CodeBuild
     Type: String
     Default: "5d1a4b76751b4c8a994ce96bafd91ec9"
   CodeRepositoryURI:
@@ -66,6 +71,7 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
+  
 
 Conditions:
   CreateFileSystem:
@@ -184,7 +190,7 @@ Resources:
           Ref: DownloadFsxData
         S3BucketARN:
           "Fn::GetAtt": BatchFoldS3Bucket.Arn
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         Timestamp: !Ref Timestamp
 
   BatchEnvironment:
@@ -371,7 +377,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -390,7 +396,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -409,7 +415,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -428,7 +434,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -447,7 +453,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -466,7 +472,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -485,7 +491,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:
@@ -504,7 +510,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketName}-${AWS::Region}"
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
         CodeBuildEncryptionKey:
           "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
         CodeBuildRoleArn:

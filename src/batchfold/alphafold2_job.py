@@ -50,30 +50,37 @@ class AlphaFold2Job(BatchFoldJob):
 
         command_list = [f"-i {self.fasta_s3_uri}:{self.output_dir}/fasta/"]
         if self.use_precomputed_msas:
-            command_list.extend([f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/{self.target_id}/msas/"])
-        command_list.extend([f"-o {self.output_dir}/{self.target_id}/:{self.output_s3_uri}"])
+            command_list.extend(
+                [
+                    f"-i {self.msa_s3_uri}/jackhmmer/:{self.output_dir}/{self.target_id}/msas/"
+                ]
+            )
+        command_list.extend(
+            [f"-o {self.output_dir}/{self.target_id}/:{self.output_s3_uri}"]
+        )
 
         if self.environment_vars:
             for item in self.environment_vars.items():
                 command_list.extend([f"export {item[0]}={item[1]}"])
 
-
-        command_list.extend([
-            "/app/run_alphafold.sh",
-            f"--data_dir={self.data_dir}",
-            f"--output_dir={self.output_dir}",
-            f"--fasta_paths={self.output_dir}/fasta/{self.target_id}.fasta",
-            f"--template_mmcif_dir={self.data_dir}/{self.template_mmcif_dir}",
-            f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
-            f"--uniref90_database_path={self.data_dir}/{self.uniref90_database_path}",
-            f"--mgnify_database_path={self.data_dir}/{self.mgnify_database_path}",
-            f"--db_preset={self.db_preset}",
-            f"--max_template_date={self.max_template_date}",
-            f"--model_preset={self.model_preset}",
-            f"--use_precomputed_msas={self.use_precomputed_msas}",
-            f"--benchmark={self.benchmark}",
-            f"--models_to_relax={self.models_to_relax}",
-        ])
+        command_list.extend(
+            [
+                "/app/run_alphafold.sh",
+                f"--data_dir={self.data_dir}",
+                f"--output_dir={self.output_dir}",
+                f"--fasta_paths={self.output_dir}/fasta/{self.target_id}.fasta",
+                f"--template_mmcif_dir={self.data_dir}/{self.template_mmcif_dir}",
+                f"--obsolete_pdbs_path={self.data_dir}/{self.obsolete_pdbs_path}",
+                f"--uniref90_database_path={self.data_dir}/{self.uniref90_database_path}",
+                f"--mgnify_database_path={self.data_dir}/{self.mgnify_database_path}",
+                f"--db_preset={self.db_preset}",
+                f"--max_template_date={self.max_template_date}",
+                f"--model_preset={self.model_preset}",
+                f"--use_precomputed_msas={self.use_precomputed_msas}",
+                f"--benchmark={self.benchmark}",
+                f"--models_to_relax={self.models_to_relax}",
+            ]
+        )
         if self.db_preset == "full_dbs":
             command_list.extend(
                 [
@@ -105,18 +112,23 @@ class AlphaFold2Job(BatchFoldJob):
                 [f"--pdb70_database_path={self.data_dir}/{self.pdb70_database_path}"]
             )
 
-        if self.gpu > 0:
-            command_list.extend(
-                [
-                    f"--use_gpu_relax=True",
-                ]
-            )
-        else:
-            command_list.extend(
-                [
-                    f"--use_gpu_relax=False",
-                ]
-            )
+        # if self.gpu > 0 and self.use_gpu_relax:
+        #     command_list.extend(
+        #         [
+        #             f"--use_gpu_relax=True",
+        #         ]
+        #     )
+        # else:
+        #     command_list.extend(
+        #         [
+        #             f"--use_gpu_relax=False",
+        #         ]
+        #     )
+        command_list.extend(
+            [
+                f"--use_gpu_relax=False",
+            ]
+        )
 
         logging.info(f"Command is \n{command_list}")
         self.define_container_overrides(command_list, self.cpu, self.memory, self.gpu)

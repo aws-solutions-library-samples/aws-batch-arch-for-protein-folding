@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.3] - 2025-10-14
+
+### 1.13.3 Updates
+
+- Added region-specific deployment buttons to README.
+
+### 1.13.3 Fixed
+
+- Resolved container issues with AlphaFold2 and OpenFold
+
+---
+
 ## [1.13.2] - 2025-09-10
 
 ### 1.13.2 Fixed
@@ -17,7 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix issue downloading ESMFold parameters
 - Fix multiple issues with ESMFold inference script
 - Fix issue with version of numpy in RFDiffusion ontainer
-
 
 ---
 

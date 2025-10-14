@@ -2,20 +2,18 @@
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# ARG CUDA=11.1.1
-ARG CUDA=11.6.0
-ARG ALPHAFOLD2_VERSION=v2.3.2
-FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu18.04
+ARG CUDA=12.2.2
+FROM nvcr.io/nvidia/cuda:${CUDA}-cudnn8-runtime-ubuntu20.04
 # FROM directive resets ARGS, so we specify again (the value is retained if
 # previously set).
 ARG CUDA
-ARG ALPHAFOLD2_VERSION
 
 # Use bash to support string substitution.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update \ 
-  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update --quiet \
+    && apt-get install --no-install-recommends --yes --quiet \
   build-essential \
   cmake \
   cuda-command-line-tools-$(cut -f1,2 -d- <<< ${CUDA//./-}) \
@@ -26,15 +24,16 @@ RUN apt-get update \
   wget \
   awscli \
   && rm -rf /var/lib/apt/lists/* \
-  && apt-get autoremove -y \
+  && apt-get autoremove --yes \
   && apt-get clean
 
 # Compile HHsuite from source.
-RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
+RUN git clone --branch v3.3.0 --single-branch https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
   && mkdir /tmp/hh-suite/build \
   && pushd /tmp/hh-suite/build \
+  # && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
   && cmake -DHAVE_AVX2=1 -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
-  && make -j 4 && make install \
+  && make -j && make install \
   && ln -s /opt/hhsuite/bin/* /usr/bin \
   && popd \
   && rm -rf /tmp/hh-suite
@@ -45,17 +44,17 @@ RUN wget -q -P /tmp \
   && bash /tmp/Miniforge3-Linux-x86_64.sh -b -p /opt/conda \
   && rm /tmp/Miniforge3-Linux-x86_64.sh  
 
-# Install conda packages.
+# Install Conda packages.
 ENV PATH="/opt/conda/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/conda/lib:$LD_LIBRARY_PATH"
-
-RUN conda install --quiet --yes --channel conda-forge pip python=3.11 openmm=8.0.0 pdbfixer --override-channels \
-  && conda install --quiet --yes --channel nvidia cuda=${CUDA_VERSION} --override-channels \
+ENV CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes"
+RUN conda install --quiet --yes --channel conda-forge pip python=3.11 \
+  && conda install --quiet --yes --channel nvidia cuda=${CUDA_VERSION} \
+  # && conda install --quiet --yes --channel conda-forge openmm=8.0.0 pdbfixer \
+  && conda install --quiet --yes --channel conda-forge openmm=8.3.1 pdbfixer \
   && conda clean --all --force-pkgs-dirs --yes
 
-# RUN git clone --branch ${ALPHAFOLD2_VERSION} --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
 RUN git clone --depth 1 https://github.com/deepmind/alphafold.git /app/alphafold
-
 RUN wget -q -P /app/alphafold/alphafold/common/ \
   https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 

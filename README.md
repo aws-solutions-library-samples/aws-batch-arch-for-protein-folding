@@ -3,9 +3,6 @@
 > [!IMPORTANT]
 > The examples provided in this repository are for experimental and educational purposes only. They demonstrate concepts and techniques but are not intended for direct use in production environments.
 
-> [!IMPORTANT]
-> The CloudFormation templates included in this repository only support deployment to the us-east-1, and us-east-2, eu-west-1, eu-west-2, eu-central-1, and ap-southwest-1 regions. For additional options, please refer to the [Drug Discovery Workflows for AWS HealthOmics](https://github.com/aws-samples/drug-discovery-workflows) project.
-
 ## Contents
 
 1. [Overview](#1-overview)  
@@ -46,11 +43,18 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ## 2. Quick Start
 
-NOTE: This procedure only supports the following AWS regions: eu-west-1, eu-west-2, eu-central-1, ap-southwest-1, us-east-1, and us-east-2
-
 1. Choose **Launch Stack** and (if prompted) log into your AWS account:
-    [![Launch Stack](imgs/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml)  
-2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
+
+    | Region | Launch URL |
+    | ------ | ---------- |
+    | eu-west-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | eu-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | eu-central-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-central-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | ap-southeast-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-ap-southeast-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | us-east-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-east-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+    | us-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
+
+2. For **Stack Name**, enter a value unique to your account and region. Also update the *DeploymentRegion** parameter with the name of your current AWS region. Leave the other parameters as their default values and select **Next**.  
     ![Provide a stack name](imgs/name.png)  
 3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
 4. Choose **Create stack**.  
@@ -109,9 +113,9 @@ Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRiva
 
 ### 4.2. AlphaFold
 
-[Version 2.3.2](https://github.com/deepmind/alphafold/releases/tag/v2.3.2) from 4/5/2023.
-
 Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
+
+Due to updates to the OpenMM module, GPU-accelerated relaxation is no longer available. All alphafold jobs now default to `use_gpu_relax=False`.
 
 The original AlphaFold 2 citation is
 
