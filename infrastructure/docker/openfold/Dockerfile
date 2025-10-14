@@ -3,7 +3,7 @@
 # Modifications Copyright 2025 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+FROM nvcr.io/nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 
 # metainformation
 LABEL org.opencontainers.image.version = "2.0.0"
