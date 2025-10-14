@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.13.3] - 2025-10-14
 
-### 1.13.2 Updates
+### 1.13.3 Updates
 
 - Added region-specific deployment buttons to README.
 
-### 1.13.2 Fixed
+### 1.13.3 Fixed
 
 - Resolved container issues with AlphaFold2 and OpenFold
 
