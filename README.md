@@ -54,7 +54,7 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
     | us-east-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-east-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
     | us-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
 
-2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
+2. For **Stack Name**, enter a value unique to your account and region. Also update the *DeploymentRegion** parameter with the name of your current AWS region. Leave the other parameters as their default values and select **Next**.  
     ![Provide a stack name](imgs/name.png)  
 3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
 4. Choose **Create stack**.  
