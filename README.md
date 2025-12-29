@@ -3,6 +3,9 @@
 > [!IMPORTANT]
 > The examples provided in this repository are for experimental and educational purposes only. They demonstrate concepts and techniques but are not intended for direct use in production environments.
 
+> [!IMPORTANT]
+> The CloudFormation templates included in this repository only support deployment to the us-east-1, and us-east-2, eu-west-1, eu-west-2, eu-central-1, and ap-southwest-1 regions. For additional options, please refer to the [Drug Discovery Workflows for AWS HealthOmics](https://github.com/aws-samples/drug-discovery-workflows) project.
+
 ## Contents
 
 1. [Overview](#1-overview)  
@@ -16,10 +19,10 @@
     4.2. [AlphaFold](#42-alphafold)  
     4.3. [OpenFold](#43-openfold)  
     4.4. [OmegaFold](#44-omegafold)  
-    4.5. [ESMFold](#46-esmfold)  
-    4.6. [ProteinMPNN](#47-proteinmpnn)  
-    4.7. [DiffDock](#48-diffdock)  
-    4.8. [RFDiffusion](#49-rfdiffusion)  
+    4.5. [ESMFold](#45-esmfold)  
+    4.6. [ProteinMPNN](#46-proteinmpnn)  
+    4.7. [DiffDock](#47-diffdock)  
+    4.8. [RFDiffusion](#48-rfdiffusion)  
 5. [Architecture Details](#5-architecture-details)  
     5.1. [Stack Creation Details](#51-stack-creation-details)  
     5.2. [Cost](#52-cost)  
@@ -43,18 +46,11 @@ This repository includes the CloudFormation template, Jupyter Notebook, and supp
 
 ## 2. Quick Start
 
+NOTE: This procedure only supports the following AWS regions: eu-west-1, eu-west-2, eu-central-1, ap-southwest-1, us-east-1, and us-east-2
+
 1. Choose **Launch Stack** and (if prompted) log into your AWS account:
-
-    | Region | Launch URL |
-    | ------ | ---------- |
-    | eu-west-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-    | eu-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-    | eu-central-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-eu-central-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-    | ap-southeast-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-ap-southeast-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-    | us-east-1 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-east-1.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-    | us-west-2 | [![Launch Stack](imgs/LaunchStack.jpg)](https://us-west-2.console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://5d1a4b76751b4c8a994ce96bafd91ec9-us-west-2.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml) |
-
-2. For **Stack Name**, enter a value unique to your account and region. Also update the *DeploymentRegion** parameter with the name of your current AWS region. Leave the other parameters as their default values and select **Next**.  
+    [![Launch Stack](imgs/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/main/batch-protein-folding-cfn-packaged.yaml)  
+2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
     ![Provide a stack name](imgs/name.png)  
 3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
 4. Choose **Create stack**.  
@@ -113,9 +109,9 @@ Please visit [https://github.com/EddyRivasLab/hmmer](https://github.com/EddyRiva
 
 ### 4.2. AlphaFold
 
-Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
+[Version 2.3.2](https://github.com/deepmind/alphafold/releases/tag/v2.3.2) from 4/5/2023.
 
-Due to updates to the OpenMM module, GPU-accelerated relaxation is no longer available. All alphafold jobs now default to `use_gpu_relax=False`.
+Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind/alphafold) for more information about the AlphaFold2 algorithm.
 
 The original AlphaFold 2 citation is
 
