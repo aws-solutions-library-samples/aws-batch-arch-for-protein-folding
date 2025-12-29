@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.4] - 2025-12-29
+
+### 1.13.4 Fixed
+
+- Fixed broken links and added region information to README
+
+---
+
 ## [1.13.3] - 2025-10-14
 
 ### 1.13.3 Updates
