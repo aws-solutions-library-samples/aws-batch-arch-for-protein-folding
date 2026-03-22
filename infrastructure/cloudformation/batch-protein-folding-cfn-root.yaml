@@ -522,6 +522,44 @@ Resources:
         Timestamp:
           Ref: Timestamp
 
+  ModuleMMSeqs2:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-mmseqs2.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
+        CodeBuildEncryptionKey:
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
+        CodeBuildRoleArn:
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
+        DeleteContainerRepoLambdaArn:
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+        Timestamp:
+          Ref: Timestamp
+
+  ModuleMMSeqs2GPU:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: batch-protein-folding-cfn-module-mmseqs2-gpu.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        CodeRepoS3BucketName: !Sub "${CodeRepoS3BucketRootName}-${DeploymentRegion}"
+        CodeBuildEncryptionKey:
+          "Fn::GetAtt": Container.Outputs.CodeBuildEncryptionKey
+        CodeBuildRoleArn:
+          "Fn::GetAtt": Container.Outputs.CodeBuildRoleArn
+        StartCodeBuildLambdaArn:
+          "Fn::GetAtt": Container.Outputs.StartCodeBuildLambdaArn
+        DeleteContainerRepoLambdaArn:
+          "Fn::GetAtt": Container.Outputs.DeleteContainerRepoLambdaArn
+        Timestamp:
+          Ref: Timestamp
+
 Outputs:
   ApplicationName:
     Description: Name of the application
@@ -551,6 +589,14 @@ Outputs:
     Description: ECR URI for ProteinMPNN container image.
     Value:
       "Fn::GetAtt": ModuleProteinMPNN.Outputs.ProteinMPNNContainerURI
+  MMSeqs2ContainerURI:
+    Description: ECR URI for MMSeqs2 container image.
+    Value:
+      "Fn::GetAtt": ModuleMMSeqs2.Outputs.MMSeqs2ContainerURI
+  MMSeqs2GPUContainerURI:
+    Description: ECR URI for MMSeqs2 GPU container image.
+    Value:
+      "Fn::GetAtt": ModuleMMSeqs2GPU.Outputs.MMSeqs2GPUContainerURI
   OpenFoldContainerURI:
     Description: ECR URI for OpenFold container image.
     Value:

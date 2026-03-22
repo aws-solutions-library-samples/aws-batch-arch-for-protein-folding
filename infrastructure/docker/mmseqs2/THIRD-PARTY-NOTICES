@@ -1,0 +1,18 @@
+The following open source software is used in this Docker image:
+
+MMSeqs2 (https://github.com/soedinglab/MMSeqs2)
+License: GNU General Public License v3.0
+Author: Soedinglab
+
+AWS CLI (https://github.com/aws/aws-cli)
+License: Apache License 2.0
+
+Ubuntu Linux (https://www.ubuntu.com/)
+License: GPL and other licenses
+
+CUDA Toolkit (https://developer.nvidia.com/cuda-toolkit)
+License: NVIDIA End User License Agreement (for GPU Dockerfile)
+
+All modifications and additions are licensed under:
+Apache License 2.0
+Copyright Amazon.com, Inc. or its affiliates.
