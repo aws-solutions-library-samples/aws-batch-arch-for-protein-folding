@@ -39,7 +39,8 @@ def main():
         "download_uniref30",
         "download_uniref90",
         "download_diffdock_params",
-        "download_rfdiffusion_params"
+        "download_rfdiffusion_params",
+        "download_mmseqs2_dbs"
     ]
 
     for script in download_scripts:
