@@ -117,7 +117,7 @@ Please visit [https://github.com/deepmind/alphafold](https://github.com/deepmind
 
 Due to updates to the OpenMM module, GPU-accelerated relaxation is no longer available. All alphafold jobs now default to `use_gpu_relax=False`.
 
-The original AlphaFold 2 citation is
+The original AlphaFold 2 citation is ([Read online](https://webeditions.page/works/highly-accurate-protein-structure-prediction-with-alphafold/?via=placement:dbf69f24d95987322acf))
 
 ```text
 @Article{AlphaFold2021,
